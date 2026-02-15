@@ -149,7 +149,7 @@ public class TrajectorySE2Factory {
             // velocity constraint depends only on state
             double maxVelocity = maxVelocity(path.getEntry(i1).point());
             if (DEBUG)
-                System.out.printf("maxV i %d p1 %s maxV %f\n", i1, p1, maxVelocity);
+                System.out.printf("maxV i %d maxV %f\n", i1, maxVelocity);
             // start with the maximum velocity
             velocities[i1] = maxVelocity;
             // reduce velocity to fit under the acceleration constraint
