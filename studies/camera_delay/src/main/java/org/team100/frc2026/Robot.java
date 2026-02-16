@@ -52,6 +52,8 @@ public class Robot extends TimedRobot100 {
     private final SimulatedCamera m_simCamera;
 
     private double m_positionRad;
+    private double t0;
+    private double t;
 
     public Robot() {
         Logging logging = Logging.instance();
@@ -71,8 +73,8 @@ public class Robot extends TimedRobot100 {
         }
 
         RoboRioChannel sensorChannel = new RoboRioChannel(1);
-        // The offset here is from the testboard, experimenting until the "sensor minus camera" is zero
-        // at rest.
+        // The offset here is from the testboard, experimenting until the "sensor minus
+        // camera" is zero at rest.
         m_sensor = new AS5048RotaryPositionSensor(
                 log,
                 sensorChannel,
@@ -187,12 +189,14 @@ public class Robot extends TimedRobot100 {
     @Override
     public void teleopInit() {
         m_positionRad = 0;
+        t0 = Takt.get();
         m_motor.setUnwrappedEncoderPositionRad(m_positionRad);
     }
 
     @Override
     public void teleopPeriodic() {
         // this comes before robotPeriodic.
+        t = Takt.get() - t0;
         double motorPositionIncrementRad = MOTOR_SPEED_RAD_S * TimedRobot100.LOOP_PERIOD_S;
         m_positionRad += motorPositionIncrementRad;
         m_motor.setUnwrappedPosition(m_positionRad, 0, 0, 0);
