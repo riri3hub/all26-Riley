@@ -122,8 +122,9 @@ public class Auton1 implements AnnotatedCommand {
                 n1.until(n1::isDone),
                 waitSeconds(1),
                 parallel(
-                    n2.until(n2::isDone),
-                    machinery.m_intake.intake()),
+                    n2,
+                   machinery.m_intake.intake()
+                ).until(n2::isDone),
                 waitSeconds(1),
                 n3.until(n3::isDone),
                 waitSeconds(1),

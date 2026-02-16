@@ -53,7 +53,7 @@ public class Intake extends SubsystemBase {
 
     public Command intake() {
         return run(this::fullSpeed).withName("Intake Full Speed");
-    }
+    }   
 
     public Command stop() {
         return run(this::stopMotor).withName("Intake Stop");
@@ -69,6 +69,7 @@ public class Intake extends SubsystemBase {
         double velocityRad_S = 450;
         m_motor.setVelocity(velocityRad_S, 0, 0);
         // m_motor.setDutyCycle(1);
+        System.out.println(velocityRad_S + "wow");
     }
 
 }
