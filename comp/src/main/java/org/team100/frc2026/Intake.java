@@ -69,7 +69,7 @@ public class Intake extends SubsystemBase {
         double velocityRad_S = 450;
         m_motor.setVelocity(velocityRad_S, 0, 0);
         // m_motor.setDutyCycle(1);
-        System.out.println(velocityRad_S + "wow");
+        System.out.println(velocityRad_S);
     }
 
 }

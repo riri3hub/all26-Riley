@@ -70,7 +70,7 @@ public class Machinery {
     final AprilTagRobotLocalizer m_localizer;
     public final SwerveDriveSubsystem m_drive;
     final Beeper m_beeper;
-    final Shooter m_shooter;
+    public final Shooter m_shooter;
     public final Intake m_intake;
     public final IntakeExtend m_extender;
     final Serializer m_serializer;

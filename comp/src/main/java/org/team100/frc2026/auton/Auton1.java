@@ -109,7 +109,7 @@ public class Auton1 implements AnnotatedCommand {
         DriveWithTrajectoryFunction n1 = new DriveWithTrajectoryFunction(
                 log, machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t1);
-        DriveWithTrajectoryFunction n2 = new DriveWithTrajectoryFunction(
+        DriveWithTrajectoryFunction IntakeBalls = new DriveWithTrajectoryFunction(
                 log, machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t2);
         DriveWithTrajectoryFunction n3 = new DriveWithTrajectoryFunction(
@@ -119,15 +119,27 @@ public class Auton1 implements AnnotatedCommand {
                 log, machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t4);
         return sequence(
-                n1.until(n1::isDone),
-                waitSeconds(1),
                 parallel(
-                    n2,
-                   machinery.m_intake.intake()
-                ).until(n2::isDone),
+                n1.until(n1::isDone),
+                // Assumed that the intake shouldn't deploy over the bump
+                waitSeconds(1).andThen(machinery.m_extender.goToExtendedPosition())), 
                 waitSeconds(1),
+
+                parallel(
+                    IntakeBalls,
+                    machinery.m_intake.intake()
+                ).until(IntakeBalls::isDone),
+                // Without telling it to, the intake would only stop spinning
+                // at the end of the auton. Without the timeout, the robot
+                // would not continue the rest of the auton
+                machinery.m_intake.stop().withTimeout(1),
+                waitSeconds(1),
+
                 n3.until(n3::isDone),
-                waitSeconds(1),
+                machinery.m_shooter.shoot().withTimeout(1),
+                waitSeconds(2),
+                machinery.m_shooter.stop().withTimeout(1),
+
                 n4.until(n4::isDone));
     }
 
