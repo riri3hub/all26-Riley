@@ -15,6 +15,7 @@ import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.rev.NeoVortexCANSparkMotor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
+import org.team100.lib.network.NetworkUtil;
 import org.team100.lib.network.RawTags;
 import org.team100.lib.sensor.position.absolute.EncoderDrive;
 import org.team100.lib.sensor.position.absolute.wpi.AS5048RotaryPositionSensor;
@@ -26,8 +27,11 @@ import org.team100.lib.util.TimeInterpolatableBuffer100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.ConnectionInfo;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends TimedRobot100 {
@@ -74,6 +78,8 @@ public class Robot extends TimedRobot100 {
     private final Rotation2dLogger m_logMotorMeasurement;
 
     private final DoubleLogger m_logActualSpeed;
+
+    DoublePublisher servernowpub;
 
     private final LongLogger m_logTimeOffset;
 
@@ -144,6 +150,8 @@ public class Robot extends TimedRobot100 {
         m_logMotorMeasurement = log.rotation2dLogger(Level.TRACE, "motor measurement now (rad)");
         m_logActualSpeed = log.doubleLogger(Level.TRACE, "actual speed (rad_s)");
         m_logTimeOffset = log.longLogger(Level.TRACE, "server time offset (us)");
+
+        servernowpub = NetworkTableInstance.getDefault().getDoubleTopic("servernow").publish();
 
         if (RobotBase.isSimulation()) {
             // these extra additions are to wrap the result.
@@ -249,6 +257,8 @@ public class Robot extends TimedRobot100 {
         m_logMotorMinusSensor.log(() -> laggedMotor.minus(laggedSensor));
         m_logMotorCmdMinusMotor.log(() -> laggedMotorCmd.minus(laggedMotor));
 
+        servernowpub.set(RobotController.getFPGATime());
+
         // microsec
         m_logTimeOffset.log(() -> NetworkTableInstance.getDefault().getServerTimeOffset().orElse(0));
         m_motor.periodic();
@@ -263,6 +273,10 @@ public class Robot extends TimedRobot100 {
         m_positionRad = 0;
         prevTime2 = Takt.actual();
         m_motor.setUnwrappedEncoderPositionRad(m_positionRad);
+        // maybe we're using the wrong version of the network tables library?
+        for (ConnectionInfo ci : NetworkTableInstance.getDefault().getConnections()) {
+            System.out.printf("*** CONNECTION %s\n", NetworkUtil.ciString(ci));
+        }
     }
 
     @Override

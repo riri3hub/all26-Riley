@@ -116,6 +116,9 @@ class TagDetector(Interpreter):
         self._fps = network.get_double_sender(path + "/fps")
         self._temp = network.get_double_sender(path + "/temp")
         self._offset = network.get_double_sender(path + "/offset")
+        self._now = network.get_double_sender(path + "/now")
+        self._servernow = ntcore.NetworkTableInstance.getDefault().getDoubleTopic("servernow").subscribe(0)
+        self._nowdiff = network.get_double_sender(path + "/nowdiff")
         # to keep track of images to write
         self.img_ts_sec = 0
         if self.debug:
@@ -218,11 +221,16 @@ class TagDetector(Interpreter):
             with open("/sys/class/thermal/thermal_zone0/temp", "r", encoding="ascii") as f:
                 raw_temp = int(f.read().strip())
                 temp_c = raw_temp / 1000
-                self._temp.send(temp_c, delay_us)
+                self._temp.send(temp_c, 0)
 
             offset = ntcore.NetworkTableInstance.getDefault().getServerTimeOffset()
             if offset is not None:
-                self._offset.send((float)(offset/1000000), delay_us)
+                self._offset.send((float)(offset/1000000), 0)
+
+            now = ntcore._now()
+            self._now.send((float)(now), 0)
+            servernow = self._servernow.get()
+            self._nowdiff.send(servernow - now, 0)
 
             # do the drawing (after the NT payload is written)
             # to minimize latency
