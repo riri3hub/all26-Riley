@@ -37,8 +37,8 @@ public class IntakeExtend extends SubsystemBase {
         switch (Identity.instance) {
 
             case TEST_BOARD_B0 -> {
-                double gearRatio = 15.3725490196;
-                PIDConstants PID = PIDConstants.makePositionPID(log, 0);
+                double gearRatio = 15.3;
+                PIDConstants PID = PIDConstants.makePositionPID(log, 1);
                 double supplyLimit = 4;
                 double statorLimit = 80;
                 KrakenX44Motor m_motor = new KrakenX44Motor(
@@ -49,12 +49,12 @@ public class IntakeExtend extends SubsystemBase {
                         supplyLimit, // og 50 //double supplyLimit,
                         statorLimit, // og 2 //double statorLimit,
                         new SimpleDynamics(log, 0.0, 0.0), // Feedforward100 ff
-                        new Friction(log, 0.26, 0.26, 0.006, 0.5),
+                        new Friction(log, 1.26, 1.26, 0.006, 0.5),
                         PID // PIDConstants pid,
                 );
                 Talon6Encoder encoder = m_motor.encoder();
 
-                TrapezoidIncrementalProfile profile = new TrapezoidIncrementalProfile(log, 1, 2, 0.05);
+                TrapezoidIncrementalProfile profile = new TrapezoidIncrementalProfile(log, 2, 4, 0.05);
                 ProfileReferenceR1 ref = new IncrementalProfileReferenceR1(log, () -> profile, 0.05, 0.05);
                 double initialPosition = 0;
                 RotaryMechanism climberMech = new RotaryMechanism(
@@ -91,7 +91,7 @@ public class IntakeExtend extends SubsystemBase {
     public Command goToExtendedPosition() {
         return new FunctionalCommand(
                 () -> reset(), // onInit
-                () -> setAngle(3.126124), // onExecute
+                () -> setAngle(3), // onExecute
                 interrupted -> { // onEnd
                 },
                 () -> m_servo.atGoal(), // isFinished
