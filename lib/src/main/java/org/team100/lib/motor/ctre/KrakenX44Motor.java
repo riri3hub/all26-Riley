@@ -42,7 +42,8 @@ public class KrakenX44Motor extends Talon6Motor {
 
     @Override
     public double kFreeSpeedRPM() {
-        return 7530;
+       // return Double.MAX_VALUE ;
+         return 7530;
     }
 
     /** Feedforward for swerve drive axis */

@@ -69,7 +69,7 @@ public class BClimberAutonRight implements AnnotatedCommand {
         return sequence(
                 n1.until(n1::isDone),
                 waitSeconds(1),
-                    machinery.m_ClimberExtension.setPosition(),
+                //    machinery.m_ClimberExtension.setPosition(),
                 waitSeconds(1));
     }
 
