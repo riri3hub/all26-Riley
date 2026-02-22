@@ -7,11 +7,7 @@ import java.util.function.BooleanSupplier;
 
 import org.team100.frc2025.Climber.ClimberCommands;
 import org.team100.frc2025.CommandGroups.MoveToAlgaePosition;
-import org.team100.frc2025.Swerve.ManualWithBargeAssist;
-import org.team100.frc2025.Swerve.ManualWithProfiledReefLock;
 import org.team100.frc2025.Swerve.Auto.BigLoop;
-import org.team100.lib.controller.r1.FeedbackR1;
-import org.team100.lib.controller.r1.PIDFeedback;
 import org.team100.lib.controller.se2.ControllerFactorySE2;
 import org.team100.lib.controller.se2.ControllerSE2;
 import org.team100.lib.hid.Buttons2025;
@@ -25,7 +21,6 @@ import org.team100.lib.subsystems.prr.commands.FollowJointProfiles;
 import org.team100.lib.subsystems.se2.commands.DriveWithTrajectoryFunction;
 import org.team100.lib.subsystems.se2.commands.FloorPickSequence2;
 import org.team100.lib.subsystems.se2.commands.ManualPosition;
-import org.team100.lib.subsystems.swerve.commands.manual.DriveManuallySimple;
 import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
 
 import edu.wpi.first.wpilibj.RobotController;
@@ -60,8 +55,8 @@ public class Binder2025 {
         //
         // DEFAULT COMMANDS
         //
-        final FeedbackR1 thetaFeedback = new PIDFeedback(
-                log, 3.2, 0, 0, true, 0.05, 1);
+        // final FeedbackR1 thetaFeedback = new PIDFeedback(
+        // log, 3.2, 0, 0, true, 0.05, 1);
 
         SwerveLimiter limiter = new SwerveLimiter(
                 log,
@@ -73,20 +68,21 @@ public class Binder2025 {
         // * normal
         // * lock rotation to reef center
         // * barge-assist (slow when near barge)
-        final Command driveDefault = new DriveManuallySimple(
-                driver::velocity,
-                m_machinery.m_localizer::setHeedRadiusM,
-                m_machinery.m_drive,
-                limiter,
-                new ManualWithProfiledReefLock(
-                        log, m_machinery.m_swerveKinodynamics, driver::leftTrigger,
-                        thetaFeedback, () -> m_machinery.m_drive.getPose().getTranslation()),
-                new ManualWithBargeAssist(
-                        log, m_machinery.m_swerveKinodynamics, driver::pov,
-                        thetaFeedback, m_machinery.m_drive::getPose),
-                driver::leftBumper);
-        m_machinery.m_drive.setDefaultCommand(driveDefault.withName("drive default"));
-        // WARNING! This default command *MOVES IMMEDIATELY WHEN ENABLED*!
+        // final Command driveDefault = new DriveManuallySimple(
+        // driver::velocity,
+        // m_machinery.m_localizer::setHeedRadiusM,
+        // m_machinery.m_drive,
+        // limiter,
+        // new ManualWithProfiledReefLock(
+        // log, m_machinery.m_swerveKinodynamics, driver::leftTrigger,
+        // thetaFeedback, () -> m_machinery.m_drive.getPose().getTranslation()),
+        // new ManualWithBargeAssist(
+        // log, m_machinery.m_swerveKinodynamics, driver::pov,
+        // thetaFeedback, m_machinery.m_drive::getPose),
+        // driver::leftBumper);
+        // m_machinery.m_drive.setDefaultCommand(driveDefault.withName("drive
+        // default"));
+        // // WARNING! This default command *MOVES IMMEDIATELY WHEN ENABLED*!
         m_machinery.m_mech.setDefaultCommand(m_machinery.m_mech.profileHomeAndThenRest().withName("mech default"));
         m_machinery.m_climber.setDefaultCommand(m_machinery.m_climber.stop().withName("climber default"));
         m_machinery.m_climberIntake

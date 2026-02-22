@@ -1,9 +1,15 @@
+
 package org.team100.lib.subsystems.swerve.commands.manual;
 
+import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
+import org.team100.lib.config.DriverSkill;
 import org.team100.lib.controller.r1.FeedbackR1;
+import org.team100.lib.experiments.Experiment;
+import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.hid.Velocity;
 import org.team100.lib.logging.Level;
@@ -15,13 +21,16 @@ import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
 import org.team100.lib.state.ModelSE2;
+import org.team100.lib.subsystems.swerve.SwerveDriveSubsystem;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
+import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
 import org.team100.lib.targeting.TargetUtil;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * Manual cartesian control, with rotational control based on a target position.
@@ -34,7 +43,22 @@ import edu.wpi.first.math.geometry.Translation2d;
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
  */
-public class ManualWithTargetLock implements FieldRelativeDriver {
+public class DriveTargetLock extends Command {
+    /**
+     * While driving manually, pay attention to tags even if they are somewhat far
+     * away.
+     */
+    private static final double HEED_RADIUS_M = 6.0;
+
+    /**
+     * Velocity control in control units, [-1,1] on all axes. This needs to be
+     * mapped to a feasible velocity control as early as possible.
+     */
+    private final Supplier<Velocity> m_twistSupplier;
+    private final DoubleConsumer m_heedRadiusM;
+    private final SwerveDriveSubsystem m_drive;
+    private final SwerveLimiter m_limiter;
+
     /**
      * Relative rotational speed. Use a moderate value to trade rotation for
      * translation
@@ -51,14 +75,22 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
 
     private ControlR1 m_thetaSetpoint;
 
-    public ManualWithTargetLock(
+    public DriveTargetLock(
             LoggerFactory fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
             Supplier<Translation2d> target,
-            FeedbackR1 thetaController) {
-        m_log_target = fieldLogger.doubleArrayLogger(Level.TRACE, "target");
+            FeedbackR1 thetaController,
+            Supplier<Velocity> twistSupplier,
+            DoubleConsumer heedRadiusM,
+            SwerveDriveSubsystem drive,
+            SwerveLimiter limiter) {
         LoggerFactory log = parent.type(this);
+        m_twistSupplier = twistSupplier;
+        m_heedRadiusM = heedRadiusM;
+        m_drive = drive;
+        m_limiter = limiter;
+        m_log_target = fieldLogger.doubleArrayLogger(Level.TRACE, "target");
         m_swerveKinodynamics = swerveKinodynamics;
         m_target = target;
         m_thetaController = thetaController;
@@ -68,12 +100,30 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
                 swerveKinodynamics.getMaxAngleAccelRad_S2() * ROTATION_SPEED,
                 0.01);
         m_log_apparent_motion = log.doubleLogger(Level.TRACE, "apparent motion");
+        addRequirements(m_drive);
     }
 
     @Override
-    public void reset(ModelSE2 state) {
-        m_thetaSetpoint = state.theta().control();
+    public void initialize() {
+        m_heedRadiusM.accept(HEED_RADIUS_M);
+        m_limiter.updateSetpoint(m_drive.getVelocity());
+        ModelSE2 p = m_drive.getState();
+        m_thetaSetpoint = p.theta().control();
         m_thetaController.reset();
+    }
+
+    @Override
+    public void execute() {
+        Velocity t = m_twistSupplier.get();
+        ModelSE2 s = m_drive.getState();
+        VelocitySE2 v = apply(s, t);
+        // scale for driver skill.
+        VelocitySE2 scaled = GeometryUtil.scale(v, DriverSkill.level().scale());
+        // Apply field-relative limits.
+        if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
+            scaled = m_limiter.apply(scaled);
+        }
+        m_drive.setVelocity(scaled);
     }
 
     /**
@@ -88,10 +138,7 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
      * @param input control units [-1,1]
      * @return feasible field-relative velocity in m/s and rad/s
      */
-    @Override
-    public VelocitySE2 apply(
-            final ModelSE2 state,
-            final Velocity input) {
+    public VelocitySE2 apply(ModelSE2 state, Velocity input) {
 
         //
         // feedback is based on the previous setpoint.
@@ -148,10 +195,11 @@ public class ManualWithTargetLock implements FieldRelativeDriver {
         // clip the input to the unit circle
         Velocity clipped = input.clip(1.0);
         // this is user input scaled to m/s and rad/s
-        VelocitySE2 scaledInput = FieldRelativeDriver.scale(
+        VelocitySE2 scaledInput = VelocitySE2.scale(
                 clipped,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         return scaledInput;
     }
+
 }
