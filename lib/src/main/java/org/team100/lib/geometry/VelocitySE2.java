@@ -2,6 +2,8 @@ package org.team100.lib.geometry;
 
 import java.util.Optional;
 
+import org.team100.lib.hid.Velocity;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -135,5 +137,22 @@ public record VelocitySE2(double x, double y, double theta) {
     /** Cartesian velocity vector, i.e. just the x and y components. */
     public Vector<N3> vVector() {
         return VecBuilder.fill(x, y, 0);
+    }
+
+    /**
+     * Scales driver input to field-relative velocity.
+     * 
+     * This makes no attempt to address infeasibilty, it just multiplies.
+     * 
+     * @param twist    [-1,1]
+     * @param maxSpeed meters per second
+     * @param maxRot   radians per second
+     * @return meters and rad per second as specified by speed limits
+     */
+    public static VelocitySE2 scale(Velocity twist, double maxSpeed, double maxRot) {
+        return new VelocitySE2(
+                maxSpeed * MathUtil.clamp(twist.x(), -1, 1),
+                maxSpeed * MathUtil.clamp(twist.y(), -1, 1),
+                maxRot * MathUtil.clamp(twist.theta(), -1, 1));
     }
 }
