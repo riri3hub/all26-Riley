@@ -239,6 +239,8 @@ public abstract class SwerveModule100 implements Player {
      * @returns rad/s
      */
     private double omega(Rotation2d desiredWrappedAngle, double dt) {
+        if (dt < 1e-6)
+            return 0;
         // dtheta is definitely a lot less than 2pi so wrapped is fine.
         Rotation2d dthetaWrapped = desiredWrappedAngle.minus(m_previousDesiredWrappedAngle);
         return dthetaWrapped.getRadians() / dt;
