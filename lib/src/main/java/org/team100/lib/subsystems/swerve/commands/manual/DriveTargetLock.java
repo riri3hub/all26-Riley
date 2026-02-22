@@ -14,8 +14,10 @@ import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.hid.Velocity;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ControlR1Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.ModelR1Logger;
 import org.team100.lib.profile.r1.IncrementalProfile;
 import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
 import org.team100.lib.state.ControlR1;
@@ -72,6 +74,8 @@ public class DriveTargetLock extends Command {
 
     private final DoubleLogger m_log_apparent_motion;
     public final DoubleArrayLogger m_log_target;
+    private final ControlR1Logger m_log_setpoint;
+    private final ModelR1Logger m_log_goal;
 
     private ControlR1 m_thetaSetpoint;
 
@@ -86,6 +90,8 @@ public class DriveTargetLock extends Command {
             SwerveDriveSubsystem drive,
             SwerveLimiter limiter) {
         LoggerFactory log = parent.type(this);
+        m_log_setpoint = log.ControlR1Logger(Level.TRACE, "setpoint");
+        m_log_goal = log.ModelR1Logger(Level.TRACE, "goal");
         m_twistSupplier = twistSupplier;
         m_heedRadiusM = heedRadiusM;
         m_drive = drive;
@@ -108,7 +114,8 @@ public class DriveTargetLock extends Command {
         m_heedRadiusM.accept(HEED_RADIUS_M);
         m_limiter.updateSetpoint(m_drive.getVelocity());
         ModelSE2 p = m_drive.getState();
-        m_thetaSetpoint = p.theta().control();
+        // m_thetaSetpoint = p.theta().control();
+        m_thetaSetpoint = new ControlR1(p.theta().x(), 0);
         m_thetaController.reset();
     }
 
@@ -144,7 +151,10 @@ public class DriveTargetLock extends Command {
         // feedback is based on the previous setpoint.
         //
 
-        final double thetaFB = m_thetaController.calculate(state.theta(), m_thetaSetpoint.model());
+        double thetaFB = m_thetaController.calculate(state.theta(), m_thetaSetpoint.model());
+
+        if (m_thetaController.atSetpoint())
+            thetaFB = 0;
 
         //
         // update the setpoint for the next time step
@@ -161,13 +171,18 @@ public class DriveTargetLock extends Command {
         absoluteBearing = new Rotation2d(
                 Math100.getMinDistance(yaw, absoluteBearing.getRadians()));
 
-        final ModelR1 goal = new ModelR1(absoluteBearing.getRadians(), targetMotion);
+        final ModelR1 goal = new ModelR1(absoluteBearing.getRadians(), 0);
+        // final ModelR1 goal = new ModelR1(absoluteBearing.getRadians(), targetMotion);
+
+        m_log_goal.log(() -> goal);
 
         // make sure the setpoint uses the modulus close to the measurement.
         m_thetaSetpoint = new ControlR1(
                 Math100.getMinDistance(yaw, m_thetaSetpoint.x()),
                 m_thetaSetpoint.v());
         m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
+
+        m_log_setpoint.log(() -> m_thetaSetpoint);
 
         // feedforward is for the next time step
         final double thetaFF = m_thetaSetpoint.v();

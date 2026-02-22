@@ -142,23 +142,23 @@ public class Binder {
                         m_machinery.m_drive,
                         m_machinery.m_drive.getLimiter())
                         .withName("Aim to shoot"));
-        // aim at our zone, button 6 and in the neutral zone
-        // whileTrue(() -> driver.rightBumper()
-        //         && FieldConstants2026.NEUTRAL_ZONE.contains(m_machinery.m_drive.getPose().getTranslation()),
-        //         new DriveTargetLock(
-        //                 fieldLogger,
-        //                 m_log,
-        //                 m_machinery.m_swerveKinodynamics,
-        //                 () -> {
-        //                     Translation2d t = m_machinery.m_drive.getPose().getTranslation();
-        //                     return new Translation2d(0, t.getY());
-        //                 },
-        //                 thetaFeedback,
-        //                 driver::velocity,
-        //                 m_machinery.m_localizer::setHeedRadiusM,
-        //                 m_machinery.m_drive,
-        //                 m_machinery.m_drive.getLimiter())
-        //                 .withName("Aim to lob"));
+        //aim at our zone, button 6 and in the neutral zone
+        whileTrue(() -> driver.rightBumper()
+                && FieldConstants2026.NEUTRAL_ZONE.contains(m_machinery.m_drive.getPose().getTranslation()),
+                new DriveTargetLock(
+                        fieldLogger,
+                        m_log,
+                        m_machinery.m_swerveKinodynamics,
+                        () -> {
+                            Translation2d t = m_machinery.m_drive.getPose().getTranslation();
+                            return new Translation2d(0, t.getY());
+                        },
+                        thetaFeedback,
+                        driver::velocity,
+                        m_machinery.m_localizer::setHeedRadiusM,
+                        m_machinery.m_drive,
+                        m_machinery.m_drive.getLimiter())
+                        .withName("Aim to lob"));
 
         ///////////////////////////////////////////////////////////
         //
