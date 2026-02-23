@@ -9,7 +9,6 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.hid.Velocity;
-import org.team100.lib.state.ModelSE2;
 import org.team100.lib.subsystems.swerve.SwerveDriveSubsystem;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
@@ -26,6 +25,10 @@ import edu.wpi.first.wpilibj2.command.Command;
  * The profile depends on robot speed, making rotation the lowest priority.
  */
 public class DriveBargeAssist extends Command {
+    /**
+     * x coordinate of the barge scoring location
+     */
+    private static final double BARGE_X = 7.4;
     /**
      * While driving manually, pay attention to tags even if they are somewhat far
      * away.
@@ -84,50 +87,42 @@ public class DriveBargeAssist extends Command {
 
         // input in [-1,1] control units
         Velocity input = m_twistSupplier.get();
-        ModelSE2 state = m_drive.getState();
 
-        VelocitySE2 v = apply(state, input);
+        // clip the input to the unit circle
+        Velocity clipped = input.clip(1.0);
+
+        Velocity avoidBarge = avoidBarge(clipped);
+
+        VelocitySE2 v = VelocitySE2.scale(
+                avoidBarge,
+                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+
         // scale for driver skill.
-        VelocitySE2 scaled = GeometryUtil.scale(v, DriverSkill.level().scale());
+        v = GeometryUtil.scale(v, DriverSkill.level().scale());
 
         // Apply field-relative limits.
         if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
-            scaled = m_limiter.apply(scaled);
+            v = m_limiter.apply(v);
         }
-        m_drive.setVelocity(scaled);
+        m_drive.setVelocity(v);
 
     }
 
-    public VelocitySE2 apply(ModelSE2 state, Velocity twist1_1) {
-        // clip the input to the unit circle
-        Velocity clipped = twist1_1.clip(1.0);
-        double scale = 1;
-        if (clipped.x() > 0) {
-            // x coordinate of the barge scoring location
-            double BARGE_X = 7.4;
-            double distance = BARGE_X - m_pose.get().getX();
-            scale = distance * scale;
-            if (Math.abs(distance) < 0.01) {
-                scale = 0;
-            } else {
-                scale = distance * scale;
-            }
-        } else {
-            scale = 1;
+    private Velocity avoidBarge(Velocity clipped) {
+        if (clipped.x() <= 0)
+            return clipped;
+        // moving towards the barge
+        double distance = BARGE_X - m_pose.get().getX();
+        double vx = vx(distance);
+        return new Velocity(vx, clipped.y(), clipped.theta());
+    }
+
+    private double vx(double distance) {
+        if (Math.abs(distance) < 0.01) {
+            return 0;
         }
-        if (scale >= 0.5) {
-            scale = 0.5;
-        }
-        Velocity scaled;
-        if (clipped.x() > 0) {
-            scaled = new Velocity(scale, clipped.y(), clipped.theta());
-        } else {
-            scaled = new Velocity(clipped.x(), clipped.y(), clipped.theta());
-        }
-        // scale to max in both translation and rotation
-        return VelocitySE2.scale(
-                scaled,
-                m_swerveKinodynamics.getMaxDriveVelocityM_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+        return Math.max(0.5, distance * distance);
+
     }
 }

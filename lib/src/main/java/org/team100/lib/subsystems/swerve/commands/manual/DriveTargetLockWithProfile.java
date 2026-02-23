@@ -30,7 +30,6 @@ import org.team100.lib.targeting.TargetUtil;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -44,8 +43,11 @@ import edu.wpi.first.wpilibj2.command.Command;
  * 
  * The targeting solution is based on bearing alone, so it won't work if the
  * robot or target is moving. That effect can be compensated, though.
+ * 
+ * I think the profile might be a source of noise when the setpoint and the
+ * measurement are close to each other.
  */
-public class DriveTargetLock extends Command {
+public class DriveTargetLockWithProfile extends Command {
     /**
      * While driving manually, pay attention to tags even if they are somewhat far
      * away.
@@ -73,13 +75,15 @@ public class DriveTargetLock extends Command {
     private final IncrementalProfile m_profile;
 
     private final DoubleLogger m_log_apparent_motion;
-    public final DoubleArrayLogger m_log_target;
+    private final DoubleArrayLogger m_log_target;
     private final ControlR1Logger m_log_setpoint;
     private final ModelR1Logger m_log_goal;
+    private final DoubleLogger m_log_thetaFB;
+    private final DoubleLogger m_log_thetaFF;
 
     private ControlR1 m_thetaSetpoint;
 
-    public DriveTargetLock(
+    public DriveTargetLockWithProfile(
             LoggerFactory fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
@@ -92,6 +96,8 @@ public class DriveTargetLock extends Command {
         LoggerFactory log = parent.type(this);
         m_log_setpoint = log.ControlR1Logger(Level.TRACE, "setpoint");
         m_log_goal = log.ModelR1Logger(Level.TRACE, "goal");
+        m_log_thetaFB = log.doubleLogger(Level.TRACE, "thetaFB");
+        m_log_thetaFF = log.doubleLogger(Level.TRACE, "thetaFF");
         m_twistSupplier = twistSupplier;
         m_heedRadiusM = heedRadiusM;
         m_drive = drive;
@@ -113,108 +119,81 @@ public class DriveTargetLock extends Command {
     public void initialize() {
         m_heedRadiusM.accept(HEED_RADIUS_M);
         m_limiter.updateSetpoint(m_drive.getVelocity());
-        ModelSE2 p = m_drive.getState();
+        ModelSE2 state = m_drive.getState();
+        // always use zero initial setpoint velocity to avoid "jerk" on init.
+        // TODO: is this ok?
         // m_thetaSetpoint = p.theta().control();
-        m_thetaSetpoint = new ControlR1(p.theta().x(), 0);
+        m_thetaSetpoint = new ControlR1(state.theta().x(), 0);
         m_thetaController.reset();
     }
 
     @Override
     public void execute() {
-        Velocity t = m_twistSupplier.get();
-        ModelSE2 s = m_drive.getState();
-        VelocitySE2 v = apply(s, t);
-        // scale for driver skill.
-        VelocitySE2 scaled = GeometryUtil.scale(v, DriverSkill.level().scale());
-        // Apply field-relative limits.
-        if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
-            scaled = m_limiter.apply(scaled);
-        }
-        m_drive.setVelocity(scaled);
-    }
+        ModelSE2 state = m_drive.getState();
 
-    /**
-     * Clips the input to the unit circle, scales to maximum (not simultaneously
-     * feasible) speeds.
-     * 
-     * This uses the current-instant setpoint to calculate feedback error.
-     * 
-     * It uses the next-time-step setpoint for feedforward.
-     * 
-     * @param state from the drivetrain
-     * @param input control units [-1,1]
-     * @return feasible field-relative velocity in m/s and rad/s
-     */
-    public VelocitySE2 apply(ModelSE2 state, Velocity input) {
+        // Feedback based on the current state and the previous setpoint.
+        double thetaFB1 = m_thetaController.calculate(state.theta(), m_thetaSetpoint.model());
+        m_log_thetaFB.log(() -> thetaFB1);
 
-        //
-        // feedback is based on the previous setpoint.
-        //
-
-        double thetaFB = m_thetaController.calculate(state.theta(), m_thetaSetpoint.model());
-
-        if (m_thetaController.atSetpoint())
+        double thetaFB = thetaFB1;
+        if (m_thetaController.atSetpoint()) {
+            // apply controller deadband
             thetaFB = 0;
-
-        //
-        // update the setpoint for the next time step
-        //
+        }
 
         // the goal omega should match the target's apparent motion
-        final Translation2d target = m_target.get();
-        final double targetMotion = TargetUtil.targetMotion(state, target);
-
-        final Translation2d currentTranslation = state.pose().getTranslation();
-        Rotation2d absoluteBearing = TargetUtil.absoluteBearing(currentTranslation, target);
-
-        final double yaw = state.theta().x();
-        absoluteBearing = new Rotation2d(
-                Math100.getMinDistance(yaw, absoluteBearing.getRadians()));
-
-        final ModelR1 goal = new ModelR1(absoluteBearing.getRadians(), 0);
-        // final ModelR1 goal = new ModelR1(absoluteBearing.getRadians(), targetMotion);
-
-        m_log_goal.log(() -> goal);
-
-        // make sure the setpoint uses the modulus close to the measurement.
-        m_thetaSetpoint = new ControlR1(
-                Math100.getMinDistance(yaw, m_thetaSetpoint.x()),
-                m_thetaSetpoint.v());
-        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
-
-        m_log_setpoint.log(() -> m_thetaSetpoint);
-
-        // feedforward is for the next time step
-        final double thetaFF = m_thetaSetpoint.v();
-
-        final double omega = MathUtil.clamp(
-                thetaFF + thetaFB,
-                -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-
-        final VelocitySE2 scaledInput = getScaledInput(input);
-
-        final VelocitySE2 twistWithLockM_S = new VelocitySE2(
-                scaledInput.x(), scaledInput.y(), omega);
-
-        m_log_apparent_motion.log(() -> targetMotion);
+        Translation2d target = m_target.get();
         m_log_target.log(() -> new double[] {
                 target.getX(),
                 target.getY(),
                 0 });
+        double targetMotion = TargetUtil.targetMotion(state, target);
+        m_log_apparent_motion.log(() -> targetMotion);
 
-        return twistWithLockM_S;
-    }
+        double unwrappedBearing = TargetUtil.unwrappedAbsoluteBearing(state.pose(), target);
+        // eliminate target motion to reduce noise
+        // TODO: put back target motion
+        ModelR1 goal = new ModelR1(unwrappedBearing, 0);
+        // final ModelR1 goal = new ModelR1(unwrappedBearing, targetMotion);
+        m_log_goal.log(() -> goal);
 
-    private VelocitySE2 getScaledInput(Velocity input) {
-        // clip the input to the unit circle
-        Velocity clipped = input.clip(1.0);
-        // this is user input scaled to m/s and rad/s
-        VelocitySE2 scaledInput = VelocitySE2.scale(
-                clipped,
+        // Make sure the old setpoint uses the modulus close to the measurement.
+        m_thetaSetpoint = new ControlR1(
+                Math100.getMinDistance(state.theta().x(), m_thetaSetpoint.x()),
+                m_thetaSetpoint.v());
+
+        // New setpoint for the next timestep.
+        m_thetaSetpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_thetaSetpoint, goal);
+        m_log_setpoint.log(() -> m_thetaSetpoint);
+
+        // Feedforward is for the next time step.
+        double thetaFF = m_thetaSetpoint.v();
+        m_log_thetaFF.log(() -> thetaFF);
+
+        double omega = MathUtil.clamp(
+                thetaFF + thetaFB,
+                -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
+                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+
+        // Clip and scale user input.
+        VelocitySE2 v = VelocitySE2.scale(
+                m_twistSupplier.get().clip(1.0),
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        return scaledInput;
+
+        // Scale for driver skill.
+        v = GeometryUtil.scale(v, DriverSkill.level().scale());
+
+        // Apply field-relative limits.
+        if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
+            v = m_limiter.apply(v);
+        }
+
+        // Override omega.
+        v = new VelocitySE2(v.x(), v.y(), omega);
+
+        // Actuate the drivetrain.
+        m_drive.setVelocity(v);
     }
 
 }

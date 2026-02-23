@@ -37,7 +37,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         AngularPositionServo turningServo = simulatedTurningServo(
                 parent.name("Turning"),
                 kinodynamics);
-        return new SimulatedSwerveModule100(driveServo, turningServo);
+        return new SimulatedSwerveModule100(parent, driveServo, turningServo);
     }
 
     /**
@@ -51,7 +51,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         AngularPositionServo turningServo = simulatedOutboardTurningServo(
                 parent.name("Turning"),
                 kinodynamics);
-        return new SimulatedSwerveModule100(driveServo, turningServo);
+        return new SimulatedSwerveModule100(parent, driveServo, turningServo);
     }
 
     private static LinearVelocityServo simulatedDriveServo(LoggerFactory parent) {
@@ -126,10 +126,10 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     }
 
     private SimulatedSwerveModule100(
+            LoggerFactory log,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
         // primary is 2:1 so final is whatever is left.
-        super(driveServo, turningServo, WHEEL_DIAMETER_M, DRIVE_GEAR_RATIO / 2);
-        //
+        super(log, driveServo, turningServo, WHEEL_DIAMETER_M, DRIVE_GEAR_RATIO / 2);
     }
 }

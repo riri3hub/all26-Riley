@@ -1,7 +1,5 @@
 package org.team100.frc2026.robot;
 
-import static edu.wpi.first.wpilibj2.command.Commands.parallel;
-
 import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
@@ -27,15 +25,18 @@ import org.team100.lib.subsystems.swerve.SwerveDriveFactory;
 import org.team100.lib.subsystems.swerve.SwerveDriveSubsystem;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamicsFactory;
+import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
 import org.team100.lib.subsystems.swerve.module.SwerveModuleCollection;
 import org.team100.lib.uncertainty.IsotropicNoiseSE2;
 import org.team100.lib.uncertainty.VariableR1;
 import org.team100.lib.util.CanId;
 import org.team100.lib.visualization.RobotPoseVisualization;
 import org.team100.lib.visualization.TrajectoryVisualization;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
@@ -67,6 +68,7 @@ public class Machinery {
     public final TrajectoryVisualization m_trajectoryViz;
     public final SwerveKinodynamics m_swerveKinodynamics;
     final AprilTagRobotLocalizer m_localizer;
+    public final SwerveLimiter m_limiter;
     public final SwerveDriveSubsystem m_drive;
     final Beeper m_beeper;
     // public final Shooter m_shooter;
@@ -79,7 +81,7 @@ public class Machinery {
     // final ShooterHood m_shooterHood;
 
     public Machinery() {
-    LoggerFactory driveLog = logger.name("Drive");
+        LoggerFactory driveLog = logger.name("Drive");
         ////////////////////////////////////////////////////////////
         //
         // SUBSYSTEMS
@@ -87,7 +89,7 @@ public class Machinery {
 
         // Subsystem initializers go here.
         // m_shooter = new Shooter(driveLog);
-        m_intake = new Intake(driveLog, new CanId(2000000));
+        m_intake = new Intake(logger, new CanId(2000000));
         m_extender = new IntakeExtend(logger, new CanId(20));
         // m_serializer = new Serializer(driveLog);
         // m_ClimberExtension = new ClimberExtension(driveLog);
@@ -105,7 +107,7 @@ public class Machinery {
         //
         // POSE ESTIMATION
         //
-        
+
         m_swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLog);
 
         m_modules = SwerveModuleCollection.get(
@@ -159,6 +161,12 @@ public class Machinery {
         //
         // DRIVETRAIN
         //
+
+        m_limiter = new SwerveLimiter(
+                driveLog,
+                m_swerveKinodynamics,
+                RobotController::getBatteryVoltage);
+
         m_drive = SwerveDriveFactory.get(
                 driveLog,
                 m_swerveKinodynamics,
@@ -276,7 +284,7 @@ public class Machinery {
         if (m_groundTruthViz != null)
             m_groundTruthViz.run();
     }
-    
+
     public void close() {
         // this keeps the tests from conflicting via the use of simulated HAL ports.
         m_modules.close();

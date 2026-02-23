@@ -2,9 +2,9 @@ package org.team100.lib.subsystems.swerve.module;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.mechanism.RotaryMechanism;
@@ -101,7 +101,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 drive,
                 neutral,
                 motorPhase);
-        return new WCPSwerveModule100(driveServo, turningServo, ratio);
+        return new WCPSwerveModule100(parent, driveServo, turningServo, ratio);
     }
 
     /**
@@ -136,7 +136,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 drive,
                 neutral,
                 motorPhase);
-        return new WCPSwerveModule100(driveServo, turningServo, ratio);
+        return new WCPSwerveModule100(parent, driveServo, turningServo, ratio);
     }
 
     private static LinearVelocityServo driveKrakenServo(
@@ -262,11 +262,11 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     }
 
     private WCPSwerveModule100(
+            LoggerFactory log,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo,
             DriveRatio ratio) {
         // primary is 2:1 so final is whatever is left.
-        super(driveServo, turningServo, WHEEL_DIAMETER_M, ratio.m_ratio / 2);
-        //
+        super(log, driveServo, turningServo, WHEEL_DIAMETER_M, ratio.m_ratio / 2);
     }
 }

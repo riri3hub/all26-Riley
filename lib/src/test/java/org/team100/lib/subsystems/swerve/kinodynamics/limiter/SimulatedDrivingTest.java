@@ -89,8 +89,7 @@ public class SimulatedDrivingTest implements Timeless {
                 logger,
                 odometryUpdater,
                 estimate,
-                swerveLocal,
-                limiter);
+                swerveLocal);
     }
 
     @Test

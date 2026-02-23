@@ -71,9 +71,11 @@ public class DriveFieldRelative extends Command {
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         m_log_scaled.log(() -> scaled1);
+
         // scale for driver skill.
         VelocitySE2 scaled = GeometryUtil.scale(scaled1, DriverSkill.level().scale());
         // Apply field-relative limits.
+
         if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
             scaled = m_limiter.apply(scaled);
         }

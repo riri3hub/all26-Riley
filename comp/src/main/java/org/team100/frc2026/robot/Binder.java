@@ -1,11 +1,12 @@
 package org.team100.frc2026.robot;
 
-import static edu.wpi.first.wpilibj2.command.Commands.parallel;
-
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import org.team100.frc2026.field.FieldConstants2026;
 import org.team100.lib.controller.r1.FeedbackR1;
+import org.team100.lib.controller.r1.FullStateFeedback;
 import org.team100.lib.controller.r1.PIDFeedback;
 import org.team100.lib.controller.se2.ControllerFactorySE2;
 import org.team100.lib.controller.se2.ControllerSE2;
@@ -16,7 +17,11 @@ import org.team100.lib.profile.se2.HolonomicProfile;
 import org.team100.lib.profile.se2.HolonomicProfileFactory;
 import org.team100.lib.subsystems.se2.commands.DriveToPoseWithProfile;
 import org.team100.lib.subsystems.swerve.commands.manual.DriveFieldRelative;
-import org.team100.lib.subsystems.swerve.commands.manual.DriveTargetLock;
+import org.team100.lib.subsystems.swerve.commands.manual.DriveMovingTargetLock;
+import org.team100.lib.subsystems.swerve.commands.manual.DriveTargetLockDirect;
+import org.team100.lib.targeting.CachedSolution;
+import org.team100.lib.targeting.LaserSolver;
+import org.team100.lib.targeting.Solver;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -68,7 +73,8 @@ public class Binder {
                         driver::velocity,
                         m_machinery.m_localizer::setHeedRadiusM,
                         m_machinery.m_drive,
-                        m_machinery.m_drive.getLimiter()).withName("drive default"));
+                        m_machinery.m_limiter)
+                        .withName("drive default"));
 
         // m_machinery.m_shooter.setDefaultCommand(
         // m_machinery.m_shooter.stop());
@@ -102,7 +108,7 @@ public class Binder {
 
         // whileTrue(driver::b, m_machinery.m_shooter.shoot());
 
-         whileTrue(driver::x, m_machinery.m_intake.intake());
+        whileTrue(driver::x, m_machinery.m_intake.intake());
 
         // whileTrue(driver::y, m_machinery.m_serializer.serialize());
 
@@ -123,9 +129,10 @@ public class Binder {
         // .andThen(m_machinery.m_ClimberExtension.setHomePosition()));
 
         // The real bindings
-       // whileTrue(driver::leftBumper, m_machinery.m_extender.goToRetractedPosition());
-      //  whileTrue(driver::leftTrigger,
-        //        m_machinery.m_extender.goToExtendedPosition()
+        // whileTrue(driver::leftBumper,
+        // m_machinery.m_extender.goToRetractedPosition());
+        // whileTrue(driver::leftTrigger,
+        // m_machinery.m_extender.goToExtendedPosition()
         // .andThen(m_machinery.m_intake.intake()));
 
         FeedbackR1 thetaFeedback = new PIDFeedback(
@@ -133,7 +140,7 @@ public class Binder {
         // aim at the hub, button 6 and also in the alliance zone
         whileTrue(() -> driver.rightBumper()
                 && FieldConstants2026.ALLIANCE_ZONE.contains(m_machinery.m_drive.getPose().getTranslation()),
-                new DriveTargetLock(
+                new DriveTargetLockDirect(
                         fieldLogger,
                         m_log,
                         m_machinery.m_swerveKinodynamics,
@@ -142,12 +149,12 @@ public class Binder {
                         driver::velocity,
                         m_machinery.m_localizer::setHeedRadiusM,
                         m_machinery.m_drive,
-                        m_machinery.m_drive.getLimiter())
+                        m_machinery.m_limiter)
                         .withName("Aim to shoot"));
-        //aim at our zone, button 6 and in the neutral zone
+        // aim at our zone, button 6 and in the neutral zone
         whileTrue(() -> driver.rightBumper()
                 && FieldConstants2026.NEUTRAL_ZONE.contains(m_machinery.m_drive.getPose().getTranslation()),
-                new DriveTargetLock(
+                new DriveTargetLockDirect(
                         fieldLogger,
                         m_log,
                         m_machinery.m_swerveKinodynamics,
@@ -159,8 +166,40 @@ public class Binder {
                         driver::velocity,
                         m_machinery.m_localizer::setHeedRadiusM,
                         m_machinery.m_drive,
-                        m_machinery.m_drive.getLimiter())
+                        m_machinery.m_limiter)
                         .withName("Aim to lob"));
+
+        Solver solver = getSolver();
+
+        Supplier<Optional<Translation2d>> target = () -> {
+            if (FieldConstants2026.ALLIANCE_ZONE.contains(m_machinery.m_drive.getPose().getTranslation())) {
+                return Optional.of(FieldConstants2026.HUB.toTranslation2d());
+            }
+            if (FieldConstants2026.NEUTRAL_ZONE.contains(m_machinery.m_drive.getPose().getTranslation())) {
+                return Optional.of(new Translation2d(0, m_machinery.m_drive.getPose().getTranslation().getY()));
+            }
+            return Optional.empty();
+        };
+
+        CachedSolution tofSolution = new CachedSolution(
+                fieldLogger, m_machinery.m_drive::getState, target, solver);
+
+        // here we rely only on PID so make it stronger
+        FeedbackR1 aggressiveFeedback = new FullStateFeedback(
+                m_log, 10, 0.1, true, 0.025, 0.25);
+
+        // aim at the hub, button 5 and also in the alliance zone
+        whileTrue(() -> driver.leftBumper(),
+                new DriveMovingTargetLock(
+                        m_log,
+                        m_machinery.m_swerveKinodynamics,
+                        driver::velocity,
+                        m_machinery.m_localizer::setHeedRadiusM,
+                        m_machinery.m_limiter,
+                        tofSolution,
+                        aggressiveFeedback,
+                        m_machinery.m_drive)
+                        .withName("Moving target lock"));
 
         ///////////////////////////////////////////////////////////
         //
@@ -170,6 +209,18 @@ public class Binder {
         whileTrue(() -> (RobotState.isTest() && driver.a() && driver.b()),
                 tester.prematch());
 
+    }
+
+    private Solver getSolver() {
+        // TOF solver is for a real 3d trajectory
+        // this makes a parabolic path for testing
+        // Drag d = new Drag(0, 0, 0, 1, 0);
+        // double v = 7;
+        // InverseRange ir = new InverseRange(d, 0, v, 0);
+        // return new TimeOfFlightRecursion(ir, 0.01);
+
+        // Laser solver is for aiming with the flashlight
+        return new LaserSolver();
     }
 
     private static Trigger whileTrue(BooleanSupplier condition, Command command) {

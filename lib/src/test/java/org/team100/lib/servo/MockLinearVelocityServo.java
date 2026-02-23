@@ -1,12 +1,10 @@
 package org.team100.lib.servo;
 
 public class MockLinearVelocityServo implements LinearVelocityServo {
-
     double m_setpoint;
 
     @Override
     public void reset() {
-        //
     }
 
     @Override
@@ -35,7 +33,6 @@ public class MockLinearVelocityServo implements LinearVelocityServo {
 
     @Override
     public void stop() {
-        //
     }
 
     @Override
@@ -45,7 +42,6 @@ public class MockLinearVelocityServo implements LinearVelocityServo {
 
     @Override
     public void periodic() {
-        //
     }
 
     @Override

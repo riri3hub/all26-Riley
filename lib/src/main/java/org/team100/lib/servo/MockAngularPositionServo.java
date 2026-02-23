@@ -1,9 +1,7 @@
 package org.team100.lib.servo;
 
-/**
- * This is just for tests and illustration.
- */
 public class MockAngularPositionServo implements AngularPositionServo {
+    double m_setpoint;
 
     @Override
     public void reset() {
@@ -23,11 +21,12 @@ public class MockAngularPositionServo implements AngularPositionServo {
 
     @Override
     public void setPositionDirect(double goalRad, double velocityRad_S, double torqueNm) {
+        m_setpoint = goalRad;
     }
 
     @Override
     public double getWrappedPositionRad() {
-        return 0;
+        return m_setpoint;
     }
 
     @Override

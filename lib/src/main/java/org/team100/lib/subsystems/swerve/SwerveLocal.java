@@ -12,7 +12,6 @@ import org.team100.lib.subsystems.swerve.module.SwerveModuleCollection;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModulePositions;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleStates;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
@@ -66,7 +65,7 @@ public class SwerveLocal implements Player {
      */
     void setChassisSpeeds(ChassisSpeeds nextSpeed) {
         SwerveModuleStates states = m_swerveKinodynamics.toSwerveModuleStates(nextSpeed);
-        setModuleStates(states);
+        m_modules.setDesiredStates(states);
         m_log_chassis_speed.log(() -> nextSpeed);
     }
 
@@ -91,10 +90,6 @@ public class SwerveLocal implements Player {
         return m_modules.positions();
     }
 
-    Translation2d[] getModuleLocations() {
-        return m_swerveKinodynamics.getKinematics().getModuleLocations();
-    }
-
     boolean[] atSetpoint() {
         return m_modules.atSetpoint();
     }
@@ -114,14 +109,5 @@ public class SwerveLocal implements Player {
     void periodic() {
         m_logPositions.log(this::positions);
         m_modules.periodic();
-    }
-
-    /////////////////////////////////////////////////////////
-
-    /**
-     * @param nextStates for now+dt
-     */
-    private void setModuleStates(SwerveModuleStates nextStates) {
-        m_modules.setDesiredStates(nextStates);
     }
 }

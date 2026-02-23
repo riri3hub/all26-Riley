@@ -226,15 +226,6 @@ public class SwerveModuleCollection implements Player {
                 m_rearRight.getPosition());
     }
 
-    public double[] turningPosition() {
-        return new double[] {
-                m_frontLeft.turningPosition(),
-                m_frontRight.turningPosition(),
-                m_rearLeft.turningPosition(),
-                m_rearRight.turningPosition()
-        };
-    }
-
     /** FOR TEST ONLY */
     public SwerveModuleStates states() {
         return new SwerveModuleStates(

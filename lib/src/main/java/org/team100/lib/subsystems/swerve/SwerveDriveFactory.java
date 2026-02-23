@@ -6,10 +6,7 @@ import org.team100.lib.localization.OdometryUpdater;
 import org.team100.lib.localization.SwerveHistory;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
 import org.team100.lib.subsystems.swerve.module.SwerveModuleCollection;
-
-import edu.wpi.first.wpilibj.RobotController;
 
 /**
  * Pull together some of the drivetrain's dependencies so they don't pollute
@@ -33,16 +30,11 @@ public class SwerveDriveFactory {
                 driveLog,
                 swerveKinodynamics,
                 modules);
-        SwerveLimiter limiter = new SwerveLimiter(
-                driveLog,
-                swerveKinodynamics,
-                RobotController::getBatteryVoltage);
         return new SwerveDriveSubsystem(
                 driveLog,
                 odometryUpdater,
                 estimate,
-                swerveLocal,
-                limiter);
+                swerveLocal);
     }
 
 }

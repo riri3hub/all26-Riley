@@ -1,4 +1,4 @@
-package org.team100.lib.subsystems.se2.commands;
+package org.team100.lib.subsystems.se2.commands.test;
 
 import org.team100.lib.commands.MoveAndHold;
 import org.team100.lib.geometry.VelocitySE2;

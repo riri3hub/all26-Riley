@@ -25,6 +25,7 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
     protected final RotaryMechanism m_mechanism;
     private final ProfileReferenceR1 m_ref;
     private final DoubleLogger m_log_goal;
+    private final DoubleLogger m_log_velocity;
 
     /**
      * Goal is "unwrapped" i.e. it's it's [-inf, inf], not [-pi,pi]
@@ -52,7 +53,7 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
         m_ref = ref;
         LoggerFactory log = parent.type(this);
         m_log_goal = log.doubleLogger(Level.TRACE, "goal (rad)");
-
+        m_log_velocity = log.doubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
     abstract void actuate(SetpointsR1 wrappedSetpoints, double torqueNm);
@@ -74,6 +75,7 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
 
     @Override
     public void setPositionDirect(double wrappedGoalRad, double velocityRad_S, double torqueNm) {
+        m_log_velocity.log(() -> velocityRad_S);
         // make sure the reference gets reinitialized if required later
         m_unwrappedGoal = null;
         m_validSetpoint = true;

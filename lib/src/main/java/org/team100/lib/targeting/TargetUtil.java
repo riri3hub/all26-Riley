@@ -2,7 +2,9 @@ package org.team100.lib.targeting;
 
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.state.ModelSE2;
+import org.team100.lib.util.Math100;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -25,6 +27,17 @@ public class TargetUtil {
      */
     public static Rotation2d absoluteBearing(Translation2d robot, Translation2d target) {
         return target.minus(robot).getAngle();
+    }
+
+    /**
+     * Absolute bearing close to the robot's current pose, might be outside
+     * [-pi,pi].
+     */
+    public static double unwrappedAbsoluteBearing(Pose2d robot, Translation2d target) {
+        Translation2d currentTranslation = robot.getTranslation();
+        Rotation2d absoluteBearing = TargetUtil.absoluteBearing(currentTranslation, target);
+        double yaw = robot.getRotation().getRadians();
+        return Math100.getMinDistance(yaw, absoluteBearing.getRadians());
     }
 
     /**

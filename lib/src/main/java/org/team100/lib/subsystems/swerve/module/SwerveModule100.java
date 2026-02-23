@@ -5,13 +5,15 @@ import java.util.Optional;
 
 import org.team100.lib.coherence.Takt;
 import org.team100.lib.config.Identity;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.music.Player;
 import org.team100.lib.servo.AngularPositionServo;
 import org.team100.lib.servo.LinearVelocityServo;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModulePosition100;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleState100;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
@@ -45,6 +47,13 @@ public abstract class SwerveModule100 implements Player {
      */
     private final double m_finalDriveRatio;
 
+    /** For playing sounds */
+    private final List<Player> m_players;
+
+    private final DoubleLogger m_log_dt;
+    private final DoubleLogger m_log_speed;
+    private final DoubleLogger m_log_omega;
+
     /**
      * The previous desired angle, used if the current desired angle is empty (i.e.
      * the module is motionless) and to calculate steering velocity.
@@ -54,13 +63,15 @@ public abstract class SwerveModule100 implements Player {
     private Rotation2d m_previousDesiredWrappedAngle;
     private double m_previousTime;
 
-    private final List<Player> m_players;
-
     protected SwerveModule100(
+            LoggerFactory log,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo,
             double wheelDiameterM,
             double finalDriveRatio) {
+        m_log_dt = log.doubleLogger(Level.TRACE, "dt");
+        m_log_speed = log.doubleLogger(Level.TRACE, "speed");
+        m_log_omega = log.doubleLogger(Level.TRACE, "omega");
         m_driveServo = driveServo;
         m_turningServo = turningServo;
         m_wheelRadiusM = wheelDiameterM / 2;
@@ -147,10 +158,6 @@ public abstract class SwerveModule100 implements Player {
                 Optional.of(new Rotation2d(unwrappedAngleRad)));
     }
 
-    double turningPosition() {
-        return m_turningServo.getWrappedPositionRad();
-    }
-
     boolean atSetpoint() {
         return m_turningServo.atSetpoint();
     }
@@ -166,47 +173,46 @@ public abstract class SwerveModule100 implements Player {
         m_turningServo.periodic();
     }
 
-    static double reduceCrossTrackError(
-            double measuredWrappedAngleRad, double desiredSpeed, Rotation2d desiredWrappedAngle) {
-        double error = MathUtil.angleModulus(desiredWrappedAngle.getRadians() - measuredWrappedAngleRad);
-        // cosine is pretty forgiving of misalignment
-        // double scale = Math.abs(Math.cos(error));
-        // gaussian is much less forgiving. note the adjustable factor. The value of
-        // 4 means there is almost no motion past about 60 degrees of error.
-        final double width = 4.0;
-        double scale = Math.exp(-width * error * error);
-        return scale * desiredSpeed;
-    }
-
-    /////////////////////////////////////////////////////////////////
-
     /**
      * Turning servo commands compute the velocity based on the previous desired
      * angle.
      * 
      * @param nextWrapped for now+dt, i.e. "next"
      */
-    private void actuate(SwerveModuleState100 nextWrapped) {
-        double nextSpeed = nextWrapped.speedMetersPerSecond();
+    void actuate(SwerveModuleState100 nextWrapped) {
         if (nextWrapped.angle().isEmpty())
             throw new IllegalArgumentException("actuation needs a real angle");
 
         Rotation2d nextWrappedAngle = nextWrapped.angle().get();
         double dt = dt();
+        // is there noise in dt?
+        m_log_dt.log(() -> dt);
         double nextOmega = omega(nextWrappedAngle, dt);
+        // is there noise in omega?
+        m_log_omega.log(() -> nextOmega);
 
         // help drive motors overcome steering.
-        nextSpeed = correctSpeedForSteering(nextSpeed, nextOmega, dt);
 
+        double nextSpeed = correctSpeedForSteering(
+                nextWrapped.speedMetersPerSecond(),
+                nextOmega,
+                dt);
+        // is there noise in speed?
+        m_log_speed.log(() -> nextSpeed);
         m_driveServo.setVelocity(nextSpeed);
 
         // Don't use a profile. This uses more current, but only briefly,
         // and it's crisper.
-        // m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), nextOmega, 0);
+        // turn off the omega part of the position to reduce noise
+        // TODO: turn this back on
         m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), 0, 0);
+        // m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), nextOmega,
+        // 0);
 
         m_previousDesiredWrappedAngle = nextWrappedAngle;
     }
+
+    /////////////////////////////////////////////////////////////////
 
     /**
      * Correct the desired speed for steering coupling.

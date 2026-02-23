@@ -6,6 +6,7 @@ import java.util.function.Function;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.GlobalVelocityR2;
 import org.team100.lib.optimization.NewtonsMethod;
+import org.team100.lib.state.ModelSE2;
 import org.team100.lib.util.StrUtil;
 
 import edu.wpi.first.math.Nat;
@@ -22,11 +23,8 @@ import edu.wpi.first.math.numbers.N2;
  * * azimuth
  * * elevation
  */
-public class ShootingMethod {
+public class ShootingMethod implements Solver {
     private static final boolean DEBUG = false;
-
-    public record Solution(Rotation2d azimuth, Rotation2d elevation) {
-    }
 
     /**
      * Minimum (azimuth, elevation)
@@ -56,10 +54,12 @@ public class ShootingMethod {
     private final IRange m_range;
     /** Solution tolerance, radial distance to target in meters. */
     private final double m_tolerance;
+    private final double m_initialElevation;
 
-    public ShootingMethod(IRange range, double tolerance) {
+    public ShootingMethod(IRange range, double tolerance, double initialElevation) {
         m_range = range;
         m_tolerance = tolerance;
+        m_initialElevation = initialElevation;
     }
 
     /**
@@ -72,19 +72,20 @@ public class ShootingMethod {
      * elevation close to the solution you want.
      */
     public Optional<Solution> solve(
-            Translation2d robotPosition,
-            GlobalVelocityR2 robotVelocity,
+            ModelSE2 state,
             Translation2d targetPosition,
-            GlobalVelocityR2 targetVelocity,
-            double initialElevation) {
+            GlobalVelocityR2 targetVelocity) {
         if (DEBUG)
             System.out.println("ShootingMethod.solve()");
+        Translation2d robotPosition = state.translation();
+        GlobalVelocityR2 robotVelocity = state.velocityR2();
         // Target relative to robot
         Translation2d T0 = targetPosition.minus(robotPosition);
         // Target velocity relative to robot
         GlobalVelocityR2 vT = targetVelocity.minus(robotVelocity);
         // Initial azimuth guess is the current target bearing.
-        Vector<N2> initialX = VecBuilder.fill(T0.getAngle().getRadians(), initialElevation);
+        Vector<N2> initialX = VecBuilder.fill(
+                T0.getAngle().getRadians(), m_initialElevation);
         NewtonsMethod<N2, N2> solver = new NewtonsMethod<>(
                 Nat.N2(),
                 Nat.N2(),
@@ -96,9 +97,12 @@ public class ShootingMethod {
                 DX_LIMIT);
         try {
             Vector<N2> x = solver.solve2(initialX, 3, true);
+            // use zero azimuth velocity for now.
+            // TODO: solve for that
             return Optional.of(
                     new Solution(
                             new Rotation2d(x.get(0)),
+                            0,
                             new Rotation2d(x.get(1))));
         } catch (IllegalArgumentException ex) {
             return Optional.empty();
