@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 /**
  * A version of target lock that allows moving robot, with fixed target.
+ * 
+ * NOTE this does not yet work :-)
  */
 public class DriveMovingTargetLock extends Command {
     /**
@@ -101,22 +103,17 @@ public class DriveMovingTargetLock extends Command {
         ModelSE2 state = m_drive.getState();
 
         // Feedback uses the previous goal
-        double thetaFB1 = m_thetaController.calculate(state.theta(), m_goal);
-        m_log_thetaFB.log(() -> thetaFB1);
+        double thetaFB = m_thetaController.calculate(state.theta(), m_goal);
+        m_log_thetaFB.log(() -> thetaFB);
 
         double yaw = state.pose().getRotation().getRadians();
         double goalYaw = Math100.getMinDistance(yaw, solution.azimuth().getRadians());
-        m_goal = new ModelR1(goalYaw, solution.azimuthVelocity());
+        m_goal = new ModelR1(goalYaw, 0);
+        // m_goal = new ModelR1(goalYaw, solution.azimuthVelocity());
         m_log_goal.log(() -> m_goal);
 
         double thetaFF = m_goal.v() * FEEDFORWARD_SCALE;
         m_log_thetaFF.log(() -> thetaFF);
-
-        double thetaFB = thetaFB1;
-        if (m_thetaController.atSetpoint()) {
-            // apply controller deadband
-            thetaFB = 0;
-        }
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB,

@@ -64,6 +64,7 @@ public class DriveTargetLockDirect extends Command {
     private final ModelR1Logger m_log_goal;
     private final DoubleLogger m_log_thetaFB;
     private final DoubleLogger m_log_thetaFF;
+    private final DoubleLogger m_log_omega;
 
     public DriveTargetLockDirect(
             LoggerFactory fieldLogger,
@@ -79,6 +80,7 @@ public class DriveTargetLockDirect extends Command {
         m_log_goal = log.ModelR1Logger(Level.TRACE, "goal");
         m_log_thetaFB = log.doubleLogger(Level.TRACE, "thetaFB");
         m_log_thetaFF = log.doubleLogger(Level.TRACE, "thetaFF");
+        m_log_omega = log.doubleLogger(Level.TRACE, "omega");
         m_twistSupplier = twistSupplier;
         m_heedRadiusM = heedRadiusM;
         m_drive = drive;
@@ -114,8 +116,8 @@ public class DriveTargetLockDirect extends Command {
         double unwrappedBearing = TargetUtil.unwrappedAbsoluteBearing(state.pose(), target);
         // eliminate target motion to reduce noise
         // TODO: put back target motion
-        ModelR1 goal = new ModelR1(unwrappedBearing, 0);
-        // final ModelR1 goal = new ModelR1(unwrappedBearing, targetMotion);
+        // ModelR1 goal = new ModelR1(unwrappedBearing, 0);
+        final ModelR1 goal = new ModelR1(unwrappedBearing, targetMotion);
         m_log_goal.log(() -> goal);
 
         // Feedforward is the goal velocity
@@ -123,19 +125,14 @@ public class DriveTargetLockDirect extends Command {
         m_log_thetaFF.log(() -> thetaFF);
 
         // Feedback uses the goal, there's no profile.
-        double thetaFB1 = m_thetaController.calculate(state.theta(), goal);
-        m_log_thetaFB.log(() -> thetaFB1);
-
-        double thetaFB = thetaFB1;
-        if (m_thetaController.atSetpoint()) {
-            // apply controller deadband
-            thetaFB = 0;
-        }
+        double thetaFB = m_thetaController.calculate(state.theta(), goal);
+        m_log_thetaFB.log(() -> thetaFB);
 
         double omega = MathUtil.clamp(
                 thetaFF + thetaFB,
                 -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
+        m_log_omega.log(() -> omega);
 
         // Clip and scale user input.
         VelocitySE2 v = VelocitySE2.scale(

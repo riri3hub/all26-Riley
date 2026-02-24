@@ -169,37 +169,34 @@ public class Binder {
                         m_machinery.m_limiter)
                         .withName("Aim to lob"));
 
-        Solver solver = getSolver();
-
-        Supplier<Optional<Translation2d>> target = () -> {
-            if (FieldConstants2026.ALLIANCE_ZONE.contains(m_machinery.m_drive.getPose().getTranslation())) {
-                return Optional.of(FieldConstants2026.HUB.toTranslation2d());
-            }
-            if (FieldConstants2026.NEUTRAL_ZONE.contains(m_machinery.m_drive.getPose().getTranslation())) {
-                return Optional.of(new Translation2d(0, m_machinery.m_drive.getPose().getTranslation().getY()));
-            }
-            return Optional.empty();
-        };
-
-        CachedSolution tofSolution = new CachedSolution(
-                fieldLogger, m_machinery.m_drive::getState, target, solver);
-
-        // here we rely only on PID so make it stronger
-        FeedbackR1 aggressiveFeedback = new FullStateFeedback(
-                m_log, 10, 0.1, true, 0.025, 0.25);
-
         // aim at the hub, button 5 and also in the alliance zone
-        whileTrue(() -> driver.leftBumper(),
-                new DriveMovingTargetLock(
-                        m_log,
-                        m_machinery.m_swerveKinodynamics,
-                        driver::velocity,
-                        m_machinery.m_localizer::setHeedRadiusM,
-                        m_machinery.m_limiter,
-                        tofSolution,
-                        aggressiveFeedback,
-                        m_machinery.m_drive)
-                        .withName("Moving target lock"));
+        // this does not yet work.
+        // Solver solver = getSolver();
+        // Supplier<Optional<Translation2d>> target = () -> {
+        //     if (FieldConstants2026.ALLIANCE_ZONE.contains(m_machinery.m_drive.getPose().getTranslation())) {
+        //         return Optional.of(FieldConstants2026.HUB.toTranslation2d());
+        //     }
+        //     if (FieldConstants2026.NEUTRAL_ZONE.contains(m_machinery.m_drive.getPose().getTranslation())) {
+        //         return Optional.of(new Translation2d(0, m_machinery.m_drive.getPose().getTranslation().getY()));
+        //     }
+        //     return Optional.empty();
+        // };
+        // CachedSolution tofSolution = new CachedSolution(
+        //         fieldLogger, m_machinery.m_drive::getState, target, solver);
+        // here we rely only on PID so make it stronger
+        // FeedbackR1 aggressiveFeedback = new FullStateFeedback(
+        //         m_log, 1, 0.1, true, 0.025, 0.25);
+        // whileTrue(() -> driver.leftBumper(),
+        //         new DriveMovingTargetLock(
+        //                 m_log,
+        //                 m_machinery.m_swerveKinodynamics,
+        //                 driver::velocity,
+        //                 m_machinery.m_localizer::setHeedRadiusM,
+        //                 m_machinery.m_limiter,
+        //                 tofSolution,
+        //                 aggressiveFeedback,
+        //                 m_machinery.m_drive)
+        //                 .withName("Moving target lock"));
 
         ///////////////////////////////////////////////////////////
         //

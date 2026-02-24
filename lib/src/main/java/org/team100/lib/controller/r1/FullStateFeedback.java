@@ -7,6 +7,7 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.ModelR1Logger;
 import org.team100.lib.state.ModelR1;
+import org.team100.lib.tuning.Mutable;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -21,8 +22,8 @@ public class FullStateFeedback implements FeedbackR1 {
     private final ModelR1Logger m_log_reference;
     private final ModelR1Logger m_log_error;
     private final DoubleLogger m_log_u_FB;
-    private final double m_K1; // position
-    private final double m_K2; // velocity
+    private final Mutable m_K1; // position
+    private final Mutable m_K2; // velocity
     private final boolean m_rotation;
     private final DoubleUnaryOperator m_modulus;
     private final double m_tol1;
@@ -31,12 +32,12 @@ public class FullStateFeedback implements FeedbackR1 {
     private boolean m_atSetpoint = false;
 
     /**
-     * @param parent  logger
-     * @param k1      position gain
-     * @param k2      velocity gain
+     * @param parent   logger
+     * @param k1       position gain
+     * @param k2       velocity gain
      * @param rotation for rotary
-     * @param xtol    for "at setpoint"
-     * @param vtol    for "at setpoint"
+     * @param xtol     for "at setpoint"
+     * @param vtol     for "at setpoint"
      */
     public FullStateFeedback(
             LoggerFactory parent,
@@ -50,8 +51,8 @@ public class FullStateFeedback implements FeedbackR1 {
         m_log_measurement = log.ModelR1Logger(Level.DEBUG, "measurement");
         m_log_error = log.ModelR1Logger(Level.DEBUG, "error");
         m_log_u_FB = log.doubleLogger(Level.DEBUG, "u_FB");
-        m_K1 = k1;
-        m_K2 = k2;
+        m_K1 = new Mutable(log, "k1", k1);
+        m_K2 = new Mutable(log, "k2", k2);
         m_rotation = rotation;
         m_modulus = rotation ? MathUtil::angleModulus : x -> x;
         m_tol1 = xtol;
@@ -72,7 +73,7 @@ public class FullStateFeedback implements FeedbackR1 {
         double xError = m_modulus.applyAsDouble(setpoint.x() - measurement.x());
         double xDotError = setpoint.v() - measurement.v();
         m_atSetpoint = Math.abs(xError) < m_tol1 && Math.abs(xDotError) < m_tol2;
-        return m_K1 * xError + m_K2 * xDotError;
+        return m_K1.getAsDouble() * xError + m_K2.getAsDouble() * xDotError;
     }
 
     /** True if the most recent call to calculate() was at the setpoint. */
