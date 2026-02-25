@@ -15,13 +15,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
+    public static final CanId canID = new CanId(0);
     private final BareMotor m_motor;
     private final BareMotor m_motor2;
     private final BareMotor m_motor3;
 
     private final double m_speed = 30;
 
-    public Shooter(LoggerFactory parent, CanId canID) {
+    public Shooter(LoggerFactory parent) {
         LoggerFactory log = parent.type(this);
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
@@ -108,13 +109,14 @@ public class Shooter extends SubsystemBase {
         m_motor3.setVelocity(Velocity, 0, 0);
     }
 
-    public void setShooterSpeed() {
+    public void setSerializerSpeed() {
 
         setSpeed(m_speed);
     }
 
     public Boolean atSpeed() {
-        return m_motor.getVelocityRad_S() == m_speed;
+        return (m_motor.getVelocityRad_S() == m_speed && m_motor2.getVelocityRad_S() == m_speed
+                && m_motor3.getVelocityRad_S() == m_speed);
     }
 
 }

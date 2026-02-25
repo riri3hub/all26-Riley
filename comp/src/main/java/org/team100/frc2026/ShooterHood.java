@@ -34,6 +34,7 @@ public class ShooterHood extends SubsystemBase {
     private final AngularPositionServo m_servo;
     private final Supplier<Translation2d> m_target;
     private final ShooterTable m_table;
+    private final CanId canID = new CanId(0);
 
     private ModelSE2 m_state;
 

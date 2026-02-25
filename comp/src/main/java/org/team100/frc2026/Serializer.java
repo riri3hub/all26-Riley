@@ -6,6 +6,7 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
+import org.team100.lib.motor.ctre.KrakenX44Motor;
 import org.team100.lib.motor.ctre.KrakenX60Motor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
 import org.team100.lib.util.CanId;
@@ -18,10 +19,13 @@ public class Serializer extends SubsystemBase {
     private final BareMotor m_motor2;
     private final BareMotor m_motor3;
     private final BareMotor m_motor4;
-
+    private final CanId canID1 = new CanId(0);
+    private final CanId canID2 = new CanId(0);
+    private final CanId canID3 = new CanId(0);
+    private final CanId canID4 = new CanId(0);
     private final double m_speed = 30;
 
-    public Serializer(LoggerFactory parent, CanId canID) {
+    public Serializer(LoggerFactory parent) {
         LoggerFactory log = parent.type(this);
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
@@ -30,9 +34,9 @@ public class Serializer extends SubsystemBase {
                 // two is too low, even for unloaded case
                 double supplyLimit = 50;
                 double statorLimit = 20;
-                m_motor = new KrakenX60Motor(
-                        log.name("Shooter1"), // LoggerFactory parent,
-                        canID, // CanId canId,
+                m_motor = new KrakenX44Motor(
+                        log.name("Serializer1"), // LoggerFactory parent,
+                        canID1, // CanId canId,
                         NeutralMode100.COAST, // NeutralMode neutral,
                         MotorPhase.REVERSE, // MotorPhase motorPhase,
                         supplyLimit, // supplyLimit,
@@ -42,9 +46,9 @@ public class Serializer extends SubsystemBase {
                         PID// PIDConstants pid,
                 );
 
-                m_motor2 = new KrakenX60Motor(
-                        log.name("Shooter2"), // LoggerFactory parent,
-                        canID, // CanId canId,
+                m_motor2 = new KrakenX44Motor(
+                        log.name("Serializer2"), // LoggerFactory parent,
+                        canID2, // CanId canId,
                         NeutralMode100.COAST, // NeutralMode neutral,
                         MotorPhase.REVERSE, // MotorPhase motorPhase,
                         supplyLimit, // supplyLimit,
@@ -53,9 +57,9 @@ public class Serializer extends SubsystemBase {
                         KrakenX60Motor.highFriction(log),
                         PID// PIDConstants pid,
                 );
-                m_motor3 = new KrakenX60Motor(
-                        log.name("Shooter3"), // LoggerFactory parent,
-                        canID, // CanId canId,
+                m_motor3 = new KrakenX44Motor(
+                        log.name("Serializer3"), // LoggerFactory parent,
+                        canID3, // CanId canId,
                         NeutralMode100.COAST, // NeutralMode neutral,
                         MotorPhase.REVERSE, // MotorPhase motorPhase,
                         supplyLimit, // supplyLimit,
@@ -64,9 +68,9 @@ public class Serializer extends SubsystemBase {
                         KrakenX60Motor.highFriction(log),
                         PID// PIDConstants pid,
                 );
-                m_motor4 = new KrakenX60Motor(
-                        log.name("Shooter3"), // LoggerFactory parent,
-                        canID, // CanId canId,
+                m_motor4 = new KrakenX44Motor(
+                        log.name("Serializer4"), // LoggerFactory parent,
+                        canID4, // CanId canId,
                         NeutralMode100.COAST, // NeutralMode neutral,
                         MotorPhase.REVERSE, // MotorPhase motorPhase,
                         supplyLimit, // supplyLimit,
@@ -121,5 +125,10 @@ public class Serializer extends SubsystemBase {
 
         setSpeed(m_speed);
     }
+    public Boolean atSpeed() {
+        return (m_motor.getVelocityRad_S() == m_speed && m_motor2.getVelocityRad_S() == m_speed
+                && m_motor3.getVelocityRad_S() == m_speed && m_motor3.getVelocityRad_S() == m_speed);
+    }
+
 
 }
