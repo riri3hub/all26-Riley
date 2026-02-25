@@ -1,5 +1,8 @@
 package org.team100.frc2026.robot;
 
+import static edu.wpi.first.wpilibj2.command.Commands.parallel;
+import static edu.wpi.first.wpilibj2.command.Commands.sequence;
+
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -28,6 +31,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -76,14 +80,14 @@ public class Binder {
                         m_machinery.m_limiter)
                         .withName("drive default"));
 
-        // m_machinery.m_shooter.setDefaultCommand(
-        // m_machinery.m_shooter.stop());
+        m_machinery.m_shooter.setDefaultCommand(
+                m_machinery.m_shooter.stop());
         m_machinery.m_intake.setDefaultCommand(
                 m_machinery.m_intake.stop());
         m_machinery.m_extender.setDefaultCommand(
                 m_machinery.m_extender.stop());
-        // m_machinery.m_shooterHood.setDefaultCommand(
-        // m_machinery.m_shooterHood.stop());
+        m_machinery.m_shooterHood.setDefaultCommand(
+                m_machinery.m_shooterHood.stop());
 
         ///////////////////////////
         //
@@ -106,12 +110,11 @@ public class Binder {
         /// SUBSYSTEMS
         ///
 
-        // whileTrue(driver::b, m_machinery.m_shooter.shoot());
+        whileTrue(driver::b, m_machinery.m_shooter.shoot());
 
         whileTrue(driver::x, m_machinery.m_intake.intake());
 
-        // whileTrue(driver::y, m_machinery.m_serializer.serialize());
-
+        whileTrue(driver::y, m_machinery.m_serializer.serialize());
         // Test bindings
         // whileTrue(driver::leftBumper, m_machinery.m_extender.goToExtendedPosition());
         // whileTrue(driver::rightBumper,
@@ -173,30 +176,35 @@ public class Binder {
         // this does not yet work.
         // Solver solver = getSolver();
         // Supplier<Optional<Translation2d>> target = () -> {
-        //     if (FieldConstants2026.ALLIANCE_ZONE.contains(m_machinery.m_drive.getPose().getTranslation())) {
-        //         return Optional.of(FieldConstants2026.HUB.toTranslation2d());
-        //     }
-        //     if (FieldConstants2026.NEUTRAL_ZONE.contains(m_machinery.m_drive.getPose().getTranslation())) {
-        //         return Optional.of(new Translation2d(0, m_machinery.m_drive.getPose().getTranslation().getY()));
-        //     }
-        //     return Optional.empty();
+        // if
+        // (FieldConstants2026.ALLIANCE_ZONE.contains(m_machinery.m_drive.getPose().getTranslation()))
+        // {
+        // return Optional.of(FieldConstants2026.HUB.toTranslation2d());
+        // }
+        // if
+        // (FieldConstants2026.NEUTRAL_ZONE.contains(m_machinery.m_drive.getPose().getTranslation()))
+        // {
+        // return Optional.of(new Translation2d(0,
+        // m_machinery.m_drive.getPose().getTranslation().getY()));
+        // }
+        // return Optional.empty();
         // };
         // CachedSolution tofSolution = new CachedSolution(
-        //         fieldLogger, m_machinery.m_drive::getState, target, solver);
+        // fieldLogger, m_machinery.m_drive::getState, target, solver);
         // here we rely only on PID so make it stronger
         // FeedbackR1 aggressiveFeedback = new FullStateFeedback(
-        //         m_log, 1, 0.1, true, 0.025, 0.25);
+        // m_log, 1, 0.1, true, 0.025, 0.25);
         // whileTrue(() -> driver.leftBumper(),
-        //         new DriveMovingTargetLock(
-        //                 m_log,
-        //                 m_machinery.m_swerveKinodynamics,
-        //                 driver::velocity,
-        //                 m_machinery.m_localizer::setHeedRadiusM,
-        //                 m_machinery.m_limiter,
-        //                 tofSolution,
-        //                 aggressiveFeedback,
-        //                 m_machinery.m_drive)
-        //                 .withName("Moving target lock"));
+        // new DriveMovingTargetLock(
+        // m_log,
+        // m_machinery.m_swerveKinodynamics,
+        // driver::velocity,
+        // m_machinery.m_localizer::setHeedRadiusM,
+        // m_machinery.m_limiter,
+        // tofSolution,
+        // aggressiveFeedback,
+        // m_machinery.m_drive)
+        // .withName("Moving target lock"));
 
         ///////////////////////////////////////////////////////////
         //

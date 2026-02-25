@@ -6,6 +6,9 @@ import java.util.function.UnaryOperator;
 
 import org.team100.frc2026.Intake;
 import org.team100.frc2026.IntakeExtend;
+import org.team100.frc2026.Serializer;
+import org.team100.frc2026.Shooter;
+import org.team100.frc2026.ShooterHood;
 import org.team100.lib.coherence.Takt;
 import org.team100.lib.indicator.Beeper;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -71,14 +74,14 @@ public class Machinery {
     public final SwerveLimiter m_limiter;
     public final SwerveDriveSubsystem m_drive;
     final Beeper m_beeper;
-    // public final Shooter m_shooter;
+    public final Shooter m_shooter;
     public final Intake m_intake;
     public final IntakeExtend m_extender;
-    // final Serializer m_serializer;
+    public final Serializer m_serializer;
 
     // public final ClimberExtension m_ClimberExtension;
     // public final Climber m_Climber;
-    // final ShooterHood m_shooterHood;
+    public final ShooterHood m_shooterHood;
 
     public Machinery() {
         LoggerFactory driveLog = logger.name("Drive");
@@ -88,12 +91,13 @@ public class Machinery {
         //
 
         // Subsystem initializers go here.
-        // m_shooter = new Shooter(driveLog);
+        m_shooter = new Shooter(logger);
         m_intake = new Intake(logger, new CanId(15), new CanId(17));
         m_extender = new IntakeExtend(logger, new CanId(16));
-        // m_serializer = new Serializer(driveLog);
+        m_serializer = new Serializer(driveLog);
+      
         // m_ClimberExtension = new ClimberExtension(driveLog);
-        // m_shooterHood = new ShooterHood(driveLog, null);
+        m_shooterHood = new ShooterHood(driveLog, null, null);
         // m_Climber = new Climber(driveLog, new CanId(32));
 
         ////////////////////////////////////////////////////////////
