@@ -70,7 +70,7 @@ public class SwerveModuleCollection implements Player {
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.getKrakenDrive(frontLeftLogger, supplyLimit, statorLimit,
                                 new CanId(1), // drive
-                                DriveRatio.FAST,
+                                DriveRatio.MEDIUM,
                                 new CanId(3), // steer
                                 new RoboRioChannel(8),
                                 0.160218,
@@ -78,7 +78,7 @@ public class SwerveModuleCollection implements Player {
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
                         WCPSwerveModule100.getKrakenDrive(frontRightLogger, supplyLimit, statorLimit,
                                 new CanId(22), // drive
-                                DriveRatio.FAST,
+                                DriveRatio.MEDIUM,
                                 new CanId(20), // steer
                                 new RoboRioChannel(6),
                                 0.876519,
@@ -86,7 +86,7 @@ public class SwerveModuleCollection implements Player {
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
                         WCPSwerveModule100.getKrakenDrive(rearLeftLogger, supplyLimit, statorLimit,
                                 new CanId(0), // drive
-                                DriveRatio.FAST,
+                                DriveRatio.MEDIUM,
                                 new CanId(2), // steer
                                 new RoboRioChannel(7), 
                                 0.406423,
@@ -94,7 +94,7 @@ public class SwerveModuleCollection implements Player {
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
                         WCPSwerveModule100.getKrakenDrive(rearRightLogger, supplyLimit, statorLimit,
                                 new CanId(23), // drive
-                                DriveRatio.FAST,
+                                DriveRatio.MEDIUM,
                                 new CanId(21), // steer
                                 new RoboRioChannel(9),
                                 0.032502,
