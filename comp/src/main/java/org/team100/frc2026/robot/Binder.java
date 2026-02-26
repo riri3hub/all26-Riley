@@ -212,7 +212,7 @@ public class Binder {
         Command runhood = m_machinery.m_shooterHood.position();
         Command runserial = m_machinery.m_serializer.serialize();
         // TODO: maybe add a delay between runhood and runshooter?
-        whileTrue(driver::x,
+        whileTrue(driver::rightTrigger,
                 parallel(
                         runshooter,
                         runhood,

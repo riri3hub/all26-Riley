@@ -32,25 +32,24 @@ public class BClimberAutonRight implements AnnotatedCommand {
     private final PathSE2Factory pathFactory;
     private final TrajectorySE2Planner planner;
 
-    public  BClimberAutonRight(
-        LoggerFactory parent,
-        SwerveKinodynamics kinodynamics,
-        ControllerSE2 controller,
-        Machinery machinery) {
-            log = parent.name(name());
-            this.controller = controller;
-            this.machinery = machinery;
-            constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
-            trajectoryFactory = new TrajectorySE2Factory(constraints);
-            pathFactory = new PathSE2Factory();
-            planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);
+    public BClimberAutonRight(
+            LoggerFactory parent,
+            SwerveKinodynamics kinodynamics,
+            ControllerSE2 controller,
+            Machinery machinery) {
+        log = parent.name(name());
+        this.controller = controller;
+        this.machinery = machinery;
+        constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
+        trajectoryFactory = new TrajectorySE2Factory(constraints);
+        pathFactory = new PathSE2Factory();
+        planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);
     }
 
     @Override
     public String name() {
         return "BClimber Auton Right";
     }
-
 
     TrajectorySE2 t1(Pose2d startingPose) {
         List<WaypointSE2> waypoints = List.of(
@@ -69,8 +68,8 @@ public class BClimberAutonRight implements AnnotatedCommand {
         return sequence(
                 n1.until(n1::isDone),
                 waitSeconds(1),
-                //    machinery.m_ClimberExtension.setPosition(),
-                waitSeconds(1));
+                machinery.m_ClimberExtension.setPosition(),
+                waitSeconds(1).andThen(machinery.m_Climber.setClimb1()));
     }
 
     @Override

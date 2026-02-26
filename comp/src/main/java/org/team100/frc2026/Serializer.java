@@ -1,32 +1,36 @@
 package org.team100.frc2026;
 
+import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.KrakenX44Motor;
 import org.team100.lib.motor.ctre.KrakenX60Motor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
+import org.team100.lib.servo.OutboardLinearVelocityServo;
 import org.team100.lib.util.CanId;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Serializer extends SubsystemBase {
-    private final BareMotor m_motor;
-    private final BareMotor m_motor2;
-    private final BareMotor m_motor3;
-    private final BareMotor m_motor4;
-    private final CanId canID1 = new CanId(0);
-    private final CanId canID2 = new CanId(0);
-    private final CanId canID3 = new CanId(0);
-    private final CanId canID4 = new CanId(0);
+    public static final CanId canID = new CanId(0);
+
+    private final OutboardLinearVelocityServo m_servo1;
+    private final OutboardLinearVelocityServo m_servo2;
+
     private final double m_speed = 30;
 
     public Serializer(LoggerFactory parent) {
         LoggerFactory log = parent.type(this);
+        LoggerFactory log1 = log.name("Serializer1");
+        LoggerFactory log2 = log.name("Serializer2");
+    
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
                 //
@@ -34,101 +38,83 @@ public class Serializer extends SubsystemBase {
                 // two is too low, even for unloaded case
                 double supplyLimit = 50;
                 double statorLimit = 20;
-                m_motor = new KrakenX44Motor(
-                        log.name("Serializer1"), // LoggerFactory parent,
-                        canID1, // CanId canId,
-                        NeutralMode100.COAST, // NeutralMode neutral,
-                        MotorPhase.REVERSE, // MotorPhase motorPhase,
-                        supplyLimit, // supplyLimit,
-                        statorLimit, // statorLimit,
-                        KrakenX60Motor.highFrictionFF(log), // Feedforward100 ff
-                        KrakenX60Motor.highFriction(log),
-                        PID// PIDConstants pid,
-                );
 
-                m_motor2 = new KrakenX44Motor(
-                        log.name("Serializer2"), // LoggerFactory parent,
-                        canID2, // CanId canId,
-                        NeutralMode100.COAST, // NeutralMode neutral,
-                        MotorPhase.REVERSE, // MotorPhase motorPhase,
-                        supplyLimit, // supplyLimit,
-                        statorLimit, // statorLimit,
-                        KrakenX60Motor.highFrictionFF(log), // Feedforward100 ff
-                        KrakenX60Motor.highFriction(log),
-                        PID// PIDConstants pid,
-                );
-                m_motor3 = new KrakenX44Motor(
-                        log.name("Serializer3"), // LoggerFactory parent,
-                        canID3, // CanId canId,
-                        NeutralMode100.COAST, // NeutralMode neutral,
-                        MotorPhase.REVERSE, // MotorPhase motorPhase,
-                        supplyLimit, // supplyLimit,
-                        statorLimit, // statorLimit,
-                        KrakenX60Motor.highFrictionFF(log), // Feedforward100 ff
-                        KrakenX60Motor.highFriction(log),
-                        PID// PIDConstants pid,
-                );
-                m_motor4 = new KrakenX44Motor(
-                        log.name("Serializer4"), // LoggerFactory parent,
-                        canID4, // CanId canId,
-                        NeutralMode100.COAST, // NeutralMode neutral,
-                        MotorPhase.REVERSE, // MotorPhase motorPhase,
-                        supplyLimit, // supplyLimit,
-                        statorLimit, // statorLimit,
-                        KrakenX60Motor.highFrictionFF(log), // Feedforward100 ff
-                        KrakenX60Motor.highFriction(log),
-                        PID// PIDConstants pid,
-                );
+                SimpleDynamics dynamics = KrakenX60Motor.highFrictionFF(log);
+                Friction friction = KrakenX60Motor.highFriction(log);
+                // TODO: set canIDs
+                BareMotor m_motor1 = new KrakenX44Motor(
+                        log1, canID, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        supplyLimit, statorLimit, dynamics, friction, PID);
+
+                BareMotor m_motor2 = new KrakenX44Motor(
+                        log2, canID, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        supplyLimit, statorLimit, dynamics, friction, PID);
+
+                // verify these numbers
+                LinearMechanism mechanism1 = new LinearMechanism(
+                        log1, m_motor1, m_motor1.encoder(), 1, 0.1,
+                        Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
+                LinearMechanism mechanism2 = new LinearMechanism(
+                        log2, m_motor2, m_motor2.encoder(), 1, 0.1,
+                        Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
+                double tolerance = 1;
+                m_servo1 = new OutboardLinearVelocityServo(log1, mechanism1, tolerance);
+                m_servo2 = new OutboardLinearVelocityServo(log2, mechanism2, tolerance);
+
             }
             default -> {
-                m_motor = new SimulatedBareMotor(log.name("Shootmotor1"), 600);
-                m_motor2 = new SimulatedBareMotor(log.name("Shootmotor2"), 600);
-                m_motor3 = new SimulatedBareMotor(log.name("Shootmotor3"), 600);
-                m_motor4 = new SimulatedBareMotor(log.name("Shootmotor3"), 600);
+                SimulatedBareMotor m_motor = new SimulatedBareMotor(log.name("Serializer"), 600);
+                LinearMechanism mechanism = new LinearMechanism(
+                        log, m_motor, m_motor.encoder(), 1, 0.1,
+                        Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
+                m_servo1 = new OutboardLinearVelocityServo(log1, mechanism, 1);
+                m_servo2 = new OutboardLinearVelocityServo(log1, mechanism, 1);
 
             }
+
         }
+
     }
 
     @Override
     public void periodic() {
-        m_motor.periodic();
+        m_servo1.periodic();
     }
 
     public Command serialize() {
-        return run(this::fullSpeed).withName("Run Serializer");
+        return run(this::fullSpeed).withName("Serialize");
     }
 
     public Command stop() {
-        return run(this::stopMotor).withName("stop");
+        return run(this::stopMotor).withName("stop serializing");
     }
 
     public void stopMotor() {
-        m_motor.stop();
+        m_servo1.stop();
+        m_servo2.stop();
+        
     }
 
     private void fullSpeed() {
         double Velocity = 450;
-        m_motor.setVelocity(Velocity, 0, 0);
-        m_motor2.setVelocity(Velocity, 0, 0);
-        m_motor3.setVelocity(Velocity, 0, 0);
-        m_motor4.setVelocity(Velocity, 0, 0);
+        m_servo1.setVelocity(Velocity, 0);
+        m_servo2.setVelocity(Velocity, 0);
+       
     }
 
     public void setSpeed(double Velocity) {
-        m_motor.setVelocity(Velocity, 0, 0);
-        m_motor2.setVelocity(Velocity, 0, 0);
-        m_motor3.setVelocity(Velocity, 0, 0);
-        m_motor4.setVelocity(Velocity, 0, 0);
+        m_servo1.setVelocity(Velocity, 0);
+        m_servo2.setVelocity(Velocity, 0);
     }
-    public void setSerializerSpeed() {
 
+    public void setSerializerSpeed() {
         setSpeed(m_speed);
     }
+
     public Boolean atSpeed() {
-        return (m_motor.getVelocityRad_S() == m_speed && m_motor2.getVelocityRad_S() == m_speed
-                && m_motor3.getVelocityRad_S() == m_speed && m_motor4.getVelocityRad_S() == m_speed);
+        return (m_servo1.atGoal() && m_servo2.atGoal());
     }
-
-
 }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
+import org.team100.frc2026.Climber;
+import org.team100.frc2026.ClimberExtension;
 import org.team100.frc2026.Intake;
 import org.team100.frc2026.IntakeExtend;
 import org.team100.frc2026.Serializer;
@@ -32,6 +34,7 @@ import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
 import org.team100.lib.subsystems.swerve.module.SwerveModuleCollection;
 import org.team100.lib.uncertainty.IsotropicNoiseSE2;
 import org.team100.lib.uncertainty.VariableR1;
+import org.team100.lib.util.CanId;
 import org.team100.lib.visualization.RobotPoseVisualization;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
@@ -79,8 +82,8 @@ public class Machinery {
     public final Serializer m_serializer;
     public final ShooterHood m_shooterHood;
 
-    // public final ClimberExtension m_ClimberExtension;
-    // public final Climber m_Climber;
+    public final ClimberExtension m_ClimberExtension;
+    public final Climber m_Climber;
     
 
     public Machinery() {
@@ -97,8 +100,8 @@ public class Machinery {
         m_serializer = new Serializer(driveLog);
         m_shooterHood = new ShooterHood(driveLog, null);
       
-        // m_ClimberExtension = new ClimberExtension(driveLog);
-        // m_Climber = new Climber(driveLog, new CanId(32));
+        m_ClimberExtension = new ClimberExtension(driveLog);
+        m_Climber = new Climber(driveLog, new CanId(32));
 
         ////////////////////////////////////////////////////////////
         //

@@ -77,7 +77,7 @@ public class ClimberExtension extends SubsystemBase {
         return run(this::setInPosition);
     }
 
-    private void setOutPosition() {
+    public void setOutPosition() {
         m_servo.setPositionProfiled(m_maxExtension, 0);
 
     }
