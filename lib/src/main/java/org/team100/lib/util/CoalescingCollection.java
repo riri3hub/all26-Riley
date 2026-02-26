@@ -16,6 +16,7 @@ import org.team100.lib.util.TrailingHistory.ValueRecord;
  * so don't let it get too large.
  */
 public class CoalescingCollection<T> {
+    private static final double HISTORY_DURATION = 1.0;
 
     private final TrailingHistory<T> m_delegate;
     /** True if items should be combined. */
@@ -47,6 +48,7 @@ public class CoalescingCollection<T> {
             }
         }
         T rep = m_combine.apply(neighbors);
+        m_delegate.evict(time - HISTORY_DURATION);
         m_delegate.add(time, rep);
     }
 

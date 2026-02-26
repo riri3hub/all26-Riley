@@ -5,6 +5,7 @@ import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -34,9 +35,16 @@ public class DrumShooterFactory {
         BareMotor motorL = getMotor(currentLimit, log, canL, ff, friction, pid);
         BareMotor motorR = getMotor(currentLimit, log, canR, ff, friction, pid);
 
+        LinearMechanism mechL = new LinearMechanism(
+                logL, motorL, motorL.encoder(), GEAR_RATIO, WHEEL_DIA_M,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        LinearMechanism mechR = new LinearMechanism(
+                logR, motorR, motorR.encoder(), GEAR_RATIO, WHEEL_DIA_M,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
         return new DualDrumShooter(parent,
-                OutboardLinearVelocityServo.make(logL, motorL, GEAR_RATIO, WHEEL_DIA_M),
-                OutboardLinearVelocityServo.make(logR, motorR, GEAR_RATIO, WHEEL_DIA_M));
+                new OutboardLinearVelocityServo(logL, mechL, 1),
+                new OutboardLinearVelocityServo(logR, mechR, 1));
     }
 
     private static BareMotor getMotor(int currentLimit, LoggerFactory log, CanId canId, SimpleDynamics ff,

@@ -73,9 +73,9 @@ public class Targets extends CameraReader<Target> {
         m_log_age = log.doubleLogger(Level.TRACE, "target age");
         m_log_poseTimestamp = log.doubleLogger(Level.TRACE, "pose timestamp");
         m_history = history;
-        m_allTargets = new TrailingHistory<>(HISTORY_DURATION);
+        m_allTargets = new TrailingHistory<>();
         m_targets = new CoalescingCollection<>(
-                new TrailingHistory<>(HISTORY_DURATION),
+                new TrailingHistory<>(),
                 new NearR2(NEARNESS_THRESHOLD),
                 new CentroidR2());
         m_vision = Cache.ofSideEffect(this::update);
@@ -106,6 +106,7 @@ public class Targets extends CameraReader<Target> {
                     robotPose,
                     cameraOffset,
                     sight.sight()).ifPresent((t) -> {
+                        m_allTargets.evict(timeSec - HISTORY_DURATION);
                         m_allTargets.add(timeSec, t);
                         m_targets.add(timeSec, t);
                     });

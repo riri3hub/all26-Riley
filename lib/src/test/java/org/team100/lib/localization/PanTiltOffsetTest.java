@@ -656,29 +656,20 @@ class PanTiltOffsetTest {
                         new Translation3d(0, Math.sqrt(2) / 2, Math.sqrt(2) / 2),
                         new Rotation3d(Math.PI / 4, 0, 0)));
 
-        // from the gyro
-        Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d(0, 0, -3.0 * Math.PI / 4.0);
-
         // CALCULATIONS
         Transform3d tagInCameraCoords = blip.blipToTransform();
-
-        Transform3d tagInCamera = PoseEstimationHelper.tagInCamera(
-                cameraInRobotCoords,
-                tagInFieldCoords,
-                tagInCameraCoords,
-                robotRotationInFieldCoordsFromGyro);
 
         Pose3d robotInField = PoseEstimationHelper.robotInField(
                 cameraInRobotCoords,
                 tagInFieldCoords,
-                tagInCamera);
+                tagInCameraCoords);
 
-        assertEquals(3, robotInField.getTranslation().getX(), DELTA);
+        assertEquals(2, robotInField.getTranslation().getX(), DELTA);
         assertEquals(3, robotInField.getTranslation().getY(), DELTA);
-        assertEquals(0, robotInField.getTranslation().getZ(), DELTA);
-        assertEquals(0, robotInField.getRotation().getX(), DELTA);
-        assertEquals(0, robotInField.getRotation().getY(), DELTA);
-        assertEquals(-3.0 * Math.PI / 4, robotInField.getRotation().getZ(), DELTA);
+        assertEquals(3, robotInField.getTranslation().getZ(), DELTA);
+        assertEquals(Math.PI / 2, robotInField.getRotation().getX(), DELTA);
+        assertEquals(Math.PI / 4, robotInField.getRotation().getY(), DELTA);
+        assertEquals(-Math.PI / 2, robotInField.getRotation().getZ(), DELTA);
     }
 
     @Test

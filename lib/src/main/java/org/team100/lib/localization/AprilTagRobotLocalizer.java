@@ -13,7 +13,6 @@ import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.Metrics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.EnumLogger;
@@ -27,7 +26,6 @@ import org.team100.lib.util.TrailingHistory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
@@ -51,21 +49,7 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
 
     /** Discard results further than this from the previous one. */
     private static final double VISION_CHANGE_TOLERANCE_M = 0.25;
-    // private static final double VISION_CHANGE_TOLERANCE_M = 1;
 
-    /**
-     * If the tag is closer than this threshold, then the camera's estimate of tag
-     * rotation might be more accurate than the gyro, so we use the camera's
-     * estimate of tag rotation to update the robot pose. If the tag is further away
-     * than this, then the camera-derived rotation is probably less accurate than
-     * the gyro, so we use the gyro instead.
-     * 
-     * Set this to zero to disable tag-derived rotation and always use the gyro.
-     * 
-     * Set this to some large number (e.g. 100) to disable gyro-derived rotation and
-     * always use the camera.
-     */
-    private final double m_tagRotationBeliefThreshold;
     private final DoubleFunction<ModelSE2> m_history;
     private final VisionUpdater m_visionUpdater;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
@@ -97,7 +81,6 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
 
     private final EnumLogger m_log_alliance;
     private final DoubleLogger m_log_heedRadius;
-    private final BooleanLogger m_log_using_gyro;
     private final DoubleLogger m_log_tag_error;
     private final Pose2dLogger m_log_pose;
 
@@ -143,10 +126,8 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
             LoggerFactory fieldLogger,
             AprilTagFieldLayoutWithCorrectOrientation layout,
             DoubleFunction<ModelSE2> history,
-            VisionUpdater visionUpdater,
-            double tagRotationBeliefThreshold) {
+            VisionUpdater visionUpdater) {
         super(parent, "vision", "blips", StructBuffer.create(Blip.struct));
-        m_tagRotationBeliefThreshold = tagRotationBeliefThreshold;
         LoggerFactory log = parent.type(this);
         LoggerFactory calLog = log.name("calibration");
         m_log_cameraToTag_factory = calLog.name("camera to tag");
@@ -154,8 +135,8 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
         m_layout = layout;
         m_history = history;
         m_visionUpdater = visionUpdater;
-        m_allTags = new TrailingHistory<>(HISTORY_DURATION);
-        m_usedTags = new TrailingHistory<>(HISTORY_DURATION);
+        m_allTags = new TrailingHistory<>();
+        m_usedTags = new TrailingHistory<>();
         m_log_cameraToTag = new HashMap<>();
         m_log_tagInRobot = new HashMap<>();
 
@@ -169,7 +150,6 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
 
         m_log_alliance = log.enumLogger(Level.TRACE, "alliance");
         m_log_heedRadius = log.doubleLogger(Level.TRACE, "heed radius");
-        m_log_using_gyro = log.booleanLogger(Level.TRACE, "rotation source");
         m_log_tag_error = log.doubleLogger(Level.TRACE, "tag error");
         m_log_pose = log.pose2dLogger(Level.TRACE, "pose");
         m_log_lag = log.doubleLogger(Level.TRACE, "lag");
@@ -234,6 +214,9 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
             Camera camera,
             Blip[] blips,
             Optional<Alliance> optAlliance) {
+        // Clean the history, relative to the current moment.
+        m_usedTags.evict(Takt.get() - HISTORY_DURATION);
+
         Transform3d cameraOffset = camera.getOffset();
 
         // Fetch the alliance (not available immediately after startup).
@@ -278,6 +261,7 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
 
             // Estimate the tag pose in the field frame.
             Pose3d estimatedTagInField = estimatedTagInField(cameraOffset, samplePose, cameraToTag);
+            m_allTags.evict(timeSec - HISTORY_DURATION);
             m_allTags.add(timeSec, estimatedTagInField);
             logTagError(tagInField, estimatedTagInField);
 
@@ -285,9 +269,6 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
             Pose2d robotPose2d = robotPose2d(samplePose, cameraOffset, tagInField, cameraToTag);
             if (DEBUG)
                 System.out.printf("robotPose2d %s\n", robotPose2d);
-
-            // Clean the used-tags collection in case we don't end up writing to it.
-            m_usedTags.cleanup(timeSec);
 
             //////////////////////////////////////////////////////////////////
             ///
@@ -319,6 +300,7 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
             ///
             //////////////////////////////////////////////////////////////////
 
+            m_usedTags.evict(timeSec - HISTORY_DURATION);
             m_usedTags.add(timeSec, estimatedTagInField);
 
             NoisyPose2d noisyMeasurement = new NoisyPose2d(
@@ -356,23 +338,6 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
         m_log_pose.log(() -> robotPose2d);
         m_pub_pose.set(robotPose2d);
         return robotPose2d;
-    }
-
-    /**
-     * If the tag is too far, replace the blip-derived tag rotation with a
-     * gyro-derived tag rotation.
-     */
-    @SuppressWarnings("unused")
-    private Transform3d maybeOverrideRotation(
-            Transform3d cameraOffset, Pose2d historicalPose, Pose3d tagInField, Transform3d tagInCamera) {
-        if (tagInCamera.getTranslation().getNorm() > m_tagRotationBeliefThreshold) {
-            m_log_using_gyro.log(() -> true);
-            tagInCamera = PoseEstimationHelper.tagInCamera(
-                    cameraOffset, tagInField, tagInCamera, new Rotation3d(historicalPose.getRotation()));
-        } else {
-            m_log_using_gyro.log(() -> false);
-        }
-        return tagInCamera;
     }
 
     /** Log the norm of the translational error of the tag. */

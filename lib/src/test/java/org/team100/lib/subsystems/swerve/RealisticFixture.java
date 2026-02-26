@@ -75,7 +75,7 @@ public class RealisticFixture {
         final AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
         estimate = new FreshSwerveEstimate(localizer, odometryUpdater, history);
 
         limiter = new SwerveLimiter(logger, swerveKinodynamics, () -> 12);

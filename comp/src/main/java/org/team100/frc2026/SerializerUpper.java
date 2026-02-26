@@ -27,9 +27,9 @@ public class SerializerUpper extends SubsystemBase {
 
     public SerializerUpper(LoggerFactory parent) {
         LoggerFactory log = parent.type(this);
-        LoggerFactory log1 = log.name("Shooter1");
-        LoggerFactory log2 = log.name("Shooter2");
-        LoggerFactory log3 = log.name("Shooter3");
+        LoggerFactory log1 = log.name("SerializerUpper1");
+        LoggerFactory log2 = log.name("SerializerUpper2");
+
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
                 //

@@ -141,15 +141,7 @@ class PoseEstimationHelperTest {
                         new Translation3d(0, 0, 1),
                         new Rotation3d(0, 0, 0)));
 
-        Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d();
-
         Transform3d tagInCamera = blip.blipToTransform();
-
-        tagInCamera = PoseEstimationHelper.tagInCamera(
-                cameraInRobot,
-                tagInField,
-                tagInCamera,
-                robotRotationInFieldCoordsFromGyro);
 
         Pose3d robotPoseInField = PoseEstimationHelper.robotInField(
                 cameraInRobot,
@@ -176,6 +168,7 @@ class PoseEstimationHelperTest {
      * 
      * So, not an issue.
      */
+    @SuppressWarnings("unused")
     // There's no need to run this all the time
     // @Test
     void posePerformance() {
@@ -197,11 +190,6 @@ class PoseEstimationHelperTest {
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < iterations; ++i) {
             Transform3d tagInCamera = blip.blipToTransform();
-            tagInCamera = PoseEstimationHelper.tagInCamera(
-                    cameraInRobot,
-                    tagInField,
-                    tagInCamera,
-                    robotRotationInFieldCoordsFromGyro);
         }
         long finishTime = System.currentTimeMillis();
         if (DEBUG) {
@@ -479,8 +467,8 @@ class PoseEstimationHelperTest {
 
         // first try the "corrected" layout, which is "into the page" tag orientation.
         // this is CORRECT
-        AprilTagFieldLayoutWithCorrectOrientation layout = 
-        new AprilTagFieldLayoutWithCorrectOrientation("2025-reefscape.json");
+        AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
+                "2025-reefscape.json");
 
         Pose3d tagInFieldCoords = layout.getTagPose(Alliance.Blue, 7).get();
 

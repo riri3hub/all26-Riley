@@ -140,8 +140,7 @@ public class Machinery {
                 fieldLogger,
                 layout,
                 history,
-                visionUpdater,
-                100);
+                visionUpdater);
 
         ////////////////////////////////////////////////////////////
         //

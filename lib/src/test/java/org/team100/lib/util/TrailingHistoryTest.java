@@ -22,34 +22,41 @@ public class TrailingHistoryTest {
 
     @Test
     void testSimple() {
-        TrailingHistory<String> h = new TrailingHistory<>(1);
+        TrailingHistory<String> h = new TrailingHistory<>();
+        h.evict(-1);
         h.add(0, "zero");
         check(h, "zero");
     }
 
     @Test
     void testEviction() {
-        TrailingHistory<String> h = new TrailingHistory<>(1);
+        TrailingHistory<String> h = new TrailingHistory<>();
+        h.evict(-1);
         h.add(0, "zero");
         // should evict 0.
+        h.evict(1);
         h.add(2, "two");
         check(h, "two");
     }
 
     @Test
     void testNonEviction() {
-        TrailingHistory<String> h = new TrailingHistory<>(1);
+        TrailingHistory<String> h = new TrailingHistory<>();
+        h.evict(-1);
         h.add(0, "zero");
         // should not evict 0.
+        h.evict(-0.5);
         h.add(0.5, "one half");
         check(h, "zero", "one half");
     }
 
     @Test
     void testOutOfOrder() {
-        TrailingHistory<String> h = new TrailingHistory<>(1);
+        TrailingHistory<String> h = new TrailingHistory<>();
+        h.evict(1);
         h.add(2, "two");
         // should not evict anything
+        h.evict(-1);
         h.add(0, "zero");
         check(h, "two", "zero");
     }

@@ -5,6 +5,7 @@ import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -54,12 +55,25 @@ public class MecanumDriveFactory {
         BareMotor motorRR = getMotor(
                 log, canRR, MotorPhase.FORWARD, statorLimit, ff, friction, pid);
 
+        LinearMechanism mechFL = new LinearMechanism(
+                logFL, motorFL, motorFL.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        LinearMechanism mechFR = new LinearMechanism(
+                logFR, motorFR, motorFR.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        LinearMechanism mechRL = new LinearMechanism(
+                logRL, motorRL, motorRL.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        LinearMechanism mechRR = new LinearMechanism(
+                logRR, motorRR, motorRR.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
         return new MecanumDrive100(
                 log, fieldLogger, gyro, trackWidthM, wheelbaseM, slip,
-                OutboardLinearVelocityServo.make(logFL, motorFL, gearRatio, wheelDiaM),
-                OutboardLinearVelocityServo.make(logFR, motorFR, gearRatio, wheelDiaM),
-                OutboardLinearVelocityServo.make(logRL, motorRL, gearRatio, wheelDiaM),
-                OutboardLinearVelocityServo.make(logRR, motorRR, gearRatio, wheelDiaM));
+                new OutboardLinearVelocityServo(logFL, mechFL, 1),
+                new OutboardLinearVelocityServo(logFR, mechFR, 1),
+                new OutboardLinearVelocityServo(logRL, mechRL, 1),
+                new OutboardLinearVelocityServo(logRR, mechRR, 1));
     }
 
     /** Real or simulated depending on identity */

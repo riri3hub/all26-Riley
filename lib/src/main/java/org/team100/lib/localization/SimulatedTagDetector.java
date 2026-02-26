@@ -36,6 +36,14 @@ import edu.wpi.first.wpilibj.RobotBase;
  * 
  * This uses a separate client NT instance, so there will be weird delays due to
  * NT rate-limiting -- these are realistic and so should be handled correctly.
+ * 
+ * TODO: I made the mistake of modeling *error* as *noise* in this class, which
+ * is wrong.
+ * 
+ * The cameras have pretty low noise and pretty high repeatability but also
+ * nontrivial error.
+ * 
+ * So fix that.
  */
 public class SimulatedTagDetector {
     private static final boolean DEBUG = false;
@@ -50,12 +58,18 @@ public class SimulatedTagDetector {
     // https://docs.google.com/spreadsheets/d/1x2_58wyVb5e9HJW8WgakgYcOXgPaJe0yTIHew206M-M
     private static final double HFOV = 0.8;
     private static final double VFOV = 0.6;
-    private static final int TAG_COUNT = 22;
     // past about 80 degrees, you can't see the tag.
     private static final double OBLIQUE_LIMIT_RAD = 1.4;
     // camera frame is from 85 ms ago, more or less
     private static final double MEAN_DELAY = 0.085;
     private static final double STDEV_DELAY = 0.02;
+
+    /**
+     * This is an awful hack that scales the "accuracy" from Wang2016 to obtain a
+     * "noise" level.
+     * TODO: measure the actual (low) noise, and model the accuracy correctly here.
+     */
+    private static final double NOISE_RATIO = 0.25;
 
     private final List<Camera> m_cameras;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
@@ -143,7 +157,7 @@ public class SimulatedTagDetector {
             Pose3d cameraPose3d = robotPose3d.plus(cameraOffset);
             Alliance alliance = opt.get();
 
-            for (int tagId = 1; tagId <= TAG_COUNT; ++tagId) {
+            for (int tagId = 1; tagId <= m_layout.size(alliance); ++tagId) {
                 if (DEBUG) {
                     System.out.printf("alliance %s camera %12s ", alliance.name(), camera.name());
                 }
@@ -195,6 +209,8 @@ public class SimulatedTagDetector {
     /**
      * Return the transform from the camera pose to the tag pose.
      * 
+     * This is the normal "x-forward" WPI style.
+     * 
      * New! Includes noise.
      * 
      * @param rand         should supply nextGaussian. Doublesupplier for
@@ -210,15 +226,27 @@ public class SimulatedTagDetector {
                 tagInCamera.getTranslation().getNorm(),
                 Metrics.offAxisAngleRad(tagInCamera));
         Translation3d t = tagInCamera.getTranslation();
-        t = new Translation3d(
-                t.getX() + n.cartesian() * rand.getAsDouble(),
-                t.getY() + n.cartesian() * rand.getAsDouble(),
-                t.getZ() + n.cartesian() * rand.getAsDouble());
+        Translation3d tnoise = new Translation3d(
+                n.cartesian() * rand.getAsDouble(),
+                n.cartesian() * rand.getAsDouble(),
+                0)
+                .times(NOISE_RATIO);
+        // We really only have XY noise.
+        t = t.plus(tnoise);
+        // t = new Translation3d(
+        // t.getX() + n.cartesian() * rand.getAsDouble(),
+        // t.getY() + n.cartesian() * rand.getAsDouble(),
+        // t.getZ() + n.cartesian() * rand.getAsDouble());
         Rotation3d r = tagInCamera.getRotation();
-        r = new Rotation3d(
-                r.getX() + n.rotation() * rand.getAsDouble(),
-                r.getY() + n.rotation() * rand.getAsDouble(),
-                r.getZ() + n.rotation() * rand.getAsDouble());
+        // We really only have yaw noise.
+        Rotation3d rnoise = new Rotation3d(
+                0, 0, n.rotation() * rand.getAsDouble())
+                .times(NOISE_RATIO);
+        r = r.plus(rnoise);
+        // r = new Rotation3d(
+        // r.getX() + n.rotation() * rand.getAsDouble(),
+        // r.getY() + n.rotation() * rand.getAsDouble(),
+        // r.getZ() + n.rotation() * rand.getAsDouble());
         return new Transform3d(t, r);
     }
 

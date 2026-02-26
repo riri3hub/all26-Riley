@@ -30,26 +30,6 @@ public class PoseEstimationHelper {
         return robotInField(cameraInField, cameraInRobot);
     }
 
-    /**
-     * Adjust the tag-in-camera pose using the gyro rotation.
-     * 
-     * @param cameraInRobot Robot-to-camera, offset from Camera.java
-     * @param tagInField    Field-to-tag, canonical pose from the JSON file
-     * @param tagInCamera   Camera-to-tag, ignores rotational component
-     * @param gyroRotation  From the pose buffer
-     */
-    public static Transform3d tagInCamera(
-            Transform3d cameraInRobot,
-            Pose3d tagInField,
-            Transform3d tagInCamera,
-            Rotation3d gyroRotation) {
-        return new Transform3d(
-                tagInCamera.getTranslation(),
-                tagRotationInCamera(
-                        tagInField.getRotation(),
-                        cameraRotationInField(cameraInRobot, gyroRotation)));
-    }
-
     //////////////////////////////
     //
     // Package-private below, don't use these.

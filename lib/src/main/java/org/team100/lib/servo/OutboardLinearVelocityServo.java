@@ -5,7 +5,6 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.mechanism.LinearMechanism;
-import org.team100.lib.motor.BareMotor;
 
 /** There is no profile here. */
 public class OutboardLinearVelocityServo implements LinearVelocityServo {
@@ -30,21 +29,6 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
         m_tolerance = tolerance;
         m_log_setpoint_v = m_log.doubleLogger(Level.TRACE, "setpoint v (m_s)");
         m_log_setpoint_a = m_log.doubleLogger(Level.TRACE, "setpoint a (m_s2)");
-    }
-
-    /**
-     * Use the supplied motor with the matching encoder, a mechanism with the
-     * specified gearing, and no limits, and return an outboard linear velocity
-     * servo that controls them.
-     */
-    public static OutboardLinearVelocityServo make(
-            LoggerFactory log,
-            BareMotor motor,
-            double gearRatio,
-            double wheelDiaM) {
-        return new OutboardLinearVelocityServo(log, new LinearMechanism(
-                log, motor, motor.encoder(), gearRatio, wheelDiaM,
-                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY), 1);
     }
 
     @Override

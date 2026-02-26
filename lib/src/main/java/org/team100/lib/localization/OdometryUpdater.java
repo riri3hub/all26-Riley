@@ -12,6 +12,7 @@ import org.team100.lib.geometry.Metrics;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.IsotropicNoiseSE2Logger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.sensor.gyro.Gyro;
 import org.team100.lib.state.ModelSE2;
@@ -52,6 +53,9 @@ public class OdometryUpdater {
     private final Fusor m_rotationFusor;
 
     private final SwerveStateLogger m_logState;
+    private final IsotropicNoiseSE2Logger m_log_prevNoise;
+    private final IsotropicNoiseSE2Logger m_log_updateNoise;
+    private final IsotropicNoiseSE2Logger m_log_newNoise;
 
     public boolean m_debug = false;
 
@@ -71,6 +75,9 @@ public class OdometryUpdater {
         m_gyroBiasFusor = new CovarianceInflation(0.02, gyro.bias_noise());
         m_rotationFusor = new CovarianceInflation(0.02, 0.003);
         m_logState = log.swerveStateLogger(Level.TRACE, "state");
+        m_log_prevNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "previous noise");
+        m_log_updateNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "update noise");
+        m_log_newNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "new noise");
     }
 
     /**
@@ -282,6 +289,10 @@ public class OdometryUpdater {
         // awhile without seeing any tags, the variance will grow
         // without bound.
         IsotropicNoiseSE2 noise = previousNoise.plus(n0);
+
+        m_log_prevNoise.log(() -> previousNoise);
+        m_log_updateNoise.log(() -> n0);
+        m_log_newNoise.log(() -> noise);
 
         // gyro and position measurements are verbatim
         SwerveState swerveState = new SwerveState(

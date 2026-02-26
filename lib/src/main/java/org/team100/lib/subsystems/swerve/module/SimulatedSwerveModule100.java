@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.team100.lib.controller.r1.FeedbackR1;
 import org.team100.lib.controller.r1.PIDFeedback;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
 import org.team100.lib.profile.r1.IncrementalProfile;
@@ -56,8 +57,10 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
 
     private static LinearVelocityServo simulatedDriveServo(LoggerFactory parent) {
         SimulatedBareMotor motor = new SimulatedBareMotor(parent, 600);
-        return OutboardLinearVelocityServo.make(
-                parent, motor, DRIVE_GEAR_RATIO, WHEEL_DIAMETER_M);
+        LinearMechanism mech = new LinearMechanism(
+                parent, motor, motor.encoder(), DRIVE_GEAR_RATIO, WHEEL_DIAMETER_M,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        return new OutboardLinearVelocityServo(parent, mech, 1);
     }
 
     /**

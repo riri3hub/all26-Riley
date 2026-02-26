@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -37,9 +38,16 @@ public class TankDriveFactory {
         BareMotor motorR = getMotor(
                 log, canR, MotorPhase.FORWARD, statorLimit, ff, friction, pid);
 
+        LinearMechanism mechL = new LinearMechanism(
+                logL, motorL, motorL.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        LinearMechanism mechR = new LinearMechanism(
+                logR, motorR, motorR.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
         return new TankDrive(fieldLogger, trackWidthM,
-                OutboardLinearVelocityServo.make(logL, motorL, gearRatio, wheelDiaM),
-                OutboardLinearVelocityServo.make(logR, motorR, gearRatio, wheelDiaM));
+                new OutboardLinearVelocityServo(logL, mechL, 1),
+                new OutboardLinearVelocityServo(logR, mechR, 1));
     }
 
     /** Real or simulated depending on identity */

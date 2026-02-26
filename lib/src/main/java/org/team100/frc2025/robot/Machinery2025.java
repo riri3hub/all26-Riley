@@ -139,8 +139,7 @@ public class Machinery2025 {
                 fieldLogger,
                 layout,
                 history,
-                visionUpdater,
-                100);
+                visionUpdater);
         m_targets = new Targets(driveLog, fieldLogger, 0.2, history);
 
         ////////////////////////////////////////////////////////////
