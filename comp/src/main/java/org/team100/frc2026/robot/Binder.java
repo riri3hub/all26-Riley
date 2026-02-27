@@ -68,6 +68,9 @@ public class Binder {
                 m_machinery.m_extender.stop());
         m_machinery.m_shooterHood.setDefaultCommand(
                 m_machinery.m_shooterHood.stop());
+        m_machinery.m_serializer.setDefaultCommand(
+            m_machinery.m_serializer.stop()
+        );
 
         ////////////////////////////////////////////////////
         ///

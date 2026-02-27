@@ -74,7 +74,6 @@ public class Serializer extends SubsystemBase {
                         log1, mechanism1, ref, tolerance);
                 m_servo2 = new OutboardLinearVelocityServo(
                         log2, mechanism2, ref, tolerance);
-
             }
             default -> {
                 SimulatedBareMotor m_motor = new SimulatedBareMotor(log.name("Serializer"), 600);
@@ -86,16 +85,14 @@ public class Serializer extends SubsystemBase {
                         log1, mechanism, ref, 1);
                 m_servo2 = new OutboardLinearVelocityServo(
                         log2, mechanism, ref, 1);
-
             }
-
         }
-
     }
 
     @Override
     public void periodic() {
         m_servo1.periodic();
+        m_servo2.periodic();
     }
 
     public Command serialize() {
@@ -109,14 +106,12 @@ public class Serializer extends SubsystemBase {
     public void stopMotor() {
         m_servo1.stop();
         m_servo2.stop();
-
     }
 
     private void fullSpeed() {
-        double Velocity = 450;
+        double Velocity = 0.5;
         m_servo1.setVelocityProfiled(Velocity);
         m_servo2.setVelocityProfiled(Velocity);
-
     }
 
     public void setSpeed(double Velocity) {
@@ -128,7 +123,4 @@ public class Serializer extends SubsystemBase {
         setSpeed(m_speed);
     }
 
-    public Boolean atSpeed() {
-        return (m_servo1.atGoal() && m_servo2.atGoal());
-    }
 }
