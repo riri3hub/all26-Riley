@@ -19,6 +19,7 @@ public interface FeedbackR1 {
     /** True if the most-recent calculation inputs are within tolerance. */
     boolean atSetpoint();
 
+    /** Reset controller errors, unset atSetpoint */
     void reset();
 
     /**

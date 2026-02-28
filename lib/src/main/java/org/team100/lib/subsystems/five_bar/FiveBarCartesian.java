@@ -59,8 +59,8 @@ public class FiveBarCartesian extends SubsystemBase {
     public FiveBarCartesian(LoggerFactory logger) {
         // zeros
         PIDConstants pid = PIDConstants.zero(logger);
-        SimpleDynamics ff = SimpleDynamics.zero(logger);
-        Friction friction = Friction.zero(logger);
+        SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
+        Friction friction = new Friction(logger, 0, 0, 0, 0);
 
         LoggerFactory loggerP1 = logger.name("p1");
         Falcon500Motor motorP1 = new Falcon500Motor(

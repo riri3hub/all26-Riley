@@ -327,13 +327,15 @@ public abstract class Talon6Motor implements BareMotor {
      * 
      * Note this takes **FOREVER**, like tens of milliseconds, so you can only do it
      * at startup.
+     * 
+     * TODO: I think this is unnecessary, so I'm commenting it out.
      */
-    public void resetEncoderPosition() {
-        System.out.println("WARNING: Setting CTRE encoder position is very slow!");
-        warn(() -> m_motor.setPosition(0, 1));
-        m_position.reset();
-        m_velocity.reset();
-    }
+    // public void resetEncoderPosition() {
+    // System.out.println("WARNING: Setting CTRE encoder position is very slow!");
+    // warn(() -> m_motor.setPosition(0, 1));
+    // m_position.reset();
+    // m_velocity.reset();
+    // }
 
     /**
      * Set integrated sensor position in radians.

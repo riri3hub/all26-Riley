@@ -19,8 +19,8 @@ public class LinearMechanismTest implements Timeless {
     /** Show that the limits have effect. */
     @Test
     void testLimits() {
-        SimpleDynamics ff = SimpleDynamics.test(logger);
-        Friction friction = Friction.test(logger);
+        SimpleDynamics ff = new SimpleDynamics(logger, 0.100, 0.100);
+        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(ff, friction);
         MockIncrementalBareEncoder encoder = new MockIncrementalBareEncoder();
         double gearRatio = 1;
@@ -60,8 +60,8 @@ public class LinearMechanismTest implements Timeless {
     /** Same cases as above, but unlimited */
     @Test
     void testUnlimited() {
-        SimpleDynamics ff = SimpleDynamics.test(logger);
-        Friction friction = Friction.test(logger);
+        SimpleDynamics ff = new SimpleDynamics(logger, 0.100, 0.100);
+        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(ff, friction);
         MockIncrementalBareEncoder encoder = new MockIncrementalBareEncoder();
         double gearRatio = 1;

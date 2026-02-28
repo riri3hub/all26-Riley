@@ -36,12 +36,7 @@ public class SimulatedTagDetectorTest {
 
     @Test
     void testSimple() throws IOException {
-        List<Camera> cameras = List.of(
-                Camera.SWERVE_LEFT,
-                Camera.SWERVE_RIGHT,
-                Camera.FUNNEL,
-                Camera.CORAL_LEFT,
-                Camera.CORAL_RIGHT);
+        List<Camera> cameras = List.of(Camera.SIM0, Camera.SIM1, Camera.SIM2, Camera.SIM3);
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         // right in front of tag 7
@@ -109,8 +104,7 @@ public class SimulatedTagDetectorTest {
         Pose3d cameraPose3d = new Pose3d(0, 0, 0, new Rotation3d(0, 0, Math.PI / 4));
         // tag rotated
         Pose3d tagPose = new Pose3d(1, 0, 1, new Rotation3d(1, 2, 3));
-        // note this is looking at the tag from behind, which is silly.
-        // TODO: fix that
+        // note this is looking at the tag from behind
         Transform3d tagInCamera = SimulatedTagDetector.tagInCamera(
                 () -> 0.0, cameraPose3d, tagPose);
         // position is not affectted by tag rotation

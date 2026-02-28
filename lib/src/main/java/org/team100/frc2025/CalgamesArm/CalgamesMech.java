@@ -9,8 +9,10 @@ import java.util.function.Supplier;
 
 import org.team100.lib.commands.MoveAndHold;
 import org.team100.lib.config.ElevatorUtil.ScoringLevel;
+import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.geometry.AccelerationSE2;
 import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.VelocitySE2;
@@ -28,7 +30,6 @@ import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
-import org.team100.lib.motor.ctre.Falcon500Motor;
 import org.team100.lib.motor.ctre.KrakenX60Motor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
 import org.team100.lib.music.Music;
@@ -169,8 +170,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         NeutralMode100.BRAKE, MotorPhase.REVERSE,
                         100,
                         100,
-                        Falcon500Motor.swerveSteerFF(elevatorfrontLog),
-                        Falcon500Motor.swerveSteerFriction(elevatorfrontLog),
+                        new SimpleDynamics(elevatorfrontLog, 0.002, 0.002),
+                        new Friction(elevatorfrontLog, 0.100, 0.100, 0.005, 0.5),
                         PIDConstants.makePositionPID(elevatorfrontLog, 1));
                 IncrementalBareEncoder elevatorFrontEncoder = elevatorFrontMotor.encoder();
 
@@ -185,8 +186,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
                         100, // orginally 60
                         100, // originally 90
-                        Falcon500Motor.swerveSteerFF(elevatorbackLog),
-                        Falcon500Motor.swerveSteerFriction(elevatorbackLog),
+                        new SimpleDynamics(elevatorbackLog, 0.002, 0.002),
+                        new Friction(elevatorbackLog, 0.100, 0.100, 0.005, 0.5),
                         PIDConstants.makePositionPID(elevatorbackLog, 1));
                 Talon6Encoder elevatorBackEncoder = elevatorBackMotor.encoder();
                 m_elevatorBack = new LinearMechanism(
@@ -201,8 +202,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         MotorPhase.REVERSE,
                         100, // og 60
                         100, // og 90
-                        Falcon500Motor.swerveSteerFF(shoulderLog),
-                        Falcon500Motor.swerveSteerFriction(shoulderLog),
+                        new SimpleDynamics(shoulderLog, 0.002, 0.002),
+                        new Friction(shoulderLog, 0.100, 0.100, 0.005, 0.5),
                         PIDConstants.makePositionPID(shoulderLog, 1));
                 Talon6Encoder shoulderEncoder = shoulderMotor.encoder();
                 // The shoulder has a 5048 on the intermediate shaft
@@ -232,8 +233,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         NeutralMode100.COAST, MotorPhase.FORWARD,
                         40, // og 60
                         60, // og 90
-                        Falcon500Motor.swerveSteerFF(wristLog),
-                        Falcon500Motor.swerveSteerFriction(wristLog),
+                        new SimpleDynamics(wristLog, 0.002, 0.002),
+                        new Friction(wristLog, 0.100, 0.100, 0.005, 0.5),
                         PIDConstants.makePositionPID(wristLog, 1));
                 // the wrist has no angle sensor, so it needs to start in the "zero" position.
                 Talon6Encoder wristEncoder = wristMotor.encoder();

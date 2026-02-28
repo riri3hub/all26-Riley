@@ -1,13 +1,18 @@
 package org.team100.lib.subsystems.mecanum;
 
-import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.rev.NeoCANSparkMotor;
+import org.team100.lib.motor.sim.SimulatedBareMotor;
+import org.team100.lib.reference.r1.NoReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.sensor.gyro.Gyro;
 import org.team100.lib.sensor.gyro.ReduxGyro;
 import org.team100.lib.servo.OutboardLinearVelocityServo;
@@ -37,27 +42,53 @@ public class MecanumDriveFactory {
         LoggerFactory logRR = log.name("rearRight");
 
         PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
-        SimpleDynamics ff = NeoCANSparkMotor.ff(log);
-        Friction friction = NeoCANSparkMotor.friction(log);
+        SimpleDynamics ff = new SimpleDynamics(log, 0.01, 0.01);
+        Friction friction = new Friction(log, 0.5, 0.5, 0.0, 0.5);
 
         Gyro gyro = gyro(log, gyroId);
         slip = slip(slip);
 
-        BareMotor motorFL = NeoCANSparkMotor.get(
+        BareMotor motorFL = getMotor(
                 log, canFL, MotorPhase.REVERSE, statorLimit, ff, friction, pid);
-        BareMotor motorFR = NeoCANSparkMotor.get(
+        BareMotor motorFR = getMotor(
                 log, canFR, MotorPhase.FORWARD, statorLimit, ff, friction, pid);
-        BareMotor motorRL = NeoCANSparkMotor.get(
+        BareMotor motorRL = getMotor(
                 log, canRL, MotorPhase.REVERSE, statorLimit, ff, friction, pid);
-        BareMotor motorRR = NeoCANSparkMotor.get(
+        BareMotor motorRR = getMotor(
                 log, canRR, MotorPhase.FORWARD, statorLimit, ff, friction, pid);
+
+        LinearMechanism mechFL = new LinearMechanism(
+                logFL, motorFL, motorFL.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        LinearMechanism mechFR = new LinearMechanism(
+                logFR, motorFR, motorFR.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        LinearMechanism mechRL = new LinearMechanism(
+                logRL, motorRL, motorRL.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        LinearMechanism mechRR = new LinearMechanism(
+                logRR, motorRR, motorRR.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+
+        ReferenceR1 ref = new NoReferenceR1();
 
         return new MecanumDrive100(
                 log, fieldLogger, gyro, trackWidthM, wheelbaseM, slip,
-                OutboardLinearVelocityServo.make(logFL, motorFL, gearRatio, wheelDiaM),
-                OutboardLinearVelocityServo.make(logFR, motorFR, gearRatio, wheelDiaM),
-                OutboardLinearVelocityServo.make(logRL, motorRL, gearRatio, wheelDiaM),
-                OutboardLinearVelocityServo.make(logRR, motorRR, gearRatio, wheelDiaM));
+                new OutboardLinearVelocityServo(logFL, mechFL, ref, 1),
+                new OutboardLinearVelocityServo(logFR, mechFR, ref, 1),
+                new OutboardLinearVelocityServo(logRL, mechRL, ref, 1),
+                new OutboardLinearVelocityServo(logRR, mechRR, ref, 1));
+    }
+
+    /** Real or simulated depending on identity */
+    public static BareMotor getMotor(
+            LoggerFactory log, CanId can, MotorPhase phase, int statorLimit,
+            SimpleDynamics ff, Friction friction, PIDConstants pid) {
+        return switch (Identity.instance) {
+            case BLANK -> new SimulatedBareMotor(log, 600);
+            default -> new NeoCANSparkMotor(
+                    log, can, NeutralMode100.BRAKE, phase, statorLimit, ff, friction, pid);
+        };
     }
 
     static Gyro gyro(LoggerFactory log, CanId gyroId) {

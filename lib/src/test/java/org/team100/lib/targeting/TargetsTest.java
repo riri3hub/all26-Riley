@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.coherence.Takt;
 import org.team100.lib.config.Camera;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
@@ -37,7 +36,7 @@ public class TargetsTest implements Timeless {
         stepTime();
 
         ModelSE2 p = new ModelSE2();
-        Targets t = new Targets(logger, logger, (x) -> p);
+        Targets t = new Targets(logger, logger, 100, (x) -> p);
         t.update();
         assertTrue(t.getTargets().isEmpty());
         // send some blips
@@ -52,13 +51,12 @@ public class TargetsTest implements Timeless {
         assertTrue(inst.isConnected());
 
         // test4 camera offset is 0,0,1, without rotation
-        StructArrayTopic<Rotation3d> topic = inst.getStructArrayTopic(
-                "objectVision/test4/5678/Rotation3d", Rotation3d.struct);
-        StructArrayPublisher<Rotation3d> pub = topic.publish();
+        StructArrayTopic<Target> topic = inst.getStructArrayTopic(
+                "objectVision/test4/targets", Target.struct);
+        StructArrayPublisher<Target> pub = topic.publish();
         stepTime();
         // tilt down 45
-        pub.set(new Rotation3d[] { new Rotation3d(0, Math.PI / 4, 0) },
-                (long) (Takt.get() * 1000000.0));
+        pub.set(new Target[] { new Target(0, new Rotation3d(0, Math.PI / 4, 0)) });
 
         // wait for NT rate-limiting
         Thread.sleep(200);
@@ -82,7 +80,7 @@ public class TargetsTest implements Timeless {
         stepTime();
 
         ModelSE2 p = new ModelSE2();
-        Targets reader = new Targets(logger, logger, (x) -> p);
+        Targets reader = new Targets(logger, logger, 100, (x) -> p);
         Thread.sleep(200);
         SimulatedTargetWriter writer = new SimulatedTargetWriter(
                 logger,
@@ -121,7 +119,7 @@ public class TargetsTest implements Timeless {
         stepTime();
 
         ModelSE2 p = new ModelSE2();
-        Targets reader = new Targets(logger, logger, (x) -> p);
+        Targets reader = new Targets(logger, logger, 100, (x) -> p);
         Thread.sleep(100);
         SimulatedTargetWriter writer = new SimulatedTargetWriter(
                 logger,
@@ -163,7 +161,7 @@ public class TargetsTest implements Timeless {
         stepTime();
 
         ModelSE2 p = new ModelSE2();
-        Targets reader = new Targets(logger, logger, x -> p);
+        Targets reader = new Targets(logger, logger, 100, x -> p);
         Thread.sleep(100);
         SimulatedTargetWriter writer = new SimulatedTargetWriter(
                 logger,
@@ -206,7 +204,7 @@ public class TargetsTest implements Timeless {
         stepTime();
 
         ModelSE2 p = new ModelSE2();
-        Targets reader = new Targets(logger, logger, (x) -> p);
+        Targets reader = new Targets(logger, logger, 100, (x) -> p);
         Thread.sleep(50);
         SimulatedTargetWriter writer = new SimulatedTargetWriter(
                 logger,

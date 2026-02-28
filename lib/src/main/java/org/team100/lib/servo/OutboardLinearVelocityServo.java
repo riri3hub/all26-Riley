@@ -3,82 +3,123 @@ package org.team100.lib.servo;
 import org.team100.lib.coherence.Takt;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ControlR1Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.mechanism.LinearMechanism;
-import org.team100.lib.motor.BareMotor;
+import org.team100.lib.reference.r1.ReferenceR1;
+import org.team100.lib.reference.r1.SetpointsR1;
+import org.team100.lib.state.ControlR1;
+import org.team100.lib.state.ModelR1;
 
-/** There is no profile here. */
+/**
+ * Profiled or direct velocity control using the feedback controller in the
+ * motor controller hardware.
+ * 
+ * WARNING: the velocity control in REV motors is not very good. If you must use
+ * it, you'll want to reduce the filtering on the sensor.
+ */
 public class OutboardLinearVelocityServo implements LinearVelocityServo {
     private static final boolean DEBUG = false;
-    private static final double VELOCITY_TOLERANCE = 1;
 
-    private final LoggerFactory m_log;
     private final LinearMechanism m_mechanism;
-    private final DoubleLogger m_log_setpoint_v;
-    private final DoubleLogger m_log_setpoint_a;
+    private final ReferenceR1 m_ref;
+    private final double m_tolerance;
+
+    private final DoubleLogger m_log_goal;
+    private final ControlR1Logger m_log_control;
+    private final DoubleLogger m_log_velocity;
 
     // For calculating acceleration
     private double m_prevGoal = 0;
     // For calculating acceleration
     private double m_prevT = 0;
 
-    private double m_goal;
+    private ModelR1 m_goal;
+    /** We use the "x" field for *VELOCITY* */
+    private ControlR1 m_nextSetpoint;
 
-    public OutboardLinearVelocityServo(LoggerFactory parent, LinearMechanism mechanism) {
-        m_log = parent.type(this);
+    public OutboardLinearVelocityServo(
+            LoggerFactory parent,
+            LinearMechanism mechanism,
+            ReferenceR1 ref,
+            double tolerance) {
+        LoggerFactory log = parent.type(this);
         m_mechanism = mechanism;
-        m_log_setpoint_v = m_log.doubleLogger(Level.TRACE, "setpoint v (m_s)");
-        m_log_setpoint_a = m_log.doubleLogger(Level.TRACE, "setpoint a (m_s2)");
-    }
-
-    /**
-     * Use the supplied motor with the matching encoder, a mechanism with the
-     * specified gearing, and no limits, and return an outboard linear velocity
-     * servo that controls them.
-     */
-    public static OutboardLinearVelocityServo make(
-            LoggerFactory log,
-            BareMotor motor,
-            double gearRatio,
-            double wheelDiaM) {
-        return new OutboardLinearVelocityServo(log, new LinearMechanism(
-                log, motor, motor.encoder(), gearRatio, wheelDiaM,
-                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+        m_ref = ref;
+        m_tolerance = tolerance;
+        m_log_goal = log.doubleLogger(Level.COMP, "goal (m_s)");
+        m_log_control = log.ControlR1Logger(Level.COMP, "control (m_s)");
+        m_log_velocity = log.doubleLogger(Level.COMP, "velocity (m_s)");
     }
 
     @Override
     public void reset() {
         if (DEBUG)
             System.out.println("WARNING: make sure resetting encoder position doesn't break anything");
-        m_mechanism.resetEncoderPosition();
+        // m_mechanism.resetEncoderPosition();
+        ControlR1 measurement = new ControlR1(getVelocity(), 0);
+        m_nextSetpoint = measurement;
+        m_ref.setGoal(measurement.model());
+        m_ref.init(measurement.model());
     }
 
+    /** Resets the profile if necessary */
+    @Override
+    public void setVelocityProfiled(double goalM_S) {
+        m_log_goal.log(() -> goalM_S);
+        ModelR1 goal = new ModelR1(goalM_S, 0);
+        if (!goal.near(m_goal, m_tolerance, Double.MAX_VALUE)) {
+            m_goal = goal;
+            m_ref.setGoal(goal);
+            if (m_nextSetpoint == null) {
+                m_nextSetpoint = new ControlR1(getVelocity(), 0);
+            }
+            m_ref.init(m_nextSetpoint.model());
+        }
+        actuate(m_ref.get());
+    }
+
+    /** Invalidates the current profile */
     @Override
     public void setDutyCycle(double dutyCycle) {
+        m_goal = null;
+        m_nextSetpoint = null;
         m_mechanism.setDutyCycle(dutyCycle);
     }
 
-    /** Passthrough to the outboard control. */
+    /**
+     * Passthrough to the outboard control.
+     * Invalidates the current profile.
+     */
     @Override
-    public void setVelocity(double setpointM_S) {
-        setVelocity(setpointM_S, accel(setpointM_S));
-    }
-
-    /** Passthrough to the outboard control. */
-    @Override
-    public void setVelocity(double setpointM_S, double setpointM_S2) {
-        if (DEBUG) {
-            System.out.printf("setpointM_S %6.3f\n", setpointM_S);
-        }
-        m_goal = setpointM_S;
-        m_mechanism.setVelocity(setpointM_S, setpointM_S2, 0);
-        m_log_setpoint_v.log(() -> setpointM_S);
-        m_log_setpoint_a.log(() -> setpointM_S2);
+    public void setVelocityDirect(double setpointM_S) {
+        setVelocityDirect(setpointM_S, accel(setpointM_S));
     }
 
     /**
-     * @return Current velocity measurement. Note this can be noisy, maybe filter
-     *         it.
+     * Passthrough to the outboard control.
+     * Invalidates the current profile.
+     * Uses the same setpoint for "current" and "next".
+     * TODO: expose both setpoints here.
+     * TODO: change name of this method to "direct"
+     */
+    @Override
+    public void setVelocityDirect(double setpointM_S, double setpointM_S2) {
+        m_goal = null;
+        ControlR1 setpoint = new ControlR1(setpointM_S, setpointM_S2);
+        actuate(new SetpointsR1(setpoint, setpoint));
+    }
+
+    private void actuate(SetpointsR1 setpoints) {
+        m_nextSetpoint = setpoints.next();
+        double velocityM_S = m_nextSetpoint.x();
+        double accelM_S2 = m_nextSetpoint.v();
+        m_mechanism.setVelocity(velocityM_S, accelM_S2, 0);
+        m_log_control.log(() -> m_nextSetpoint);
+    }
+
+    /**
+     * Current velocity measurement. Note this can be noisy, maybe filter it.
      */
     @Override
     public double getVelocity() {
@@ -87,11 +128,14 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
 
     @Override
     public boolean atGoal() {
-        return Math.abs(m_goal - m_mechanism.getVelocityM_S()) < VELOCITY_TOLERANCE;
+        return atSetpoint() && profileDone();
     }
 
+    /** invalidates the current goal and setpoint */
     @Override
     public void stop() {
+        m_goal = null;
+        m_nextSetpoint = null;
         m_mechanism.stop();
     }
 
@@ -101,8 +145,35 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
     }
 
     @Override
+    public void play(double freq) {
+        m_mechanism.play(freq);
+    }
+
+    @Override
+    public boolean atSetpoint() {
+        // Note x field for velocity.
+        double vErr = m_nextSetpoint.x() - m_mechanism.getVelocityM_S();
+        return Math.abs(vErr) < m_tolerance;
+    }
+
+    @Override
+    public boolean profileDone() {
+        if (m_goal == null) {
+            // if there's no profile, it's always done.
+            return true;
+        }
+        return m_ref.profileDone();
+    }
+
+    @Override
+    public void close() {
+        m_mechanism.close();
+    }
+
+    @Override
     public void periodic() {
         m_mechanism.periodic();
+        m_log_velocity.log(() -> getVelocity());
     }
 
     ////////////////////////////////////////////////
@@ -121,14 +192,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
         double dt = t - m_prevT;
         m_prevT = t;
         double accel = (setpoint - m_prevGoal) / dt;
-        if (DEBUG)
-            System.out.printf("dt %5.3f setpoint %5.3f accel %5.3f %s\n", dt, setpoint, accel, m_log.getRoot());
         m_prevGoal = setpoint;
         return accel;
-    }
-
-    @Override
-    public void play(double freq) {
-        m_mechanism.play(freq);
     }
 }

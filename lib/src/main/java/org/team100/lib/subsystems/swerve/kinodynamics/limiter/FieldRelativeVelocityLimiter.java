@@ -1,7 +1,5 @@
 package org.team100.lib.subsystems.swerve.kinodynamics.limiter;
 
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -25,8 +23,6 @@ public class FieldRelativeVelocityLimiter {
     }
 
     public VelocitySE2 apply(VelocitySE2 target) {
-        if (Experiments.instance.enabled(Experiment.LimitsPreferRotation))
-            return preferRotation(target);
         return proportional(target);
     }
 

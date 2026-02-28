@@ -107,6 +107,9 @@ public interface BareMotor extends Player {
     /**
      * Motor free speed in RPM at 12.0 V, used to compute Ke, the back-EMF constant.
      * This should be published by the manufacturer, or measured by experiment.
+     * 
+     * To get the motor control to ignore back EMF (for tuning), set this to a very
+     * large number.
      */
     double kFreeSpeedRPM();
 

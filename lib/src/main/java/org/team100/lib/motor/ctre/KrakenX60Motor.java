@@ -44,28 +44,4 @@ public class KrakenX60Motor extends Talon6Motor {
     public double kFreeSpeedRPM() {
         return 5800;
     }
-
-    /** Feedforward for swerve drive axis */
-    public static SimpleDynamics swerveDriveFF(LoggerFactory log) {
-        // TODO: friction here is probably too low.
-        // TODO: verify kA
-        return new SimpleDynamics(log, 0.004, 0.002);
-    }
-
-    public static Friction swerveDriveFriction(LoggerFactory log) {
-        // TODO: friction here is probably too low.
-        return new Friction(log, 0.26, 0.26, 0.006, 0.5);
-    }
-
-    public static SimpleDynamics highFrictionFF(LoggerFactory log) {
-        return new SimpleDynamics(log, 0.004, 0.002);
-    }
-
-    public static Friction highFriction(LoggerFactory log) {
-        return new Friction(log, 0.26, 0.26, 0.006, 0.5);
-    }
-
-    public static SimpleDynamics lowFrictionFF(LoggerFactory log) {
-        return new SimpleDynamics(log, 0.004, 0.002);
-    }
 }

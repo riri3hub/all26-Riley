@@ -7,13 +7,16 @@ import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.sensor.position.incremental.IncrementalBareEncoder;
-import org.team100.lib.sensor.position.incremental.sim.SimulatedBareEncoder;
 import org.team100.lib.util.CanId;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
-/** Any motor connected to the Talon SRX controller. */
+/**
+ * Any motor connected to the Talon SRX controller.
+ * 
+ * As implemented here, this controller does not support sensing.
+ */
 public class TalonSRXMotor implements BareMotor {
     private static final double FF_DUTY_RAD_S = 0.0016;
 
@@ -84,12 +87,6 @@ public class TalonSRXMotor implements BareMotor {
     }
 
     @Override
-    public IncrementalBareEncoder encoder() {
-        // TODO: does this work?
-        return new SimulatedBareEncoder(m_log, this);
-    }
-
-    @Override
     public void stop() {
         m_motor.neutralOutput();
     }
@@ -119,32 +116,33 @@ public class TalonSRXMotor implements BareMotor {
     // unsupported methods
 
     @Override
+    public IncrementalBareEncoder encoder() {
+        throw new UnsupportedOperationException("TalonSRX sensing is not supported.");
+    }
+
+    @Override
     public void setTorqueLimit(double torqueNm) {
         throw new UnsupportedOperationException("TalonSRX limits power, not torque.");
     }
 
     @Override
     public double getVelocityRad_S() {
-        // TODO: does this work at all?
-        return m_motor.getSelectedSensorVelocity();
+        throw new UnsupportedOperationException("TalonSRX sensing is not supported.");
     }
 
     @Override
     public double getUnwrappedPositionRad() {
-        // TODO: does this work at all?
-        return m_motor.getSelectedSensorPosition();
+        throw new UnsupportedOperationException("TalonSRX sensing is not supported.");
     }
 
     @Override
     public void setUnwrappedEncoderPositionRad(double positionRad) {
-        // TODO: does this work at all?
-        m_motor.setSelectedSensorPosition(positionRad);
+        throw new UnsupportedOperationException("TalonSRX sensing is not supported.");
     }
 
     @Override
     public void setUnwrappedPosition(double positionRad, double velocityRad_S, double accelRad_S2, double torqueNm) {
-        // TODO: does this work at all?
-        m_motor.setSelectedSensorPosition(positionRad);
+        throw new UnsupportedOperationException("TalonSRX sensing is not supported.");
     }
 
     @Override

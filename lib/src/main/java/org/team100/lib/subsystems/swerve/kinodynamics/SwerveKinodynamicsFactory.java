@@ -44,9 +44,9 @@ public class SwerveKinodynamicsFactory {
                         25, // max decel m/s/s
                         40, // max module steering rate rad/s
                         120, // max module steering accel rad/s/s
-                        0.590, // front track m
-                        0.590, // back track m
-                        0.590, // wheelbase m
+                        0.56515, // front track m
+                        0.56515, // back track m
+                        0.56515, // wheelbase m
                         0.295275, // front offset m
                         0.5); // vcg m NOTE VERY HIGH
             case SWERVE_TWO:

@@ -2,8 +2,10 @@ package org.team100.frc2025.grip;
 
 import java.util.List;
 
+import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.BooleanLogger;
@@ -11,7 +13,6 @@ import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
-import org.team100.lib.motor.ctre.Falcon500Motor;
 import org.team100.lib.motor.ctre.KrakenX60Motor;
 import org.team100.lib.motor.sim.LazySimulatedBareMotor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
@@ -24,6 +25,9 @@ import au.grapplerobotics.interfaces.LaserCanInterface.Measurement;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * The manipulator from the Calgames robot in 2025
+ */
 public class Manipulator extends SubsystemBase implements Music {
 
     private final BooleanLogger coralLogger;
@@ -55,22 +59,22 @@ public class Manipulator extends SubsystemBase implements Music {
                         MotorPhase.FORWARD,
                         40, // og 40
                         40, // og 40
-                        Falcon500Motor.ff(leftMotorLog),
-                        Falcon500Motor.friction(leftMotorLog),
+                        new SimpleDynamics(leftMotorLog, 0.000, 0.000),
+                        new Friction(leftMotorLog, 0.900, 0.900, 0.0, 0.5),
                         PIDConstants.zero(leftMotorLog));
                 KrakenX60Motor rightMotor = new KrakenX60Motor(rightMotorLog, new CanId(20), NeutralMode100.COAST,
                         MotorPhase.REVERSE,
                         40, // og 40
                         40, // og 40
-                        Falcon500Motor.ff(rightMotorLog),
-                        Falcon500Motor.friction(rightMotorLog),
+                        new SimpleDynamics(rightMotorLog, 0.000, 0.000),
+                        new Friction(rightMotorLog, 0.900, 0.900, 0.0, 0.5),
                         PIDConstants.zero(rightMotorLog));
                 KrakenX60Motor algaeMotor = new KrakenX60Motor(algaeMotorLog, new CanId(21), NeutralMode100.COAST,
                         MotorPhase.FORWARD,
                         120, // og 120
                         120, // og 120
-                        Falcon500Motor.ff(algaeMotorLog),
-                        Falcon500Motor.friction(algaeMotorLog),
+                        new SimpleDynamics(algaeMotorLog, 0.000, 0.000),
+                        new Friction(algaeMotorLog, 0.900, 0.900, 0.0, 0.5),
                         PIDConstants.zero(algaeMotorLog));
                 algaeMotor.setTorqueLimit(4);
                 m_algaeMotor = algaeMotor;

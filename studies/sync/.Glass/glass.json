@@ -1,0 +1,148 @@
+{
+  "NetworkTables": {
+    "retained": {
+      "log": {
+        "open": true,
+        "sensor minus camera": {
+          "open": true
+        }
+      }
+    },
+    "transitory": {
+      "SyncReply##v_syncreply": {
+        "open": true
+      },
+      "SyncRequest##v_syncrequest": {
+        "open": true
+      },
+      "sync": {
+        "1e5acbaa5a7f9d10": {
+          "open": true
+        },
+        "SyncReply##v_sync/reply": {
+          "open": true
+        },
+        "SyncRequest##v_sync/request": {
+          "open": true
+        },
+        "open": true
+      },
+      "vision": {
+        "1e5acbaa5a7f9d10": {
+          "0": {
+            "Blip24[]##v_vision/1e5acbaa5a7f9d10/0/blips": {
+              "Blip24##v_[0]": {
+                "Transform3d##v_pose": {
+                  "Rotation3d##v_rotation": {
+                    "Quaternion##v_q": {
+                      "open": true
+                    },
+                    "open": true
+                  },
+                  "open": true
+                },
+                "open": true
+              },
+              "open": true
+            },
+            "Blip[]##v_vision/1e5acbaa5a7f9d10/0/blips": {
+              "Blip##v_[0]": {
+                "open": true
+              },
+              "open": true
+            },
+            "open": true
+          },
+          "open": true
+        },
+        "open": true
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Log Level": "String Chooser",
+      "field": "Field2d"
+    }
+  },
+  "NetworkTables Settings": {
+    "mode": "Client (NT4)",
+    "serverTeam": "100"
+  },
+  "Plots": {
+    "Plot <0>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.9399999976158142,
+            0.9399999976158142,
+            0.9399999976158142,
+            1.0
+          ],
+          "height": 338,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:log/sensor minus camera/rad"
+            }
+          ],
+          "viewTime": 60.0
+        }
+      ]
+    },
+    "Plot <1>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.9399999976158142,
+            0.9399999976158142,
+            0.9399999976158142,
+            1.0
+          ],
+          "height": 303,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:sync/1e5acbaa5a7f9d10/drift (us)"
+            }
+          ],
+          "viewTime": 120.0
+        }
+      ]
+    },
+    "Plot <2>": {
+      "plots": [
+        {
+          "backgroundColor": [
+            0.9399999976158142,
+            0.9399999976158142,
+            0.9399999976158142,
+            1.0
+          ],
+          "height": 338,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:log/diff (ms)"
+            }
+          ],
+          "viewTime": 60.0
+        }
+      ]
+    }
+  }
+}

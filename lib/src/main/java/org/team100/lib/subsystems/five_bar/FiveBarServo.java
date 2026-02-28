@@ -10,10 +10,10 @@ import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.Falcon500Motor;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
-import org.team100.lib.reference.r1.IncrementalProfileReferenceR1;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.sensor.position.absolute.ProxyRotaryPositionSensor;
 import org.team100.lib.sensor.position.incremental.IncrementalBareEncoder;
 import org.team100.lib.servo.AngularPositionServo;
@@ -68,9 +68,9 @@ public class FiveBarServo extends SubsystemBase {
     public FiveBarServo(LoggerFactory logger) {
         // zeros
         PIDConstants pid = PIDConstants.zero(logger);
-        SimpleDynamics ff = SimpleDynamics.zero(logger);
-        Friction friction = Friction.zero(logger);
-        IncrementalProfile profile = new TrapezoidIncrementalProfile(
+        SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
+        Friction friction = new Friction(logger, 0, 0, 0, 0);
+        ProfileR1 profile = new TrapezoidProfileR1(
                 logger, MAX_VELOCITY, MAX_ACCEL, POSITION_TOLERANCE);
 
         LoggerFactory loggerP1 = logger.name("p1");
@@ -94,7 +94,7 @@ public class FiveBarServo extends SubsystemBase {
                 0.0,
                 1.0);
 
-        ProfileReferenceR1 refP1 = new IncrementalProfileReferenceR1(
+        ReferenceR1 refP1 = new ProfileReferenceR1(
                 loggerP1, () -> profile, POSITION_TOLERANCE, VELOCITY_TOLERANCE);
         m_servoP1 = new OutboardAngularPositionServo(
                 loggerP1,
@@ -121,7 +121,7 @@ public class FiveBarServo extends SubsystemBase {
                 1.0,
                 0.0,
                 1.0);
-        ProfileReferenceR1 refP5 = new IncrementalProfileReferenceR1(
+        ReferenceR1 refP5 = new ProfileReferenceR1(
                 loggerP5, () -> profile, POSITION_TOLERANCE, VELOCITY_TOLERANCE);
         m_servoP5 = new OutboardAngularPositionServo(
                 loggerP5,

@@ -1,7 +1,7 @@
 package org.team100.lib.profile.se2;
 
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.profile.r1.IncrementalProfile;
+import org.team100.lib.profile.r1.ProfileR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ControlSE2;
 import org.team100.lib.state.ModelR1;
@@ -26,21 +26,21 @@ public class FreeRotationProfile implements ProfileSE2 {
     private static final double SOLVE_DT = 0.1;
     private static final double DT = TimedRobot100.LOOP_PERIOD_S;
 
-    private final IncrementalProfile px;
-    private final IncrementalProfile py;
-    private final IncrementalProfile ptheta;
+    private final ProfileR1 px;
+    private final ProfileR1 py;
+    private final ProfileR1 ptheta;
 
     // package-private for testing
-    IncrementalProfile ppx;
-    IncrementalProfile ppy;
+    ProfileR1 ppx;
+    ProfileR1 ppy;
     // for testing only
     double sx;
     double sy;
 
     FreeRotationProfile(
-            IncrementalProfile px,
-            IncrementalProfile py,
-            IncrementalProfile ptheta) {
+            ProfileR1 px,
+            ProfileR1 py,
+            ProfileR1 ptheta) {
         this.px = px;
         this.py = py;
         this.ptheta = ptheta;

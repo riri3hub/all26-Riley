@@ -18,10 +18,12 @@ import edu.wpi.first.math.interpolation.Interpolatable;
  */
 public record ControlR1(double x, double v, double a) implements Interpolatable<ControlR1> {
 
+    /** Zero acceleration */
     public ControlR1(double x, double v) {
         this(x, v, 0);
     }
 
+    /** Zero everything */
     public ControlR1() {
         this(0, 0, 0);
     }

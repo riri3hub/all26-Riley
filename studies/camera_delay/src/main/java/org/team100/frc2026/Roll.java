@@ -2,20 +2,29 @@ package org.team100.frc2026;
 
 import java.util.function.ObjDoubleConsumer;
 
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.Rotation2dLogger;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 /** Extract the roll component. */
 public class Roll implements ObjDoubleConsumer<Transform3d> {
+    private final Rotation2dLogger m_logRoll;
     private final ObjDoubleConsumer<Rotation2d> m_delegate;
 
-    public Roll(ObjDoubleConsumer<Rotation2d> delegate) {
+    public Roll(LoggerFactory parent, ObjDoubleConsumer<Rotation2d> delegate) {
+        LoggerFactory log = parent.type(this);
+        m_logRoll = log.rotation2dLogger(Level.TRACE, "roll");
         m_delegate = delegate;
     }
 
     @Override
     public void accept(Transform3d t, double value) {
-        m_delegate.accept(new Rotation2d(t.getRotation().getX()), value);
+        Rotation2d roll = new Rotation2d(t.getRotation().getX());
+        m_logRoll.log(() -> roll);
+        m_delegate.accept(roll, value);
     }
 
 }

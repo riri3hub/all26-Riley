@@ -1,10 +1,9 @@
 """Interface spec for image interpreters."""
 
-from typing import Protocol
-
-from app.camera.camera_protocol import Request
-
 # pylint: disable=R0903
+
+from typing import Protocol
+from app.camera.camera_protocol import Request
 
 
 class Interpreter(Protocol):

@@ -1,8 +1,8 @@
 package org.team100.lib.subsystems.five_bar.commands;
 
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidProfileWPI;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.WPITrapezoidProfileR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
 import org.team100.lib.subsystems.five_bar.FiveBarCartesian;
@@ -22,7 +22,7 @@ public class Move extends Command {
 
     private final FiveBarCartesian m_fiveBar;
     private final Translation2d m_goal;
-    private final IncrementalProfile m_profile;
+    private final ProfileR1 m_profile;
     private final Timer m_timer;
 
     private ControlR1 m_setpoint;
@@ -35,7 +35,7 @@ public class Move extends Command {
     public Move(FiveBarCartesian fiveBar, Translation2d goal, double velocity) {
         m_fiveBar = fiveBar;
         m_goal = goal;
-        m_profile = new TrapezoidProfileWPI(velocity, 1);
+        m_profile = new WPITrapezoidProfileR1(velocity, 1);
 
         m_timer = new Timer();
         addRequirements(fiveBar);

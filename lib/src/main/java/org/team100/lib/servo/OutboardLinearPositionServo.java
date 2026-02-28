@@ -5,7 +5,7 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ControlR1Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.mechanism.LinearMechanism;
-import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.reference.r1.SetpointsR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
@@ -16,7 +16,7 @@ import org.team100.lib.state.ModelR1;
  */
 public class OutboardLinearPositionServo implements LinearPositionServo {
     private final LinearMechanism m_mechanism;
-    private final ProfileReferenceR1 m_ref;
+    private final ReferenceR1 m_ref;
     private final double m_positionTolerance;
     private final double m_velocityTolerance;
 
@@ -33,7 +33,7 @@ public class OutboardLinearPositionServo implements LinearPositionServo {
     public OutboardLinearPositionServo(
             LoggerFactory parent,
             LinearMechanism mechanism,
-            ProfileReferenceR1 ref,
+            ReferenceR1 ref,
             double positionTolerance,
             double velocityTolerance) {
         LoggerFactory log = parent.type(this);
@@ -114,6 +114,7 @@ public class OutboardLinearPositionServo implements LinearPositionServo {
         return m_nextSetpoint.a();
     }
 
+        /** Invalidates the current profile */
     public void setDutyCycle(double value) {
         m_goal = null;
         m_nextSetpoint = null;

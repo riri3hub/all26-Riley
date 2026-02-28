@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
 import org.team100.lib.subsystems.prr.EAWConfig;
@@ -42,9 +42,9 @@ public class ProfiledTest {
         ModelR1 g1 = new ModelR1(goal.shoulderHeight(), 0);
         ModelR1 g2 = new ModelR1(goal.shoulderAngle(), 0);
         ModelR1 g3 = new ModelR1(goal.wristAngle(), 0);
-        IncrementalProfile p1 = new TrapezoidIncrementalProfile(log, 1, 1, 0.05);
-        IncrementalProfile p2 = new TrapezoidIncrementalProfile(log, 1, 1, 0.05);
-        IncrementalProfile p3 = new TrapezoidIncrementalProfile(log, 1, 1, 0.05);
+        ProfileR1 p1 = new TrapezoidProfileR1(log, 1, 1, 0.05);
+        ProfileR1 p2 = new TrapezoidProfileR1(log, 1, 1, 0.05);
+        ProfileR1 p3 = new TrapezoidProfileR1(log, 1, 1, 0.05);
 
         ControlR1 i1 = new ControlR1(start.shoulderHeight(), 0);
         ControlR1 i2 = new ControlR1(start.shoulderAngle(), 0);
@@ -100,9 +100,9 @@ public class ProfiledTest {
         ModelR1 g1 = new ModelR1(goal.shoulderHeight(), 0);
         ModelR1 g2 = new ModelR1(goal.shoulderAngle(), 0);
         ModelR1 g3 = new ModelR1(goal.wristAngle(), 0);
-        IncrementalProfile p1 = new TrapezoidIncrementalProfile(log, 1, 1, 0.05);
-        IncrementalProfile p2 = new TrapezoidIncrementalProfile(log, 1, 1, 0.05);
-        IncrementalProfile p3 = new TrapezoidIncrementalProfile(log, 1, 1, 0.05);
+        ProfileR1 p1 = new TrapezoidProfileR1(log, 1, 1, 0.05);
+        ProfileR1 p2 = new TrapezoidProfileR1(log, 1, 1, 0.05);
+        ProfileR1 p3 = new TrapezoidProfileR1(log, 1, 1, 0.05);
 
         ControlR1 i1 = new ControlR1(start.shoulderHeight(), 0);
         ControlR1 i2 = new ControlR1(start.shoulderAngle(), 0);
@@ -151,9 +151,9 @@ public class ProfiledTest {
         ModelR1 g1 = new ModelR1(goal.shoulderHeight(), 0);
         ModelR1 g2 = new ModelR1(goal.shoulderAngle(), 0);
         ModelR1 g3 = new ModelR1(goal.wristAngle(), 0);
-        IncrementalProfile p1 = new TrapezoidIncrementalProfile(log, 1, 1, 0.05);
-        IncrementalProfile p2 = new TrapezoidIncrementalProfile(log, 1, 1, 0.05);
-        IncrementalProfile p3 = new TrapezoidIncrementalProfile(log, 1, 1, 0.05);
+        ProfileR1 p1 = new TrapezoidProfileR1(log, 1, 1, 0.05);
+        ProfileR1 p2 = new TrapezoidProfileR1(log, 1, 1, 0.05);
+        ProfileR1 p3 = new TrapezoidProfileR1(log, 1, 1, 0.05);
 
         ControlR1 i1 = new ControlR1(start.shoulderHeight(), 0);
         ControlR1 i2 = new ControlR1(start.shoulderAngle(), 0);

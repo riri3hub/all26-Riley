@@ -42,10 +42,11 @@ public class SimulatedBareEncoder implements IncrementalBareEncoder {
         return positionRad;
     }
 
-    @Override
-    public void reset() {
-        m_motor.reset();
-    }
+        // TODO: I think this is unnecessary.
+    // @Override
+    // public void reset() {
+    //     m_motor.reset();
+    // }
 
     @Override
     public void close() {

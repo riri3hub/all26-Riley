@@ -13,6 +13,7 @@ import org.team100.lib.localization.OdometryUpdater;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.EnumLogger;
 import org.team100.lib.logging.LoggerFactory.ModelSE2Logger;
 import org.team100.lib.logging.LoggerFactory.VelocitySE2Logger;
@@ -21,7 +22,6 @@ import org.team100.lib.music.Player;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.subsystems.se2.VelocitySubsystemSE2;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
-import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModulePositions;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleStates;
 import org.team100.lib.uncertainty.IsotropicNoiseSE2;
@@ -33,15 +33,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsystemSE2, Music {
-    // DEBUG produces a LOT of output, you should only enable it while you're
-    // looking at it.
+    // DEBUG produces a LOT of output. Only enable it while you're looking.
     private static final boolean DEBUG = false;
     private final FreshSwerveEstimate m_estimate;
     private final OdometryUpdater m_odometryUpdater;
     private final SwerveLocal m_swerveLocal;
-    private final SwerveLimiter m_limiter;
 
-    // CACHES
+    // CACHE
     private final ObjectCache<ModelSE2> m_stateCache;
 
     // LOGGERS
@@ -49,6 +47,7 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
     private final DoubleArrayLogger m_log_pose_array;
     private final EnumLogger m_log_skill;
     private final VelocitySE2Logger m_log_input;
+    private final DoubleLogger m_log_rotation_evolution;
 
     private final List<Player> m_players;
 
@@ -56,20 +55,19 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
             LoggerFactory parent,
             OdometryUpdater odometryUpdater,
             FreshSwerveEstimate estimate,
-            SwerveLocal swerveLocal,
-            SwerveLimiter limiter) {
+            SwerveLocal swerveLocal) {
         LoggerFactory log = parent.type(this);
         m_estimate = estimate;
         m_odometryUpdater = odometryUpdater;
         m_swerveLocal = swerveLocal;
-        m_limiter = limiter;
         m_stateCache = Cache.of(this::update);
-        stop();
         m_log_state = log.modelSE2Logger(Level.COMP, "state");
         m_log_pose_array = log.doubleArrayLogger(Level.COMP, "pose array");
         m_log_skill = log.enumLogger(Level.TRACE, "skill level");
         m_log_input = log.VelocitySE2Logger(Level.TRACE, "drive input");
+        m_log_rotation_evolution = log.doubleLogger(Level.TRACE, "rotation evolution");
         m_players = m_swerveLocal.players();
+        stop();
     }
 
     ////////////////
@@ -78,15 +76,12 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
     //
 
     /**
-     * Skip all scaling, limits generator, etc.
+     * Drive using field coordinates
      * 
      * @param nextV for the next timestep
      */
     @Override
     public void setVelocity(VelocitySE2 nextV) {
-        // keep the limiter up to date on what we're doing
-        m_limiter.updateSetpoint(nextV);
-
         // Actuation is constant for the whole control period, which means
         // that to calculate robot-relative speed from field-relative speed,
         // we need to use the robot rotation *at the future time*.
@@ -94,7 +89,9 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
         // Note this may add a bit of noise.
         ModelSE2 nextState = currentState.evolve(TimedRobot100.LOOP_PERIOD_S);
         Rotation2d nextTheta = nextState.rotation();
-
+        // is there noise here?
+        m_log_rotation_evolution.log(
+                () -> nextTheta.minus(currentState.rotation()).getRadians());
         ChassisSpeeds nextSpeed = SwerveKinodynamics.toInstantaneousChassisSpeeds(
                 nextV, nextTheta);
         m_swerveLocal.setChassisSpeeds(nextSpeed);
@@ -102,35 +99,17 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
     }
 
     /**
-     * Scales the supplied ChassisSpeed by the driver speed modifier.
-     * 
-     * @param speeds in robot coordinates
+     * Drive in robot-relative coordinates.
      */
-    public void setChassisSpeeds(final ChassisSpeeds speeds) {
-        // scale for driver skill; default is half speed.
-        DriverSkill.Level driverSkillLevel = DriverSkill.level();
-        m_swerveLocal.setChassisSpeeds(speeds.times(driverSkillLevel.scale()));
+    public void setChassisSpeeds(ChassisSpeeds speeds) {
+        m_swerveLocal.setChassisSpeeds(speeds);
     }
 
     /**
-     * Does not desaturate or optimize.
-     * 
-     * This "raw" mode is just for testing.
+     * For testing only.
      */
     public void setRawModuleStates(SwerveModuleStates states) {
         m_swerveLocal.setRawModuleStates(states);
-    }
-
-    /** Use raw mode to set modules driving ahead */
-    public Command aheadSlow() {
-        return run(() -> setRawModuleStates(SwerveModuleStates.aheadSlow))
-                .finallyDo(() -> stop());
-    }
-
-    /** Use robot-relative mode to set modules driving to the right */
-    public Command rightwardSlow() {
-        return run(() -> setChassisSpeeds(new ChassisSpeeds(0, -1.0, 0)))
-                .finallyDo(() -> stop());
     }
 
     @Override
@@ -138,6 +117,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
         m_swerveLocal.stop();
     }
 
+    /**
+     * Empty the pose history, reset the servos, add the given pose, and flush the
+     * cache.
+     */
     public void resetPose(Pose2d robotPose, IsotropicNoiseSE2 noise) {
         if (DEBUG)
             System.out.println("WARNING: Make sure resetting the swerve module collection doesn't break anything");
@@ -171,16 +154,10 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
     public void periodic() {
         if (DEBUG)
             System.out.println("drive periodic");
-        // m_poseEstimator.periodic();
-        // 4/2/25 Joel removed this state resetter because it happens earlier in
-        // Robot.java
-        // and i think we don't need to do it twice.
-        // m_stateSupplier.reset();
+        m_swerveLocal.periodic();
         m_log_state.log(this::getState);
         m_log_pose_array.log(this::poseArray);
-
         m_log_skill.log(() -> DriverSkill.level());
-        m_swerveLocal.periodic();
     }
 
     private double[] poseArray() {
@@ -193,25 +170,6 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
 
     public void close() {
         m_swerveLocal.close();
-    }
-
-    /////////////////////////////////////////////////////////////////
-
-    /**
-     * Compute the current state. This is a fairly heavyweight thing to do, so it
-     * should be cached (thus refreshed once per cycle).
-     */
-    private ModelSE2 update() {
-        double now = Takt.get();
-        SwerveModulePositions positions = m_swerveLocal.positions();
-        // now that the pose estimator uses the SideEffect thing, we don't need this.
-        // m_odometryUpdater.update();
-        // m_cameraUpdater.run();
-        ModelSE2 swerveModel = m_estimate.apply(now);
-        if (DEBUG) {
-            System.out.printf("update() positions %s estimated pose: %s\n", positions, swerveModel);
-        }
-        return swerveModel;
     }
 
     /** Return cached pose. */
@@ -230,15 +188,70 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
     }
 
     @Override
+    public List<Player> players() {
+        return m_players;
+    }
+
+    ///////////////////////////////////////////////////////////////
+    //
+    // Commands
+    //
+
+    public Command stopCommand() {
+        return runOnce(this::stop);
+    }
+
+    /** Use raw mode to set modules driving ahead. */
+    public Command aheadSlow() {
+        return run(() -> setRawModuleStates(SwerveModuleStates.aheadSlow));
+    }
+
+    /** Use robot-relative mode to set modules driving to the right. */
+    public Command rightwardSlow() {
+        return run(() -> setChassisSpeeds(new ChassisSpeeds(0, -1.0, 0)));
+    }
+
+    /**
+     * This can conflict with the apriltag input and cause the robot to lose its
+     * mind. Do not use it without understanding it and testing it in a safe
+     * environment.
+     */
+    public Command resetPoseCommand(Pose2d pose) {
+        return runOnce(() -> resetPose(pose, IsotropicNoiseSE2.high()));
+    }
+
+    /**
+     * This can conflict with the apriltag input and cause the robot to lose its
+     * mind. Do not use it without understanding it and testing it in a safe
+     * environment.
+     */
+    public Command setRotationCommand(Rotation2d rotation) {
+        return runOnce(() -> resetPose(
+                new Pose2d(getPose().getTranslation(), rotation),
+                IsotropicNoiseSE2.high()));
+    }
+
+    @Override
     public Command play(double freq) {
         return run(() -> {
             m_swerveLocal.play(freq);
         });
     }
 
-    @Override
-    public List<Player> players() {
-        return m_players;
+    /////////////////////////////////////////////////////////////////
+
+    /**
+     * Compute the current state. This is a fairly heavyweight thing to do, so it
+     * should be cached (thus refreshed once per cycle).
+     */
+    private ModelSE2 update() {
+        double now = Takt.get();
+        SwerveModulePositions positions = m_swerveLocal.positions();
+        ModelSE2 swerveModel = m_estimate.apply(now);
+        if (DEBUG) {
+            System.out.printf("update() positions %s estimated pose: %s\n", positions, swerveModel);
+        }
+        return swerveModel;
     }
 
 }

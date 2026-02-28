@@ -12,6 +12,7 @@ import org.team100.lib.geometry.Metrics;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.IsotropicNoiseSE2Logger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.sensor.gyro.Gyro;
 import org.team100.lib.state.ModelSE2;
@@ -19,7 +20,7 @@ import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleDeltas;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModulePositions;
 import org.team100.lib.uncertainty.IsotropicNoiseSE2;
-import org.team100.lib.uncertainty.Uncertainty;
+import org.team100.lib.uncertainty.OdometryNoise;
 import org.team100.lib.uncertainty.VariableR1;
 import org.team100.lib.util.StrUtil;
 
@@ -52,6 +53,9 @@ public class OdometryUpdater {
     private final Fusor m_rotationFusor;
 
     private final SwerveStateLogger m_logState;
+    private final IsotropicNoiseSE2Logger m_log_prevNoise;
+    private final IsotropicNoiseSE2Logger m_log_updateNoise;
+    private final IsotropicNoiseSE2Logger m_log_newNoise;
 
     public boolean m_debug = false;
 
@@ -71,6 +75,9 @@ public class OdometryUpdater {
         m_gyroBiasFusor = new CovarianceInflation(0.02, gyro.bias_noise());
         m_rotationFusor = new CovarianceInflation(0.02, 0.003);
         m_logState = log.swerveStateLogger(Level.TRACE, "state");
+        m_log_prevNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "previous noise");
+        m_log_updateNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "update noise");
+        m_log_newNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "new noise");
     }
 
     /**
@@ -227,14 +234,14 @@ public class OdometryUpdater {
         VariableR1 gyroMeasurementRad = VariableR1.fromStdDev(gyroStepRad, gyroStepWhiteNoise);
 
         // Cartesian distance in this step
-        double distanceM = Metrics.translationalNorm(twist);
+        final double distanceM = Metrics.translationalNorm(twist);
         // Rotation in this step
-        double rotationRad = twist.dtheta;
+        final double rotationRad = twist.dtheta;
 
         double odoDThetaRad = twist.dtheta;
+        IsotropicNoiseSE2 odoNoise = OdometryNoise.get(distanceM, rotationRad);
         // This noise goes to zero when we're not moving.
-        double odoDThetaStdDev = Uncertainty.odometryRotationStdDev(
-                distanceM, rotationRad);
+        double odoDThetaStdDev = odoNoise.rotation();
 
         // This noise goes to zero when we're not moving.
         VariableR1 odoRotationMeasurementRad = VariableR1.fromStdDev(
@@ -273,7 +280,7 @@ public class OdometryUpdater {
         ModelSE2 model = new ModelSE2(newPose, velocity);
 
         // Noise here can be zero, if we're not moving.
-        double cartesianNoise = Uncertainty.odometryCartesianStdDev(distanceM);
+        double cartesianNoise = odoNoise.cartesian();
         IsotropicNoiseSE2 n0 = IsotropicNoiseSE2.fromStdDev(
                 cartesianNoise, fusedRotationMeasurement.sigma());
 
@@ -282,6 +289,10 @@ public class OdometryUpdater {
         // awhile without seeing any tags, the variance will grow
         // without bound.
         IsotropicNoiseSE2 noise = previousNoise.plus(n0);
+
+        m_log_prevNoise.log(() -> previousNoise);
+        m_log_updateNoise.log(() -> n0);
+        m_log_newNoise.log(() -> noise);
 
         // gyro and position measurements are verbatim
         SwerveState swerveState = new SwerveState(

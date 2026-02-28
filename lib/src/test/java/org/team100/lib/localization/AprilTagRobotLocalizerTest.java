@@ -11,12 +11,14 @@ import java.util.function.DoubleFunction;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.coherence.Takt;
+import org.team100.lib.config.Camera;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.uncertainty.NoisyPose2d;
+import org.team100.lib.util.StrUtil;
 
 import edu.wpi.first.hal.AllianceStationID;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -54,7 +56,7 @@ class AprilTagRobotLocalizerTest implements Timeless {
         };
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
         // client instance
         NetworkTableInstance inst = NetworkTableInstance.create();
@@ -65,11 +67,12 @@ class AprilTagRobotLocalizerTest implements Timeless {
         Thread.sleep(100);
         assertTrue(inst.isConnected());
 
-        StructArrayTopic<Blip24> topic = inst.getStructArrayTopic(
-                "vision/1234/5678/blips", Blip24.struct);
-        StructArrayPublisher<Blip24> pub = topic.publish();
-        pub.set(new Blip24[] {
-                Blip24.fromXForward(1, new Transform3d(1, 0, 0, new Rotation3d())) },
+        StructArrayTopic<Blip> topic = inst.getStructArrayTopic(
+                "vision/1234/blips", Blip.struct);
+        StructArrayPublisher<Blip> pub = topic.publish();
+        // blip id=1
+        pub.set(new Blip[] {
+                Blip.fromXForward(0, 1, new Transform3d(1, 0, 0, new Rotation3d())) },
                 (long) Takt.get() * 1000000);
 
         // wait for NT rate-limiting
@@ -83,12 +86,12 @@ class AprilTagRobotLocalizerTest implements Timeless {
         localizer.update();
         // skip first update
         assertTrue(poseEstimate.isEmpty());
-        // a little bit different so NT will pass it along
-        // so about 1 meter ahead; camera offset is identity, but we
-        // use gyro rotation, which is zero, so our pose should be 1 meter
-        // back along the x axis.
-        pub.set(new Blip24[] {
-                Blip24.fromXForward(1, new Transform3d(1.01, 0, 0, new Rotation3d())) },
+
+        // blip id=1
+        // which is at (16.697, 0.655, 1.486), (0, 0, -0.94) in our coordinates
+        // with zero camera offset the tag z is the tag elevation
+        pub.set(new Blip[] {
+                Blip.fromXForward(0, 1, new Transform3d(1.01, 0, 1.486, new Rotation3d())) },
                 (long) Takt.get() * 1000000);
 
         // wait for NT rate-limiting
@@ -99,12 +102,12 @@ class AprilTagRobotLocalizerTest implements Timeless {
         assertEquals(1, poseEstimate.size());
         Pose2d pose = poseEstimate.get(0);
 
-        // 1 meter back along x since we override the rotation
-        assertEquals(15.697, pose.getX(), DELTA);
-        // same y since rotation = 0
-        assertEquals(0.665, pose.getY(), DELTA);
-        // this is the gyro rotation we told it to use, not the tag rotation.
-        assertEquals(0.0, pose.getRotation().getRadians(), DELTA);
+        // 1m away at -0.94 rad means 0.59 in x
+        assertEquals(16.107, pose.getX(), DELTA);
+        // and 0.807 in y
+        assertEquals(1.472, pose.getY(), DELTA);
+        // this is just the tag rotation
+        assertEquals(-0.94, pose.getRotation().getRadians(), DELTA);
     }
 
     @Test
@@ -126,12 +129,13 @@ class AprilTagRobotLocalizerTest implements Timeless {
         };
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
         // in red layout blip 7 is on the other side of the field
 
         // one meter range (Z forward)
-        Blip24 blip = new Blip24(7, new Transform3d(new Translation3d(0, 0, 1), new Rotation3d()));
+        Blip blip = new Blip(0, 7,
+                new Transform3d(new Translation3d(0, 0, 1), new Rotation3d()));
 
         // verify tag location
         Pose3d tagPose = layout.getTagPose(Alliance.Red, 7).get();
@@ -143,15 +147,15 @@ class AprilTagRobotLocalizerTest implements Timeless {
         assertEquals(0, tagPose.getRotation().getZ(), DELTA);
 
         // final String key = "foo";
-        final Blip24[] blips = new Blip24[] {
+        final Blip[] blips = new Blip[] {
                 blip
         };
 
-        Transform3d cameraOffset = new Transform3d();
+        Camera camera = Camera.UNKNOWN;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, blips, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, blips, alliance);
         // do it twice to convince vdp it's a good estimate
-        localizer.estimateRobotPose(cameraOffset, blips, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, blips, alliance);
         assertEquals(1, poseEstimate.size());
         assertEquals(1, timeEstimate.size());
 
@@ -178,11 +182,12 @@ class AprilTagRobotLocalizerTest implements Timeless {
         };
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
         // camera sees the tag straight ahead in the center of the frame,
         // but rotated pi/4 to the left. this is ignored anyway.
-        Blip24 blip = new Blip24(7, new Transform3d(
+        // 1000 usec is 0.001 sec
+        Blip blip = new Blip(1000, 7, new Transform3d(
                 new Translation3d(0, 0, Math.sqrt(2)),
                 new Rotation3d(0, -Math.PI / 4, 0)));
 
@@ -195,13 +200,13 @@ class AprilTagRobotLocalizerTest implements Timeless {
         assertEquals(0, tagPose.getRotation().getY(), DELTA);
         assertEquals(0, tagPose.getRotation().getZ(), DELTA);
 
-        final Blip24[] blips = new Blip24[] { blip };
+        final Blip[] blips = new Blip[] { blip };
 
-        Transform3d cameraOffset = new Transform3d();
+        Camera camera = Camera.UNKNOWN;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, blips, Takt.get() - 0.075, alliance);
+        localizer.estimateRobotPose(camera, blips, alliance);
         // two good estimates are required, so do another one.
-        localizer.estimateRobotPose(cameraOffset, blips, Takt.get() - 0.075, alliance);
+        localizer.estimateRobotPose(camera, blips, alliance);
 
         assertEquals(1, poseEstimate.size());
         assertEquals(1, timeEstimate.size());
@@ -214,12 +219,8 @@ class AprilTagRobotLocalizerTest implements Timeless {
         // facing diagonal, this is just what we provided.
         assertEquals(-Math.PI / 4, result.getRotation().getRadians(), DELTA);
 
-        // the delay is the input plus the magic number.
-        double now = Takt.get();
         Double t = timeEstimate.get(0);
-        double delay = now - t;
-        // this was 0.102 with the magic number before, now it's the 0.075 number above.
-        assertEquals(0.075, delay, DELTA);
+        assertEquals(0.001, t, DELTA);
     }
 
     @Test
@@ -233,19 +234,8 @@ class AprilTagRobotLocalizerTest implements Timeless {
 
     @Test
     void testCase1() throws IOException {
-
-        // the case from 2/14
-        // robot 45 degrees to the right (negative), so 135 degrees
-        // x = 2.2m, y = - 1.3 m from the center speaker tag
-        // camera B
-        // camera to tag 4: z=2.4, x=0, y=0 (approx)
-        // camera to tag 3: z=2.8, x=0.1, y=0.1 (approx)
-        // tag 4 in red is at about (0, 2.5)
-        // tag 3 in red is at about (0, 3)
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
-
         DoubleFunction<ModelSE2> history = t -> new ModelSE2(new Rotation2d(3 * Math.PI / 4));
 
         VisionUpdater visionUpdater = new VisionUpdater() {
@@ -256,74 +246,64 @@ class AprilTagRobotLocalizerTest implements Timeless {
             }
         };
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
-        Blip24 tag4 = new Blip24(4, new Transform3d(
+        Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(0, 0, 2.4),
                 new Rotation3d()));
-        Blip24 tag3 = new Blip24(3, new Transform3d(
+        Blip tag3 = new Blip(0, 3, new Transform3d(
                 new Translation3d(0.1, 0.1, 2.8),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag3, tag4 };
+        final Blip[] tags = new Blip[] { tag3, tag4 };
 
-        Transform3d cameraOffset = new Transform3d(
-                new Translation3d(-0.1265, 0.03, 0.61),
-                new Rotation3d(0, Math.toRadians(31.5), Math.PI));
+        Camera camera = Camera.GAME_PIECE;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
 
     }
 
     @Test
     void testCase2() throws IOException {
-
-        // 1m in front of tag 4
-        // field is 16.54 m long, 8.21 m wide
-        // tag 4 is at 16.579, 5.547, 1.451 in blue so
-        // -0.039, 2.662, 1.451 in red.
-        // so the robot pose should be 1, 2.662, 1.451
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         Pose3d tag4pose = layout.getTagPose(Alliance.Red, 4).get();
         assertEquals(8.272, tag4pose.getX(), DELTA);
         assertEquals(1.914, tag4pose.getY(), DELTA);
         assertEquals(1.868, tag4pose.getZ(), DELTA);
+        System.out.println(StrUtil.poseStr(tag4pose));
 
-        DoubleFunction<ModelSE2> history = t -> new ModelSE2(new Rotation2d(Math.PI));
+        DoubleFunction<ModelSE2> history = t -> new ModelSE2(new Rotation2d(0));
         VisionUpdater visionUpdater = new VisionUpdater() {
             @Override
             public void put(double t, NoisyPose2d p) {
-                assertEquals(9.272, p.pose().getX(), DELTA);
+                System.out.println(p);
+                // if the camera is 1m away at 30 deg down then the x dimension is sqrt(3)/2
+                assertEquals(8.272 - Math.sqrt(3) / 2, p.pose().getX(), DELTA);
                 assertEquals(1.914, p.pose().getY(), DELTA);
             }
         };
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
         // tag is 1m away on bore
-        final Blip24 tag4 = new Blip24(4, new Transform3d(
+        final Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(0, 0, 1),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag4 };
+        final Blip[] tags = new Blip[] { tag4 };
 
-        Transform3d cameraOffset = new Transform3d();
+        // if the tag is on bore then the camera is pretty high and also tilted up
+        // the tag is tilted 30 degrees so the height is 0.5 meters lower than the tag
+        Camera camera = Camera.TEST7A;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
     }
 
     @Test
     void testCase2WithOffset() throws IOException {
-        // 1m in front of tag 4
-        // field is 16.54 m long, 8.21 m wide
-        // tag 4 is at 16.579, 5.547, 1.451 in blue so
-        // -0.039, 2.662, 1.451 in red.
-        // so the robot pose should be 1, 2.662, 1.451
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         Pose3d tag4pose = layout.getTagPose(Alliance.Red, 4).get();
@@ -335,37 +315,29 @@ class AprilTagRobotLocalizerTest implements Timeless {
         VisionUpdater visionUpdater = new VisionUpdater() {
             @Override
             public void put(double t, NoisyPose2d p) {
-                assertEquals(10.272, p.pose().getX(), DELTA);
+                assertEquals(7.272 - Math.sqrt(3) / 2, p.pose().getX(), DELTA);
                 assertEquals(1.914, p.pose().getY(), DELTA);
             }
         };
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
-        Blip24 tag4 = new Blip24(4, new Transform3d(
+        Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(0, 0, 1),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag4 };
+        final Blip[] tags = new Blip[] { tag4 };
 
-        Transform3d cameraOffset = new Transform3d(
-                new Translation3d(1, 0, 0),
-                new Rotation3d());
+        // nonzero camera offset
+        Camera camera = Camera.TEST7;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
     }
 
     @Test
     void testCase2WithTriangulation() throws IOException {
-
-        // 1m in front of tag 4
-        // field is 16.54 m long, 8.21 m wide
-        // tag 4 is at 16.579, 5.547, 1.451 in blue so
-        // -0.039, 2.662, 1.451 in red.
-        // so the robot pose should be 1, 2.662, 1.451
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         Pose3d tag4pose = layout.getTagPose(Alliance.Red, 4).get();
@@ -384,32 +356,25 @@ class AprilTagRobotLocalizerTest implements Timeless {
         };
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
-        Blip24 tag3 = new Blip24(3, new Transform3d(
+        Blip tag3 = new Blip(0, 3, new Transform3d(
                 new Translation3d(0.561, 0, 1),
                 new Rotation3d()));
-        Blip24 tag4 = new Blip24(4, new Transform3d(
+        Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(0, 0, 1),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag3, tag4 };
+        final Blip[] tags = new Blip[] { tag3, tag4 };
 
-        Transform3d cameraOffset = new Transform3d();
+        Camera camera = Camera.UNKNOWN;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
     }
 
     @Test
     void testCase2tilt() throws IOException {
-
-        // 1m in front of tag 4, tilted up 45
-        // field is 16.54 m long, 8.21 m wide
-        // tag 4 is at 16.579, 5.547, 1.451 in blue so
-        // -0.039, 2.662, 1.451 in red.
-        // so the robot pose should be 1, 2.662, 1.451
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         Pose3d tag4pose = layout.getTagPose(Alliance.Red, 4).get();
@@ -422,37 +387,28 @@ class AprilTagRobotLocalizerTest implements Timeless {
         VisionUpdater visionUpdater = new VisionUpdater() {
             @Override
             public void put(double t, NoisyPose2d p) {
-                assertEquals(9.272, p.pose().getX(), DELTA);
+                assertEquals(7.047, p.pose().getX(), DELTA);
                 assertEquals(1.914, p.pose().getY(), DELTA);
             }
         };
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
-        Blip24 tag4 = new Blip24(4, new Transform3d(
+        Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag4 };
+        final Blip[] tags = new Blip[] { tag4 };
 
-        Transform3d cameraOffset = new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0, Math.PI / 4, 0));
+        Camera camera = Camera.TEST8;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
     }
 
     @Test
     void testCase3() throws IOException {
-
-        // 1m in front of tag 4, 1m to the right
-        // field is 16.54 m long, 8.21 m wide
-        // tag 4 is at 16.579, 5.547, 1.451 in blue so
-        // -0.039, 2.662, 1.451 in red.
-        // so the robot pose should be 1, 3.662, 1.451
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         Pose3d tag4pose = layout.getTagPose(Alliance.Red, 4).get();
@@ -465,35 +421,28 @@ class AprilTagRobotLocalizerTest implements Timeless {
         VisionUpdater visionUpdater = new VisionUpdater() {
             @Override
             public void put(double t, NoisyPose2d p) {
-                assertEquals(9.272, p.pose().getX(), DELTA);
-                assertEquals(2.914, p.pose().getY(), DELTA);
+                assertEquals(7.407, p.pose().getX(), DELTA);
+                assertEquals(0.914, p.pose().getY(), DELTA);
             }
         };
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
-        Blip24 tag4 = new Blip24(4, new Transform3d(
+        Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(-1, 0, 1),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag4 };
+        final Blip[] tags = new Blip[] { tag4 };
 
-        Transform3d cameraOffset = new Transform3d();
+        Camera camera = Camera.UNKNOWN;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
     }
 
     @Test
     void testCase4() throws IOException {
-
-        // 1m in front of tag 4, 1m to the right, rotated to the left
-        // field is 16.54 m long, 8.21 m wide
-        // tag 4 is at 16.579, 5.547, 1.451 in blue so
-        // -0.039, 2.662, 1.451 in red.
-        // so the robot pose should be 1, 3.662, 1.451
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         Pose3d tag4pose = layout.getTagPose(Alliance.Red, 4).get();
@@ -506,35 +455,28 @@ class AprilTagRobotLocalizerTest implements Timeless {
         VisionUpdater visionUpdater = new VisionUpdater() {
             @Override
             public void put(double t, NoisyPose2d p) {
-                assertEquals(9.272, p.pose().getX(), DELTA);
-                assertEquals(2.914, p.pose().getY(), DELTA);
+                assertEquals(7.047, p.pose().getX(), DELTA);
+                assertEquals(1.914, p.pose().getY(), DELTA);
             }
         };
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
-        Blip24 tag4 = new Blip24(4, new Transform3d(
+        Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag4 };
+        final Blip[] tags = new Blip[] { tag4 };
 
-        Transform3d cameraOffset = new Transform3d();
+        Camera camera = Camera.UNKNOWN;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
     }
 
     @Test
     void testCase5() throws IOException {
-
-        // 1m in front of tag 4, 1m to the left, rotated to the right
-        // field is 16.54 m long, 8.21 m wide
-        // tag 4 is at 16.579, 5.547, 1.451 in blue so
-        // -0.039, 2.662, 1.451 in red.
-        // so the robot pose should be 1, 3.662, 1.451
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         Pose3d tag4pose = layout.getTagPose(Alliance.Red, 4).get();
@@ -547,34 +489,26 @@ class AprilTagRobotLocalizerTest implements Timeless {
         VisionUpdater visionUpdater = new VisionUpdater() {
             @Override
             public void put(double t, NoisyPose2d p) {
-                assertEquals(9.272, p.pose().getX(), DELTA);
-                assertEquals(0.914, p.pose().getY(), DELTA);
+                assertEquals(7.047, p.pose().getX(), DELTA);
+                assertEquals(1.914, p.pose().getY(), DELTA);
             }
         };
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
-        Blip24 tag4 = new Blip24(4, new Transform3d(
+        Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(0, 0, 1.4142),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag4 };
-        Transform3d cameraOffset = new Transform3d();
+        final Blip[] tags = new Blip[] { tag4 };
+        Camera camera = Camera.UNKNOWN;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
     }
 
     @Test
     void testCase6() throws IOException {
-
-        // 1m in front of tag 4, 1m to the left, rotated to the right
-        // looking down at a 45 degree angle
-        // field is 16.54 m long, 8.21 m wide
-        // tag 4 is at 16.579, 5.547, 1.451 in blue so
-        // -0.039, 2.662, 1.451 in red.
-        // so the robot pose should be 1, 3.662, 1.451
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         Pose3d tag4pose = layout.getTagPose(Alliance.Red, 4).get();
@@ -587,37 +521,27 @@ class AprilTagRobotLocalizerTest implements Timeless {
         VisionUpdater visionUpdater = new VisionUpdater() {
             @Override
             public void put(double t, NoisyPose2d p) {
-                assertEquals(9.272, p.pose().getX(), DELTA);
-                assertEquals(0.914, p.pose().getY(), DELTA);
+                assertEquals(6.54, p.pose().getX(), DELTA);
+                assertEquals(1.914, p.pose().getY(), DELTA);
             }
         };
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
-        Blip24 tag4 = new Blip24(4, new Transform3d(
+        Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(0, 0, 2),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag4 };
+        final Blip[] tags = new Blip[] { tag4 };
 
-        Transform3d cameraOffset = new Transform3d(
-                new Translation3d(),
-                new Rotation3d(0, Math.PI / 4, 0));
+        Camera camera = Camera.TEST8;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
     }
 
     @Test
     void testCase7() throws IOException {
-
-        // 1m in front of tag 4, 1m to the left, rotated to the right
-        // looking up at a 30 degree angle
-        // field is 16.54 m long, 8.21 m wide
-        // tag 4 is at 16.579, 5.547, 1.451 in blue so
-        // -0.039, 2.662, 1.451 in red.
-        // so the robot pose should be 1, 3.662, 1.451
-
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
                 "2025-reefscape.json");
         Pose3d tag4pose = layout.getTagPose(Alliance.Red, 4).get();
@@ -630,25 +554,24 @@ class AprilTagRobotLocalizerTest implements Timeless {
         VisionUpdater visionUpdater = new VisionUpdater() {
             @Override
             public void put(double t, NoisyPose2d p) {
-                assertEquals(9.272, p.pose().getX(), DELTA);
-                assertEquals(0.914, p.pose().getY(), DELTA);
+                assertEquals(6.858, p.pose().getX(), DELTA);
+                assertEquals(1.914, p.pose().getY(), DELTA);
             }
         };
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
 
         // 30 degrees, long side is sqrt2, so hypotenuse is sqrt2/sqrt3/2
-        Blip24 tag4 = new Blip24(4, new Transform3d(
+        Blip tag4 = new Blip(0, 4, new Transform3d(
                 new Translation3d(0, 0, 1.633),
                 new Rotation3d()));
 
-        final Blip24[] tags = new Blip24[] { tag4 };
+        final Blip[] tags = new Blip[] { tag4 };
 
-        Transform3d cameraOffset = new Transform3d(
-                new Translation3d(0, 0, 0),
-                new Rotation3d(0, Math.PI / 6, 0));
+
+        Camera camera = Camera.TEST9;
         Optional<Alliance> alliance = Optional.of(Alliance.Red);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
-        localizer.estimateRobotPose(cameraOffset, tags, Takt.get(), alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
+        localizer.estimateRobotPose(camera, tags, alliance);
     }
 }

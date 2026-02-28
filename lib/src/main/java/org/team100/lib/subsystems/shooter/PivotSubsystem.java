@@ -1,16 +1,24 @@
 package org.team100.lib.subsystems.shooter;
 
+import org.team100.lib.config.Friction;
+import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
+import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.rev.Neo550CANSparkMotor;
+import org.team100.lib.motor.sim.SimulatedBareMotor;
 import org.team100.lib.util.CanId;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * An example of a shooter pivot.
+ */
 public class PivotSubsystem extends SubsystemBase {
 
     private final BareMotor m_pivot;
@@ -19,14 +27,18 @@ public class PivotSubsystem extends SubsystemBase {
     public PivotSubsystem(LoggerFactory parent, int currentLimit) {
         LoggerFactory logger = parent.type(this);
         m_log_angle = logger.doubleLogger(Level.TRACE, "Angle (rad)");
-        m_pivot = Neo550CANSparkMotor.get(
-                logger,
-                new CanId(5),
-                MotorPhase.FORWARD,
-                currentLimit,
-                Neo550CANSparkMotor.ff(logger),
-                Neo550CANSparkMotor.friction(logger),
-                PIDConstants.zero(logger));
+        m_pivot = (switch (Identity.instance) {
+            case BLANK ->
+                new SimulatedBareMotor(logger, 600);
+            default -> new Neo550CANSparkMotor(
+                    logger,
+                    new CanId(5),
+                    NeutralMode100.BRAKE,
+                    MotorPhase.FORWARD, currentLimit,
+                    new SimpleDynamics(logger, 0, 0),
+                    new Friction(logger, 0, 0.07, 0.01, 0.5),
+                    PIDConstants.zero(logger));
+        });
     }
 
     public void dutyCycle(double set) {

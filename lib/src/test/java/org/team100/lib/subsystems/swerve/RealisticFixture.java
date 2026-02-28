@@ -42,6 +42,7 @@ public class RealisticFixture {
     public FreshSwerveEstimate estimate;
     public SwerveKinodynamics swerveKinodynamics;
     public SwerveLocal swerveLocal;
+    public SwerveLimiter limiter;
     public SwerveDriveSubsystem drive;
     public ControllerSE2 controller;
     public LoggerFactory logger;
@@ -74,17 +75,16 @@ public class RealisticFixture {
         final AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
         estimate = new FreshSwerveEstimate(localizer, odometryUpdater, history);
 
-        SwerveLimiter limiter = new SwerveLimiter(logger, swerveKinodynamics, () -> 12);
+        limiter = new SwerveLimiter(logger, swerveKinodynamics, () -> 12);
 
         drive = new SwerveDriveSubsystem(
                 logger,
                 odometryUpdater,
                 estimate,
-                swerveLocal,
-                limiter);
+                swerveLocal);
 
         controller = ControllerFactorySE2.test(logger);
     }

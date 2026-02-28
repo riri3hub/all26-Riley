@@ -32,7 +32,7 @@ public class SingleDrumShooter extends SubsystemBase {
     }
 
     public void set(double velocityM_S) {
-        m_drum.setVelocity(velocityM_S);
+        m_drum.setVelocityProfiled(velocityM_S);
     }
 
     public void stop() {

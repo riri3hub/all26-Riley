@@ -2,8 +2,8 @@ package org.team100.lib.subsystems.shooter;
 
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.mechanism.LinearMechanism;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
-import org.team100.lib.reference.r1.IncrementalProfileReferenceR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
+import org.team100.lib.reference.r1.ProfileReferenceR1;
 import org.team100.lib.servo.OutboardLinearPositionServo;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -24,16 +24,17 @@ public class IndexerSubsystem extends SubsystemBase {
         m_objectLength = objectLengthM;
         m_IndexerVelocityM_S = indexVelocityM_S;
         m_linearMechanism = linearMechanism;
-        TrapezoidIncrementalProfile profile = new TrapezoidIncrementalProfile(
+        TrapezoidProfileR1 profile = new TrapezoidProfileR1(
                 m_logger, indexVelocityM_S, maxAccel, 0.02);
+        ProfileReferenceR1 ref = new ProfileReferenceR1(
+                m_logger,
+                () -> profile,
+                0.02,
+                0.02);
         m_indexer = new OutboardLinearPositionServo(
                 m_logger,
                 linearMechanism,
-                new IncrementalProfileReferenceR1(
-                        m_logger,
-                        () -> profile,
-                        0.02,
-                        0.02),
+                ref,
                 0.02, 0.02);
     }
 

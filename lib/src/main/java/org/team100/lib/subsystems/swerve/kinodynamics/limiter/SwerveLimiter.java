@@ -2,8 +2,6 @@ package org.team100.lib.subsystems.swerve.kinodynamics.limiter;
 
 import java.util.function.DoubleSupplier;
 
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -28,7 +26,6 @@ public class SwerveLimiter {
     private final FieldRelativeVelocityLimiter m_velocityLimiter;
     private final FieldRelativeCapsizeLimiter m_capsizeLimiter;
     private final FieldRelativeAccelerationLimiter m_accelerationLimiter;
-    private final SwerveDeadband m_deadband;
     // Velocity expected at the current time, i.e. the previous time step's desire.
     private VelocitySE2 m_current;
 
@@ -48,8 +45,6 @@ public class SwerveLimiter {
         // Rotating fast can be upsetting.
         final double alphaScale = 0.2;
         m_accelerationLimiter = new FieldRelativeAccelerationLimiter(log, dynamics, cartesianScale, alphaScale);
-
-        m_deadband = new SwerveDeadband(log);
     }
 
     /**
@@ -81,11 +76,6 @@ public class SwerveLimiter {
         result = m_accelerationLimiter.apply(m_current, result);
         if (DEBUG) {
             System.out.printf("accel limited %s\n", result);
-        }
-
-        // Ignore very small inputs.
-        if (Experiments.instance.enabled(Experiment.SwerveInputDeadband)) {
-            result = m_deadband.apply(result);
         }
 
         updateSetpoint(result);

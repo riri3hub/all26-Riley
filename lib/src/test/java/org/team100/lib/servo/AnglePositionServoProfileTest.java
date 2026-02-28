@@ -12,9 +12,9 @@ import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MockBareMotor;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
-import org.team100.lib.reference.r1.IncrementalProfileReferenceR1;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
+import org.team100.lib.reference.r1.ProfileReferenceR1;
 import org.team100.lib.sensor.position.absolute.MockRotaryPositionSensor;
 import org.team100.lib.state.ModelR1;
 import org.team100.lib.testing.Timeless;
@@ -26,14 +26,14 @@ class AnglePositionServoProfileTest implements Timeless {
     private final MockBareMotor motor;
     private final MockRotaryPositionSensor sensor;
     private final FeedbackR1 feedback2;
-    private final IncrementalProfileReferenceR1 ref;
+    private final ProfileReferenceR1 ref;
     private final OnboardAngularPositionServo servo;
     // for calculating the trapezoidal integral
     double previousMotorSpeed = 0;
 
     public AnglePositionServoProfileTest() {
-        SimpleDynamics ff = SimpleDynamics.test(logger);
-        Friction friction = Friction.test(logger);
+        SimpleDynamics ff = new SimpleDynamics(logger, 0.100, 0.100);
+        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
         motor = new MockBareMotor(ff, friction);
         sensor = new MockRotaryPositionSensor();
         RotaryMechanism mech = new RotaryMechanism(
@@ -44,8 +44,8 @@ class AnglePositionServoProfileTest implements Timeless {
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
         feedback2 = new PIDFeedback(logger, 1, 0, 0, false, 0.05, 1);
-        IncrementalProfile profile = new TrapezoidIncrementalProfile(logger, 1, 1, 0.05);
-        ref = new IncrementalProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(logger, 1, 1, 0.05);
+        ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         servo = new OnboardAngularPositionServo(logger, mech, ref, feedback2);
         servo.reset();
     }

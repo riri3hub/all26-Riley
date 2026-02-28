@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
-import org.team100.lib.profile.r1.TrapezoidProfileWPI;
+import org.team100.lib.profile.r1.WPITrapezoidProfileR1;
 import org.team100.lib.state.ModelR1;
 import org.team100.lib.testing.Timeless;
 
@@ -16,9 +16,9 @@ public class IncrementalProfileReferenceR1Test implements Timeless {
 
     @Test
     void testSimple() {
-        TrapezoidProfileWPI p = new TrapezoidProfileWPI(2, 6);
+        WPITrapezoidProfileR1 p = new WPITrapezoidProfileR1(2, 6);
         ModelR1 goal = new ModelR1(1, 0);
-        ProfileReferenceR1 ref = new IncrementalProfileReferenceR1(log, () -> p, 0.05, 0.05);
+        ReferenceR1 ref = new ProfileReferenceR1(log, () -> p, 0.05, 0.05);
         ref.setGoal(goal);
         ModelR1 measurement = new ModelR1();
         ref.init(measurement);

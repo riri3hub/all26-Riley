@@ -21,7 +21,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class AllAutons {
     private final AutonChooser m_autonChooser;
 
-    public AllAutons(Machinery machinery, ControllerSE2 controller) {
+    public AllAutons(Machinery machinery) {
+        ControllerSE2 controller = machinery.m_holonomicController;
         m_autonChooser = new AutonChooser();
         LoggerFactory log = Logging.instance().rootLogger.name("Auton");
         m_autonChooser.add(new DoNothing());
@@ -43,6 +44,21 @@ public class AllAutons {
                 machinery));
         m_autonChooser.add(new ClimberAutonRight(
                 // m_autonChooser.add(new Auton1(
+                log,
+                machinery.m_swerveKinodynamics,
+                controller,
+                machinery));
+        m_autonChooser.add(new AutonTest(
+                log,
+                machinery.m_swerveKinodynamics,
+                controller,
+                machinery));
+        m_autonChooser.add(new AutonTest2(
+                log,
+                machinery.m_swerveKinodynamics,
+                controller,
+                machinery));
+        m_autonChooser.add(new Auton1(
                 log,
                 machinery.m_swerveKinodynamics,
                 controller,

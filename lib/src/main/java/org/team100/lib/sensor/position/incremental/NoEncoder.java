@@ -17,9 +17,9 @@ public class NoEncoder implements IncrementalBareEncoder {
         return 0;
     }
 
-    @Override
-    public void reset() {
-    }
+    // @Override
+    // public void reset() {
+    // }
 
     @Override
     public void close() {

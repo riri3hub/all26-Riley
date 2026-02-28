@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * up, so set the acceleration a bit higher than that to start.
  */
 public class DualDrumShooter extends SubsystemBase {
-    // private static final double TARGET_VELOCITY_M_S = 7;
 
     private final LinearVelocityServo m_left;
     private final LinearVelocityServo m_right;
@@ -35,8 +34,8 @@ public class DualDrumShooter extends SubsystemBase {
     }
 
     public void set(double velocityM_S) {
-        m_left.setVelocity(velocityM_S);
-        m_right.setVelocity(velocityM_S);
+        m_left.setVelocityProfiled(velocityM_S);
+        m_right.setVelocityProfiled(velocityM_S);
     }
 
     public double get() {

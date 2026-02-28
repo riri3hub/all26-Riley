@@ -82,4 +82,9 @@ public class AprilTagFieldLayoutWithCorrectOrientation {
         }
         return Optional.of(pose.get().transformBy(FIX));
     }
+
+    public int size(Alliance alliance) {
+        AprilTagFieldLayout layout = layouts.get(alliance);
+        return layout.getTags().size();
+    }
 }

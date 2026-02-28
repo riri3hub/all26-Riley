@@ -10,29 +10,26 @@ from app.framework.looper import Looper
 
 
 class CameraLoop(Looper):
-    """Capture a request, interpret it, release it, repeat.
-    You can run multiple interpreters on the same image.
-    Note: this has a significant effect on frame rate."""
+    """Capture a request, interpret it, release it, repeat."""
 
     def __init__(
         self,
         camera: Camera,
-        interpreters: list[Interpreter],
+        interpreter: Interpreter,
         done: Event,
     ) -> None:
         super().__init__(done)
-        self.interpreters = interpreters
-        self.camera = camera
+        self._interpreter: Interpreter = interpreter
+        self._camera: Camera = camera
 
     @override
     def execute(self) -> None:
-        req = self.camera.capture_request()
+        req = self._camera.capture_request()
         try:
-            for i in self.interpreters:
-                i.analyze(req)
+            self._interpreter.analyze(req)
         finally:
             req.release()
 
     @override
     def end(self) -> None:
-        self.camera.stop()
+        self._camera.stop()

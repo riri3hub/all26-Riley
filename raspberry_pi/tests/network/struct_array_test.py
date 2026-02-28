@@ -67,14 +67,16 @@ class StructArrayTest(unittest.TestCase):
         """A simple struct pub/listener case."""
         inst = ntcore.NetworkTableInstance.getDefault()
         inst.startServer()
-        poller = ntcore.NetworkTableListenerPoller(inst)
+        poller: ntcore.NetworkTableListenerPoller = ntcore.NetworkTableListenerPoller(
+            inst
+        )
         poller.addListener(["foo"], ntcore.EventFlags.kValueAll)
         pub = inst.getStructTopic("foo/1", Datum).publish()
         pub.set(Datum(1, 2), ntcore._now())
-        queue = poller.readQueue()
+        queue: list[ntcore.Event] = poller.readQueue()
         self.assertEqual(1, len(queue))
-        event = queue.pop()
-        item = cast(ntcore.ValueEventData, event.data)
+        event: ntcore.Event = queue.pop()
+        item = cast(ntcore.ValueEventData, event.data) # type: ignore
         # the value type is not known here
         self.assertEqual(ntcore.Value, type(item.value))
         value = wpistruct.unpack(Datum, item.value.getRaw())
@@ -93,7 +95,7 @@ class StructArrayTest(unittest.TestCase):
         self.assertEqual(1, len(queue))
         event = queue.pop()
         # item =  event.data
-        item = cast(ntcore.ValueEventData, event.data)
+        item = cast(ntcore.ValueEventData, event.data) # type: ignore
         self.assertEqual(ntcore.Value, type(item.value))
         item_size = wpistruct.getSize(Datum)
         self.assertEqual(8, item_size)

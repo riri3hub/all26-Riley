@@ -15,10 +15,10 @@ public class MockIncrementalBareEncoder implements IncrementalBareEncoder {
         return position;
     }
 
-    @Override
-    public void reset() {
-        //
-    }
+    // @Override
+    // public void reset() {
+    //     //
+    // }
 
     @Override
     public void close() {

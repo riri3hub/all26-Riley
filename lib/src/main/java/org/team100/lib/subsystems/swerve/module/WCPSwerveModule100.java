@@ -2,9 +2,9 @@ package org.team100.lib.subsystems.swerve.module;
 
 import java.util.function.Supplier;
 
-import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.mechanism.RotaryMechanism;
@@ -12,9 +12,10 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.Falcon500Motor;
 import org.team100.lib.motor.ctre.KrakenX60Motor;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.reference.r1.IncrementalProfileReferenceR1;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.reference.r1.NoReferenceR1;
 import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.sensor.position.absolute.CombinedRotaryPositionSensor;
 import org.team100.lib.sensor.position.absolute.EncoderDrive;
 import org.team100.lib.sensor.position.absolute.ProxyRotaryPositionSensor;
@@ -91,7 +92,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 statorLimitAmps,
                 driveMotorCanId,
                 ratio);
-        AngularPositionServo turningServo = turningServo(
+        AngularPositionServo turningServo = turningKrakenServo(
                 parent.name("Turning"),
                 turningMotorCanId,
                 turningEncoderChannel,
@@ -101,7 +102,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 drive,
                 neutral,
                 motorPhase);
-        return new WCPSwerveModule100(driveServo, turningServo, ratio);
+        return new WCPSwerveModule100(parent, driveServo, turningServo, ratio);
     }
 
     /**
@@ -136,7 +137,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 drive,
                 neutral,
                 motorPhase);
-        return new WCPSwerveModule100(driveServo, turningServo, ratio);
+        return new WCPSwerveModule100(parent, driveServo, turningServo, ratio);
     }
 
     private static LinearVelocityServo driveKrakenServo(
@@ -145,9 +146,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double statorLimit,
             CanId driveMotorCanId,
             DriveRatio ratio) {
-        SimpleDynamics ff = KrakenX60Motor.swerveDriveFF(parent);
+        SimpleDynamics ff = new SimpleDynamics(parent, 0.004, 0.002);
         // note (10/2/24) 0.4 produces oscillation, on carpet.
-        Friction friction = KrakenX60Motor.swerveDriveFriction(parent);
+        Friction friction = new Friction(parent, 0.26, 0.26, 0.006, 0.5);
         PIDConstants pid = PIDConstants.makeVelocityPID(parent, 0.05);
         KrakenX60Motor driveMotor = new KrakenX60Motor(
                 parent,
@@ -167,7 +168,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 WHEEL_DIAMETER_M,
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
-        return new OutboardLinearVelocityServo(parent, mech);
+        return new OutboardLinearVelocityServo(
+                parent, mech, new NoReferenceR1(), 1);
     }
 
     private static LinearVelocityServo driveFalconServo(
@@ -176,8 +178,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             double statorLimit,
             CanId driveMotorCanId,
             DriveRatio ratio) {
-        SimpleDynamics ff = Falcon500Motor.swerveDriveFF(parent);
-        Friction friction = Falcon500Motor.swerveDriveFriction(parent);
+        SimpleDynamics ff = new SimpleDynamics(parent, 0.003, 0.003);
+        Friction friction = new Friction(parent, 0.260, 0.260, 0.002, 0.5);
         PIDConstants pid = PIDConstants.makeVelocityPID(parent, 0.05);
         Falcon500Motor driveMotor = new Falcon500Motor(
                 parent,
@@ -194,8 +196,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 driveMotor, encoder, ratio.m_ratio, WHEEL_DIAMETER_M, Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
         return new OutboardLinearVelocityServo(
-                parent,
-                mech);
+                parent, mech, new NoReferenceR1(), 1);
     }
 
     private static AngularPositionServo turningServo(
@@ -209,8 +210,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             NeutralMode100 neutral,
             MotorPhase motorPhase) {
 
-        SimpleDynamics ff = Falcon500Motor.swerveSteerFF(parent);
-        Friction friction = Falcon500Motor.swerveSteerFriction(parent);
+        SimpleDynamics ff = new SimpleDynamics(parent, 0.002, 0.002);
+        Friction friction = new Friction(parent, 0.100, 0.100, 0.005, 0.5);
 
         // Talon outboard POSITION PID
         // 10/2/24 drive torque produces about a 0.5 degree deviation so maybe
@@ -250,23 +251,75 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         return turningServo;
     }
 
+    private static AngularPositionServo turningKrakenServo(
+            LoggerFactory parent,
+            CanId turningMotorCanId,
+            RoboRioChannel turningEncoderChannel,
+            double turningOffset,
+            double gearRatio,
+            SwerveKinodynamics kinodynamics,
+            EncoderDrive drive,
+            NeutralMode100 neutral,
+            MotorPhase motorPhase) {
+
+        SimpleDynamics ff = new SimpleDynamics(parent, 0.002, 0.002);
+        Friction friction = new Friction(parent, 0.100, 0.100, 0.005, 0.5);
+
+        // Talon outboard POSITION PID
+        // 10/2/24 drive torque produces about a 0.5 degree deviation so maybe
+        // this is too low.
+        PIDConstants pid = PIDConstants.makePositionPID(parent, 2.0);
+
+        KrakenX60Motor turningMotor = new KrakenX60Motor(
+                parent,
+                turningMotorCanId,
+                neutral,
+                motorPhase,
+                STEERING_SUPPLY_LIMIT,
+                STEERING_STATOR_LIMIT,
+                ff,
+                friction,
+                pid);
+
+        // this reads the steering angle directly.
+        RotaryPositionSensor turningSensor = new AS5048RotaryPositionSensor(
+                parent,
+                turningEncoderChannel,
+                turningOffset,
+                drive);
+
+        Talon6Encoder builtInEncoder = turningMotor.encoder();
+
+        ProxyRotaryPositionSensor proxy = new ProxyRotaryPositionSensor(builtInEncoder, gearRatio);
+        CombinedRotaryPositionSensor combined = new CombinedRotaryPositionSensor(parent, turningSensor, proxy);
+
+        RotaryMechanism mech = new RotaryMechanism(
+                parent, turningMotor, combined, gearRatio, Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY);
+
+        AngularPositionServo turningServo = outboardTurningServo(
+                parent, kinodynamics, mech, combined);
+        turningServo.reset();
+        return turningServo;
+    }
+
     private static AngularPositionServo outboardTurningServo(
             LoggerFactory parent,
             SwerveKinodynamics kinodynamics,
             RotaryMechanism mech,
             CombinedRotaryPositionSensor combinedEncoder) {
-        Supplier<IncrementalProfile> profile = kinodynamics.getSteeringProfile();
-        ProfileReferenceR1 ref = new IncrementalProfileReferenceR1(
+        Supplier<ProfileR1> profile = kinodynamics.getSteeringProfile();
+        ReferenceR1 ref = new ProfileReferenceR1(
                 parent, profile, STEERING_POSITION_TOLERANCE_RAD, STEERING_VELOCITY_TOLERANCE_RAD_S);
         return new OutboardAngularPositionServo(parent, mech, ref);
     }
 
     private WCPSwerveModule100(
+            LoggerFactory log,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo,
             DriveRatio ratio) {
         // primary is 2:1 so final is whatever is left.
-        super(driveServo, turningServo, WHEEL_DIAMETER_M, ratio.m_ratio / 2);
-        //
+        super(log, driveServo, turningServo, WHEEL_DIAMETER_M, ratio.m_ratio / 2);
     }
 }

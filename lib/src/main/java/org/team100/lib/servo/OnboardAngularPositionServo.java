@@ -7,7 +7,7 @@ import org.team100.lib.logging.LoggerFactory.ControlR1Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.logging.LoggerFactory.ModelR1Logger;
 import org.team100.lib.mechanism.RotaryMechanism;
-import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.reference.r1.SetpointsR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
@@ -35,7 +35,7 @@ public class OnboardAngularPositionServo extends AngularPositionServoImpl {
     public OnboardAngularPositionServo(
             LoggerFactory parent,
             RotaryMechanism mech,
-            ProfileReferenceR1 ref,
+            ReferenceR1 ref,
             FeedbackR1 feedback) {
         super(parent, mech, ref);
         if (feedback.handlesWrapping())

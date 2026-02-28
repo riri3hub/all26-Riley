@@ -7,6 +7,8 @@ import org.team100.lib.reference.r1.SetpointsR1;
  */
 public interface LinearPositionServo {
     /**
+     * Zeros controller errors, sets setpoint and goal to current measurement.
+     * 
      * It is essential to call this after a period of disuse, to prevent transients.
      * 
      * To prevent oscillation, the previous setpoint is used to compute the profile,
@@ -36,6 +38,7 @@ public interface LinearPositionServo {
 
     boolean atSetpoint();
 
+    /** Useful for sequencing, without waiting for the controller. */
     boolean profileDone();
 
     /** Profile is done and we're on the setpoint. */

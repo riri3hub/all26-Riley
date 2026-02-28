@@ -97,10 +97,10 @@ public class MecanumDrive100 extends SubsystemBase implements VelocitySubsystemS
         ChassisSpeeds speed = SwerveKinodynamics.toInstantaneousChassisSpeeds(
                 nextV, yaw);
         MecanumDriveWheelSpeeds mSpeed = m_kinematics.toWheelSpeeds(speed);
-        m_frontLeft.setVelocity(mSpeed.frontLeftMetersPerSecond);
-        m_frontRight.setVelocity(mSpeed.frontRightMetersPerSecond);
-        m_rearLeft.setVelocity(mSpeed.rearLeftMetersPerSecond);
-        m_rearRight.setVelocity(mSpeed.rearRightMetersPerSecond);
+        m_frontLeft.setVelocityDirect(mSpeed.frontLeftMetersPerSecond);
+        m_frontRight.setVelocityDirect(mSpeed.frontRightMetersPerSecond);
+        m_rearLeft.setVelocityDirect(mSpeed.rearLeftMetersPerSecond);
+        m_rearRight.setVelocityDirect(mSpeed.rearRightMetersPerSecond);
         m_log_input.log(() -> nextV);
     }
 

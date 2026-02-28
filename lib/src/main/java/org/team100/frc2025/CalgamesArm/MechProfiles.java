@@ -1,8 +1,8 @@
 package org.team100.frc2025.CalgamesArm;
 
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.profile.r1.CompleteProfile;
-import org.team100.lib.profile.r1.CurrentLimitedExponentialProfile;
+import org.team100.lib.profile.r1.CompleteProfileR1;
+import org.team100.lib.profile.r1.DualProfileR1;
 import org.team100.lib.subsystems.prr.EAWConfig;
 import org.team100.lib.subsystems.prr.commands.FollowJointProfiles;
 
@@ -13,9 +13,9 @@ public class MechProfiles {
         return new FollowJointProfiles(
                 subsystem,
                 goal,
-                new CurrentLimitedExponentialProfile(2, 4, 5), // elevator
-                new CurrentLimitedExponentialProfile(8, 8, 16), // arm
-                new CurrentLimitedExponentialProfile(8, 8, 16)); // wrist
+                new DualProfileR1(2, 4, 5), // elevator
+                new DualProfileR1(8, 8, 16), // arm
+                new DualProfileR1(8, 8, 16)); // wrist
     }
 
     /**
@@ -29,9 +29,9 @@ public class MechProfiles {
         return new FollowJointProfiles(
                 subsystem,
                 goal,
-                new CompleteProfile(log.name("elevator"), 2, 4, 6, 5, 50, 50, 0.001), // elevator
-                new CompleteProfile(log.name("arm"), 12, 8, 16, 16, 50, 50, 0.001), // arm
-                new CompleteProfile(log.name("wrist"), 8, 4, 12, 16, 50, 50, 0.001)); // wrist
+                new CompleteProfileR1(log.name("elevator"), 2, 4, 6, 5, 50, 50, 0.001), // elevator
+                new CompleteProfileR1(log.name("arm"), 12, 8, 16, 16, 50, 50, 0.001), // arm
+                new CompleteProfileR1(log.name("wrist"), 8, 4, 12, 16, 50, 50, 0.001)); // wrist
     }
 
     /**
@@ -46,9 +46,9 @@ public class MechProfiles {
         return new FollowJointProfiles(
                 subsystem,
                 goal,
-                new CompleteProfile(log.name("elevator"), 2, 6, 4, 5, 50, 50, 0.001), // elevator
-                new CompleteProfile(log.name("arm"), 12, 20, 8, 16, 100, 100, 0.001), // arm
-                new CompleteProfile(log.name("wrist"), 8, 12, 4, 16, 50, 50, 0.001)); // wrist
+                new CompleteProfileR1(log.name("elevator"), 2, 6, 4, 5, 50, 50, 0.001), // elevator
+                new CompleteProfileR1(log.name("arm"), 12, 20, 8, 16, 100, 100, 0.001), // arm
+                new CompleteProfileR1(log.name("wrist"), 8, 12, 4, 16, 50, 50, 0.001)); // wrist
     }
 
     public static FollowJointProfiles algae(LoggerFactory parent, CalgamesMech subsystem, EAWConfig goal) {
@@ -56,9 +56,9 @@ public class MechProfiles {
         return new FollowJointProfiles(
                 subsystem,
                 goal,
-                new CompleteProfile(log.name("elevator"), 2, 6, 4, 5, 50, 50, 0.001), // elevator
-                new CompleteProfile(log.name("arm"), 12, 8, 8, 16, 100, 100, 0.001), // arm
-                new CompleteProfile(log.name("wrist"), 8, 12, 4, 16, 50, 50, 0.001)); // wrist
+                new CompleteProfileR1(log.name("elevator"), 2, 6, 4, 5, 50, 50, 0.001), // elevator
+                new CompleteProfileR1(log.name("arm"), 12, 8, 8, 16, 100, 100, 0.001), // arm
+                new CompleteProfileR1(log.name("wrist"), 8, 12, 4, 16, 50, 50, 0.001)); // wrist
     }
 
     public static FollowJointProfiles gentle(LoggerFactory parent, CalgamesMech subsystem, EAWConfig goal) {
@@ -66,9 +66,9 @@ public class MechProfiles {
         return new FollowJointProfiles(
                 subsystem,
                 goal,
-                new CompleteProfile(log.name("elevator"), 2, 6, 4, 5, 50, 50, 0.001), // elevator
-                new CompleteProfile(log.name("arm"), 2, 2, 2, 8, 100, 100, 0.001), // arm
-                new CompleteProfile(log.name("wrist"), 8, 12, 4, 16, 50, 50, 0.001)); // wrist
+                new CompleteProfileR1(log.name("elevator"), 2, 6, 4, 5, 50, 50, 0.001), // elevator
+                new CompleteProfileR1(log.name("arm"), 2, 2, 2, 8, 100, 100, 0.001), // arm
+                new CompleteProfileR1(log.name("wrist"), 8, 12, 4, 16, 50, 50, 0.001)); // wrist
     }
 
     public static FollowJointProfiles algaeUp(LoggerFactory parent, CalgamesMech subsystem, EAWConfig goal) {
@@ -76,9 +76,9 @@ public class MechProfiles {
         return new FollowJointProfiles(
                 subsystem,
                 goal,
-                new CompleteProfile(log.name("elevator"), 2, 6, 4, 5, 50, 50, 0.001), // elevator
-                new CompleteProfile(log.name("arm"), 4, 4, 4, 8, 100, 100, 0.001), // arm
-                new CompleteProfile(log.name("wrist"), 8, 12, 4, 16, 50, 50, 0.001)); // wrist
+                new CompleteProfileR1(log.name("elevator"), 2, 6, 4, 5, 50, 50, 0.001), // elevator
+                new CompleteProfileR1(log.name("arm"), 4, 4, 4, 8, 100, 100, 0.001), // arm
+                new CompleteProfileR1(log.name("wrist"), 8, 12, 4, 16, 50, 50, 0.001)); // wrist
     }
 
 }

@@ -45,8 +45,8 @@ public class OpenLoopSubsystem extends SubsystemBase {
                 int statorLimit = 90;
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.05);
                 // you should make a case in the feedforward class for your constants
-                SimpleDynamics ff = SimpleDynamics.test(log);
-                Friction friction = Friction.test(log);
+                SimpleDynamics ff = new SimpleDynamics(log, 0.100, 0.100);
+                Friction friction = new Friction(log, 0.100, 0.100, 0.0, 0.1);
                 m_motor = new Falcon500Motor(
                         log, canId,
                         NeutralMode100.COAST, MotorPhase.FORWARD,

@@ -6,8 +6,8 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.subsystems.swerve.VeeringCorrection;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleStates;
 import org.team100.lib.tuning.Mutable;
@@ -38,7 +38,6 @@ public class SwerveKinodynamics {
     private final double m_backtrack;
     private final double m_wheelbase;
     private final double m_frontoffset;
-    // TODO: make this adjustable (e.g. by elevator height)
     private final double m_vcg;
     /** Diagonal distance from center to wheel. */
     private final double m_radius;
@@ -55,7 +54,7 @@ public class SwerveKinodynamics {
     private final Mutable m_maxSteeringAccelerationRad_S2;
 
     // Updated when input Mutables change.
-    private IncrementalProfile m_steeringProfile;
+    private ProfileR1 m_steeringProfile;
 
     /**
      * @param maxDriveVelocity        module drive speed m/s
@@ -118,14 +117,14 @@ public class SwerveKinodynamics {
     }
 
     private void update(double x) {
-        m_steeringProfile = new TrapezoidIncrementalProfile(
+        m_steeringProfile = new TrapezoidProfileR1(
                 m_log.name("steering"),
                 m_maxSteeringVelocityRad_S.getAsDouble(),
                 m_maxSteeringAccelerationRad_S2.getAsDouble(),
                 0.02); // one degree
     }
 
-    public Supplier<IncrementalProfile> getSteeringProfile() {
+    public Supplier<ProfileR1> getSteeringProfile() {
         return () -> m_steeringProfile;
     }
 
@@ -188,8 +187,6 @@ public class SwerveKinodynamics {
     /**
      * Acceleration which will tip the robot onto two wheels, m/s^2. Computed from
      * vertical center of gravity and frame size.
-     * 
-     * TODO: make this adjustable (e.g. by elevator height)
      */
     public double getMaxCapsizeAccelM_S2() {
         return 9.8 * (m_fulcrum / m_vcg);

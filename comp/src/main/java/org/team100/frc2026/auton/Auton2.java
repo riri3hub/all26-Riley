@@ -50,10 +50,11 @@ public class Auton2 implements AnnotatedCommand {
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
          
         // create a new VelocityRegionContstraint `slow_bump_zone`
-        VelocityLimitRegionConstraint slow_bump_zone = new VelocityLimitRegionConstraint(log, BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone2 = new VelocityLimitRegionConstraint(log, BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone3 = new VelocityLimitRegionConstraint(log, BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone4 = new VelocityLimitRegionConstraint(log, BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
+        // the "name" values here separate the "Mutables" inside.
+        VelocityLimitRegionConstraint slow_bump_zone = new VelocityLimitRegionConstraint(log.name("bumpzone"), BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone2 = new VelocityLimitRegionConstraint(log.name("bumpzone2"), BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone3 = new VelocityLimitRegionConstraint(log.name("bumpzone3"), BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone4 = new VelocityLimitRegionConstraint(log.name("bumpzone4"), BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
         new_constraints.add(slow_bump_zone);
         new_constraints.add(slow_bump_zone2);
         new_constraints.add(slow_bump_zone3);
@@ -121,19 +122,20 @@ public class Auton2 implements AnnotatedCommand {
                 waitSeconds(1),
 
                 parallel(
-                    IntakeBalls,
-                    machinery.m_intake.intake()
+                    IntakeBalls
+                   // machinery.m_intake.intake()
                 ).until(IntakeBalls::isDone),
                 // Without telling it to, the intake would only stop spinning
                 // at the end of the auton. Without the timeout, the robot
                 // would not continue the rest of the auton
-                machinery.m_intake.stop().withTimeout(1),
+               // machinery.m_intake.stop().withTimeout(1),
                 waitSeconds(1),
 
                 ScoreSetUp.until(ScoreSetUp::isDone),
-                machinery.m_shooter.shoot().withTimeout(1),
-                waitSeconds(2),
-                machinery.m_shooter.stop().withTimeout(1));    
+              //  machinery.m_shooter.shoot().withTimeout(1),
+                waitSeconds(2)
+              //  machinery.m_shooter.stop().withTimeout(1));
+        );    
         }
 
     @Override

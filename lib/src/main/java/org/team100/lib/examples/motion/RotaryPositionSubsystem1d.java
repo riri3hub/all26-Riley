@@ -1,9 +1,9 @@
 package org.team100.lib.examples.motion;
 
-import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.controller.r1.FeedbackR1;
 import org.team100.lib.controller.r1.FullStateFeedback;
 import org.team100.lib.logging.LoggerFactory;
@@ -12,10 +12,10 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.KrakenX60Motor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidProfileWPI;
-import org.team100.lib.reference.r1.IncrementalProfileReferenceR1;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.WPITrapezoidProfileR1;
 import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.sensor.position.absolute.EncoderDrive;
 import org.team100.lib.sensor.position.absolute.RotaryPositionSensor;
 import org.team100.lib.sensor.position.absolute.sim.SimulatedRotaryPositionSensor;
@@ -73,9 +73,9 @@ public class RotaryPositionSubsystem1d extends SubsystemBase {
 
         double maxVel = 40;
         double maxAccel = 40;
-        IncrementalProfile profile = new TrapezoidProfileWPI(maxVel, maxAccel);
+        ProfileR1 profile = new WPITrapezoidProfileR1(maxVel, maxAccel);
 
-        ProfileReferenceR1 ref = new IncrementalProfileReferenceR1(log, () -> profile, positionTolerance,
+        ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, positionTolerance,
                 velocityTolerance);
 
         /*
@@ -93,8 +93,8 @@ public class RotaryPositionSubsystem1d extends SubsystemBase {
                 double inputOffset = 0.135541;
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.05);
                 // you should make a case in the feedforward class for your constants
-                SimpleDynamics ff = SimpleDynamics.test(log);
-                Friction friction = Friction.test(log);
+                SimpleDynamics ff = new SimpleDynamics(log, 0.100, 0.100);
+                Friction friction = new Friction(log, 0.100, 0.100, 0.0, 0.1);
                 KrakenX60Motor motor = new KrakenX60Motor(
                         log, new CanId(1),
                         NeutralMode100.COAST, MotorPhase.REVERSE,

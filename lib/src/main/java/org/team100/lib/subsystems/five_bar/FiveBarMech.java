@@ -190,8 +190,8 @@ public class FiveBarMech extends SubsystemBase {
         PIDConstants pid = PIDConstants.makePositionPID(
                 logger, 2.0);
         /** We never use feedforward since all our goals are motionless. */
-        SimpleDynamics ff = SimpleDynamics.zero(logger);
-        Friction friction = Friction.zero(logger);
+        SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
+        Friction friction = new Friction(logger, 0, 0, 0, 0);
         return new Falcon500Motor(
                 logger,
                 canId,

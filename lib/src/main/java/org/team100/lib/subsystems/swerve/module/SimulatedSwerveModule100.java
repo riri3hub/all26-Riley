@@ -5,10 +5,12 @@ import java.util.function.Supplier;
 import org.team100.lib.controller.r1.FeedbackR1;
 import org.team100.lib.controller.r1.PIDFeedback;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.reference.r1.IncrementalProfileReferenceR1;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.reference.r1.NoReferenceR1;
+import org.team100.lib.reference.r1.ProfileReferenceR1;
 import org.team100.lib.sensor.position.absolute.CombinedRotaryPositionSensor;
 import org.team100.lib.sensor.position.absolute.ProxyRotaryPositionSensor;
 import org.team100.lib.sensor.position.absolute.sim.SimulatedRotaryPositionSensor;
@@ -37,7 +39,7 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         AngularPositionServo turningServo = simulatedTurningServo(
                 parent.name("Turning"),
                 kinodynamics);
-        return new SimulatedSwerveModule100(driveServo, turningServo);
+        return new SimulatedSwerveModule100(parent, driveServo, turningServo);
     }
 
     /**
@@ -51,13 +53,16 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         AngularPositionServo turningServo = simulatedOutboardTurningServo(
                 parent.name("Turning"),
                 kinodynamics);
-        return new SimulatedSwerveModule100(driveServo, turningServo);
+        return new SimulatedSwerveModule100(parent, driveServo, turningServo);
     }
 
     private static LinearVelocityServo simulatedDriveServo(LoggerFactory parent) {
         SimulatedBareMotor motor = new SimulatedBareMotor(parent, 600);
-        return OutboardLinearVelocityServo.make(
-                parent, motor, DRIVE_GEAR_RATIO, WHEEL_DIAMETER_M);
+        LinearMechanism mech = new LinearMechanism(
+                parent, motor, motor.encoder(), DRIVE_GEAR_RATIO, WHEEL_DIAMETER_M,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        return new OutboardLinearVelocityServo(
+                parent, mech, new NoReferenceR1(), 1);
     }
 
     /**
@@ -83,9 +88,9 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
                 false,
                 0.05, // note low tolerance
                 1);
-        Supplier<IncrementalProfile> profile = kinodynamics.getSteeringProfile();
+        Supplier<ProfileR1> profile = kinodynamics.getSteeringProfile();
         // without a profile, there's no velocity feedforward. Hm.
-        IncrementalProfileReferenceR1 ref = new IncrementalProfileReferenceR1(parent, profile, 0.05, 0.05);
+        ProfileReferenceR1 ref = new ProfileReferenceR1(parent, profile, 0.05, 0.05);
         OnboardAngularPositionServo turningServo = new OnboardAngularPositionServo(
                 parent,
                 turningMech,
@@ -116,8 +121,8 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
         RotaryMechanism turningMech = new RotaryMechanism(
                 parent, motor, combinedEncoder, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
-        Supplier<IncrementalProfile> profile = kinodynamics.getSteeringProfile();
-        IncrementalProfileReferenceR1 ref = new IncrementalProfileReferenceR1(parent, profile, 0.05, 0.05);
+        Supplier<ProfileR1> profile = kinodynamics.getSteeringProfile();
+        ProfileReferenceR1 ref = new ProfileReferenceR1(parent, profile, 0.05, 0.05);
 
         OutboardAngularPositionServo turningServo = new OutboardAngularPositionServo(
                 parent, turningMech, ref);
@@ -126,10 +131,10 @@ public class SimulatedSwerveModule100 extends SwerveModule100 {
     }
 
     private SimulatedSwerveModule100(
+            LoggerFactory log,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo) {
         // primary is 2:1 so final is whatever is left.
-        super(driveServo, turningServo, WHEEL_DIAMETER_M, DRIVE_GEAR_RATIO / 2);
-        //
+        super(log, driveServo, turningServo, WHEEL_DIAMETER_M, DRIVE_GEAR_RATIO / 2);
     }
 }

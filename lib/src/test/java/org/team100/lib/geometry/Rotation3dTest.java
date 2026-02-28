@@ -24,13 +24,12 @@ public class Rotation3dTest {
         assertEquals(b, i);
     }
 
-    // @Test
-    // Commented out the test was fixed on 1/23/26 -Vasili
+    @Test
     void testInterpolation() {
         Rotation3d a = new Rotation3d(1, 0, 0);
         Rotation3d b = new Rotation3d(0, 1, 0);
-        // TODO: this is wrong, see https://github.com/wpilibsuite/allwpilib/issues/8523
-        assertNotEquals(b, a.interpolate(b, 1));
+        // see https://github.com/wpilibsuite/allwpilib/issues/8523
+        assertEquals(b, a.interpolate(b, 1));
     }
 
     @Test
@@ -38,7 +37,8 @@ public class Rotation3dTest {
         Rotation3d a = new Rotation3d(1, 0, 0);
         Rotation3d b = new Rotation3d(0, 1, 0);
         Rotation3d d = b.minus(a);
-        // TODO: this is wrong, see https://github.com/wpilibsuite/allwpilib/issues/8523
+        // rotation is not commutative.
+        // see https://github.com/wpilibsuite/allwpilib/issues/8523
         assertNotEquals(b, a.plus(d));
     }
 

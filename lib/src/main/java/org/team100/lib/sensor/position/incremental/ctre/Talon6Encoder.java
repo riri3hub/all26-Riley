@@ -16,7 +16,8 @@ public class Talon6Encoder implements IncrementalBareEncoder {
         m_motor = motor;
         m_log_position = log.doubleLogger(Level.TRACE, "position (rad)");
         m_log_velocity = log.doubleLogger(Level.TRACE, "velocity (rad_s)");
-        reset();
+        // TODO: I think this is unnecessary.
+        // reset();
     }
 
     /**
@@ -37,10 +38,11 @@ public class Talon6Encoder implements IncrementalBareEncoder {
         return m_motor.getUnwrappedPositionRad();
     }
 
-    @Override
-    public void reset() {
-        m_motor.resetEncoderPosition();
-    }
+    // TODO: I think this is unnecessary.
+    // @Override
+    // public void reset() {
+    //     m_motor.resetEncoderPosition();
+    // }
 
     @Override
     public void close() {

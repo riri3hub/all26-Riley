@@ -2,7 +2,7 @@ package org.team100.lib.subsystems.prr.commands;
 
 import org.team100.lib.commands.MoveAndHold;
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.profile.r1.IncrementalProfile;
+import org.team100.lib.profile.r1.ProfileR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
 import org.team100.lib.subsystems.prr.EAWConfig;
@@ -23,9 +23,9 @@ public class FollowJointProfiles extends MoveAndHold {
     private final ModelR1 m_g1;
     private final ModelR1 m_g2;
     private final ModelR1 m_g3;
-    private final IncrementalProfile m_p1;
-    private final IncrementalProfile m_p2;
-    private final IncrementalProfile m_p3;
+    private final ProfileR1 m_p1;
+    private final ProfileR1 m_p2;
+    private final ProfileR1 m_p3;
 
     private ControlR1 m_c1;
     private ControlR1 m_c2;
@@ -34,9 +34,9 @@ public class FollowJointProfiles extends MoveAndHold {
     public FollowJointProfiles(
             SubsystemPRR subsystem,
             EAWConfig goal,
-            IncrementalProfile p1,
-            IncrementalProfile p2,
-            IncrementalProfile p3) {
+            ProfileR1 p1,
+            ProfileR1 p2,
+            ProfileR1 p3) {
         m_subsystem = subsystem;
         // Joint goals are motionless
         m_g1 = new ModelR1(goal.shoulderHeight(), 0);

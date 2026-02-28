@@ -1,11 +1,13 @@
-""" This is a video streaming server to be used for testing in Windows.
+# type: ignore
+
+"""This is a video streaming server to be used for testing in Windows.
 
 It's a slightly modified version of
 
 github.com/egeakman/mjpeg-streamer
 """
 
-# pylint: disable=E1101,R0902
+# pylint: disable=E0401,E1101,R0902
 
 import asyncio
 import threading
@@ -13,12 +15,12 @@ import time
 from collections import deque
 from typing import List, Optional, Tuple, Union
 
-import aiohttp
+import aiohttp  # type: ignore
 import cv2
 
 import numpy as np
-from aiohttp import MultipartWriter, web
-from aiohttp.web_runner import GracefulExit
+from aiohttp import MultipartWriter, web  # type: ignore
+from aiohttp.web_runner import GracefulExit  # type: ignore
 
 
 class Stream:

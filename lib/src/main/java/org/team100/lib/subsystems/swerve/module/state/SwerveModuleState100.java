@@ -53,19 +53,13 @@ public class SwerveModuleState100 implements Comparable<SwerveModuleState100>, S
     public static SwerveModuleState100 optimize(
             SwerveModuleState100 desiredWrappedState, Rotation2d currentWrappedAngle) {
         if (desiredWrappedState.m_angle.isEmpty()) {
-            // this does happen
             return desiredWrappedState;
         }
         Rotation2d delta = desiredWrappedState.m_angle.get().minus(currentWrappedAngle);
         if (Math.abs(delta.getDegrees()) > 90.0) {
-            return new SwerveModuleState100(
-                    -desiredWrappedState.m_speedM_S,
-                    Optional.of(desiredWrappedState.m_angle.get().rotateBy(Rotation2d.k180deg)));
-        } else {
-            return new SwerveModuleState100(
-                    desiredWrappedState.m_speedM_S,
-                    desiredWrappedState.m_angle);
+            return invert(desiredWrappedState);
         }
+        return desiredWrappedState;
     }
 
     /** Speed of the wheel of the module. */
@@ -117,4 +111,11 @@ public class SwerveModuleState100 implements Comparable<SwerveModuleState100>, S
 
     /** SwerveModuleState struct for serialization. */
     public static final SwerveModuleStateStruct struct = new SwerveModuleStateStruct();
+
+    //////////////////////////////////
+
+    private static SwerveModuleState100 invert(SwerveModuleState100 desiredWrappedState) {
+        Optional<Rotation2d> flipped = Optional.of(desiredWrappedState.m_angle.get().rotateBy(Rotation2d.k180deg));
+        return new SwerveModuleState100(-desiredWrappedState.m_speedM_S, flipped);
+    }
 }

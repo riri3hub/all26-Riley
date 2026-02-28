@@ -74,7 +74,6 @@ public class BareMotorGroup implements BareMotor {
 
     @Override
     public IncrementalBareEncoder encoder() {
-        // TODO: does this work?
         return new SimulatedBareEncoder(m_log, this);
     }
 

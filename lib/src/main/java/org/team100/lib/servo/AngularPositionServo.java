@@ -10,7 +10,7 @@ import org.team100.lib.music.Player;
  */
 public interface AngularPositionServo extends Player {
     /**
-     * Zeros controller errors, sets setpoint to current position.
+     * Zeros controller errors, sets setpoint and goal to current measurement.
      *
      * It is essential to call this after a period of disuse, to prevent transients.
      * 
@@ -62,6 +62,11 @@ public interface AngularPositionServo extends Player {
      * @param torqueNm       Feedforward for gravity or spring compensation.
      */
     void setPositionDirect(double wrappedGoalRad, double velocityRad_S, double torqueNm);
+
+    /**
+     * For unwrapped goal
+     */
+    void actuateWithProfile(double unwrappedGoalX, double torqueNm);
 
     /**
      * This is the "wrapped" value, i.e. it is periodic within +/- pi.

@@ -13,6 +13,7 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.indicator.Alerts;
 import org.team100.lib.indicator.AutonAlerts;
 import org.team100.lib.logging.RobotLog;
+import org.team100.lib.network.Sync;
 import org.team100.lib.util.Banner;
 
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -27,7 +28,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * This is the main robot class, which wires up events from TimedRobot100.
  */
 public class Robot extends TimedRobot100 {
-
+    private final Sync sync;
     private final RobotLog m_robotLog;
     private final Machinery m_machinery;
     private final Alerts m_alerts;
@@ -54,13 +55,16 @@ public class Robot extends TimedRobot100 {
         // Log what the scheduler is doing. Use "withName()".
         SmartDashboard.putData(CommandScheduler.getInstance());
 
+        NetworkTableInstance inst = NetworkTableInstance.getDefault();
+        sync = new Sync(inst);
+
         m_robotLog = new RobotLog();
 
         m_machinery = new Machinery();
         m_binder = new Binder(m_machinery);
         m_binder.bind();
 
-        m_allAutons = new AllAutons(m_machinery, m_binder.m_holonomicController);
+        m_allAutons = new AllAutons(m_machinery);
         m_alerts = new Alerts();
         m_autonAlerts = new AutonAlerts(
                 m_allAutons::getAnnotated,
@@ -76,6 +80,8 @@ public class Robot extends TimedRobot100 {
     public void robotPeriodic() {
         // Advance the drumbeat.
         Takt.update();
+        // reply to sync requests.
+        sync.run();
         // Take all the measurements we can, as soon and quickly as possible.
         Cache.refresh();
         // Run one iteration of the command scheduler.
@@ -138,6 +144,9 @@ public class Robot extends TimedRobot100 {
 
     @Override
     public void testInit() {
+        System.out.println("*************************************");
+        System.out.println("TEST MODE!");
+        System.out.println("To run tests, hold down 'a' and 'b'");
     }
 
     @Override

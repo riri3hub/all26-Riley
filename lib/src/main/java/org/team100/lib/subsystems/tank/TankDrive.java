@@ -56,8 +56,8 @@ public class TankDrive extends SubsystemBase {
     public void setVelocity(double translationM_S, double rotationRad_S) {
         ChassisSpeeds speed = new ChassisSpeeds(translationM_S, 0, rotationRad_S);
         DifferentialDriveWheelSpeeds wheelSpeeds = m_kinematics.toWheelSpeeds(speed);
-        m_left.setVelocity(wheelSpeeds.leftMetersPerSecond);
-        m_right.setVelocity(wheelSpeeds.rightMetersPerSecond);
+        m_left.setVelocityDirect(wheelSpeeds.leftMetersPerSecond);
+        m_right.setVelocityDirect(wheelSpeeds.rightMetersPerSecond);
     }
 
     public void stop() {

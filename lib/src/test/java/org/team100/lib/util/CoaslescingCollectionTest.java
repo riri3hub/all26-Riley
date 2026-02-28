@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 public class CoaslescingCollectionTest {
     @Test
     void test1d() {
-        TrailingHistory<Double> history = new TrailingHistory<>(5);
+        TrailingHistory<Double> history = new TrailingHistory<>();
         BiPredicate<Double, Double> near = new BiPredicate<>() {
             @Override
             public boolean test(Double a, Double b) {

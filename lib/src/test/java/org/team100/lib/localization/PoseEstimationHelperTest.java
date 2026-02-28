@@ -75,7 +75,7 @@ class PoseEstimationHelperTest {
         // one meter range (Z forward)
         // pure tilt note we don't actually use this
 
-        Blip24 blip = new Blip24(7,
+        Blip blip = new Blip(0, 7,
                 new Transform3d(
                         new Translation3d(0, 0, 1),
                         new Rotation3d(0, 0, 0)));
@@ -107,7 +107,7 @@ class PoseEstimationHelperTest {
 
         // one meter range (Z forward)
         // identity rotation
-        Blip24 blip = new Blip24(5,
+        Blip blip = new Blip(0, 5,
                 new Transform3d(
                         new Translation3d(0, 0, 1),
                         new Rotation3d(0, 0, 0)));
@@ -136,20 +136,12 @@ class PoseEstimationHelperTest {
 
         // identity rotation
         // one meter range (Z forward)
-        Blip24 blip = new Blip24(5,
+        Blip blip = new Blip(0, 5,
                 new Transform3d(
                         new Translation3d(0, 0, 1),
                         new Rotation3d(0, 0, 0)));
 
-        Rotation3d robotRotationInFieldCoordsFromGyro = new Rotation3d();
-
         Transform3d tagInCamera = blip.blipToTransform();
-
-        tagInCamera = PoseEstimationHelper.tagInCamera(
-                cameraInRobot,
-                tagInField,
-                tagInCamera,
-                robotRotationInFieldCoordsFromGyro);
 
         Pose3d robotPoseInField = PoseEstimationHelper.robotInField(
                 cameraInRobot,
@@ -176,6 +168,7 @@ class PoseEstimationHelperTest {
      * 
      * So, not an issue.
      */
+    @SuppressWarnings("unused")
     // There's no need to run this all the time
     // @Test
     void posePerformance() {
@@ -186,7 +179,7 @@ class PoseEstimationHelperTest {
 
         // identity rotation
         // one meter range (Z forward)
-        Blip24 blip = new Blip24(5,
+        Blip blip = new Blip(0, 5,
                 new Transform3d(
                         new Translation3d(0, 0, 1),
                         new Rotation3d(0, 0, 0)));
@@ -197,11 +190,6 @@ class PoseEstimationHelperTest {
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < iterations; ++i) {
             Transform3d tagInCamera = blip.blipToTransform();
-            tagInCamera = PoseEstimationHelper.tagInCamera(
-                    cameraInRobot,
-                    tagInField,
-                    tagInCamera,
-                    robotRotationInFieldCoordsFromGyro);
         }
         long finishTime = System.currentTimeMillis();
         if (DEBUG) {
@@ -226,9 +214,9 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testBlip24ToTransform() {
+    void testBlipToTransform() {
         { // identity
-            Blip24 blip = new Blip24(5,
+            Blip blip = new Blip(0, 5,
                     new Transform3d(
                             new Translation3d(),
                             new Rotation3d()));
@@ -241,7 +229,7 @@ class PoseEstimationHelperTest {
             assertEquals(0, transform3d.getRotation().getZ(), DELTA);
         }
         {
-            Blip24 blip = new Blip24(5,
+            Blip blip = new Blip(0, 5,
                     new Transform3d(
                             new Translation3d(-2, -1, 3),
                             new Rotation3d(Math.PI / 4, 0, 0)));
@@ -256,10 +244,10 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testBlip24ToTranslation() {
+    void testBlipToTranslation() {
         // Blip is "z-forward", one meter up, two meters left, three meters ahead
         // rotation doesn't matter
-        Blip24 blip = new Blip24(5,
+        Blip blip = new Blip(0, 5,
                 new Transform3d(
                         new Translation3d(-2, -1, 3),
                         new Rotation3d()));
@@ -273,9 +261,9 @@ class PoseEstimationHelperTest {
     }
 
     @Test
-    void testBlip24ToRotation() {
+    void testBlipToRotation() {
         { // identity rotation
-            Blip24 blip = new Blip24(5,
+            Blip blip = new Blip(0, 5,
                     new Transform3d(
                             new Translation3d(-2, -1, 3),
                             new Rotation3d()));
@@ -288,7 +276,7 @@ class PoseEstimationHelperTest {
         {
             // one meter range (Z forward)
             // tilt up in camera frame = +x rot
-            Blip24 blip = new Blip24(5,
+            Blip blip = new Blip(0, 5,
                     new Transform3d(
                             new Translation3d(0, Math.sqrt(2) / 2, Math.sqrt(2) / 2),
                             new Rotation3d(Math.PI / 4, 0, 0)));
@@ -302,7 +290,7 @@ class PoseEstimationHelperTest {
         {
             // one meter range (Z forward)
             // pan right in camera frame = +y rot
-            Blip24 blip = new Blip24(5,
+            Blip blip = new Blip(0, 5,
                     new Transform3d(
                             new Translation3d(0, Math.sqrt(2) / 2, Math.sqrt(2) / 2),
                             new Rotation3d(0, Math.PI / 4, 0)));
@@ -421,7 +409,7 @@ class PoseEstimationHelperTest {
         // it's looking straight at a tag, which implies "into the page"
         // orientation.
 
-        Blip24 blip = new Blip24(7,
+        Blip blip = new Blip(0, 7,
                 new Transform3d(
                         new Translation3d(0, 0, 1),
                         new Rotation3d(0, 0, 0)));
@@ -464,7 +452,7 @@ class PoseEstimationHelperTest {
         // it's looking straight at a tag, which implies "into the page"
         // orientation.
 
-        Blip24 blip = new Blip24(7,
+        Blip blip = new Blip(0, 7,
                 new Transform3d(
                         new Translation3d(0, 0, 1),
                         new Rotation3d(0, 0, 0)));
@@ -479,8 +467,8 @@ class PoseEstimationHelperTest {
 
         // first try the "corrected" layout, which is "into the page" tag orientation.
         // this is CORRECT
-        AprilTagFieldLayoutWithCorrectOrientation layout = 
-        new AprilTagFieldLayoutWithCorrectOrientation("2025-reefscape.json");
+        AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation(
+                "2025-reefscape.json");
 
         Pose3d tagInFieldCoords = layout.getTagPose(Alliance.Blue, 7).get();
 

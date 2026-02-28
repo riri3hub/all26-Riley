@@ -9,9 +9,9 @@
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
-    "workbench.colorTheme": "Default Light Modern",
+    "workbench.colorTheme": "Default Dark+",
     "editor.minimap.enabled": false,
-    "python.analysis.typeCheckingMode": "standard",
+    "python.analysis.typeCheckingMode": "strict",
     "mypy-type-checker.reportingScope": "workspace",
     "markdown.validate.enabled": true,
     "tidyMarkdown.disableFormatter": true,
@@ -26,5 +26,12 @@
     "editor.stickyScroll.scrollWithEditor": false,
     "workbench.tree.enableStickyScroll": false,
     "editor.stickyScroll.enabled": false,
-    "workbench.editor.revealIfOpen": true
+    "workbench.editor.revealIfOpen": true,
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportArgumentType": "none",
+        "reportOptionalMemberAccess": "none"
+    },
+    "python-envs.defaultEnvManager": "ms-python.python:system",
+    "python-envs.pythonProjects": [],
+    "terminal.integrated.enablePersistentSessions": false
 }

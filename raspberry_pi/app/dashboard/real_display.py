@@ -1,31 +1,26 @@
-""" Annotate and show the captured image through the CameraServer."""
+"""Annotate and show the captured image through the CameraServer."""
 
 # pylint: disable=C0415,E0611
 
 from platform import system
-
-import numpy as np
-from cv2 import (FONT_HERSHEY_SIMPLEX, circle, drawContours, line, putText,
-                 resize)
+from cv2 import FONT_HERSHEY_SIMPLEX, circle, drawContours, line, putText, resize
 from cv2.typing import MatLike
-from numpy.typing import NDArray
 from robotpy_apriltag import AprilTagDetection
 from typing_extensions import override
 from wpimath.geometry import Transform3d
-
 from app.dashboard.display import Display
 
 FONT = FONT_HERSHEY_SIMPLEX
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
-Mat = NDArray[np.uint8]
-
 
 class RealDisplay(Display):
-    def __init__(self, width: int, height: int, name: str) -> None:
-        self.width = width
-        self.height = height
+    def __init__(self, width: int, height: int) -> None:
+        print("\n*** Display: RealDisplay")
+        self._width: int = width
+        self._height: int = height
+        name: str = "display"
         if system() == "Windows":
             from app.dashboard.mjpeg_streamer import MjpegServer, Stream
 
@@ -36,16 +31,13 @@ class RealDisplay(Display):
             self._server.add_stream(self._stream)
             self._server.start()
         else:
-            from cscore import CameraServer
+            from cscore import CameraServer  # type: ignore
 
             print("Using CameraServer for Linux.  See localhost:1181,1182,etc")
             self._cvsource = CameraServer.putVideo(name, width, height)
 
-
     @override
     def tag(self, image: MatLike, tag: AprilTagDetection, pose: Transform3d) -> None:
-        # TODO use corners instead of detection
-
         # Draw lines around the tag
         for i in range(4):
             j = (i + 1) % 4
@@ -55,20 +47,6 @@ class RealDisplay(Display):
 
         (c_x, c_y) = (int(tag.getCenter().x), int(tag.getCenter().y))
         circle(image, (c_x, c_y), 10, WHITE, -1)
-
-        # this is for lens calibration, just for the DIST_TEST camera
-        # TODO: make this actually respect the camera center
-        # cam_cx = 728 # optical center, not center of the line
-        # cam_cy = 544
-        # circle(image, (cam_cx, cam_cy), 10, WHITE, -1)
-        # self.text(
-        #     image,
-        #     f"cx:{c_x-cam_cx:3d} cy:{c_y-cam_cy:3d}",
-        #     (5, 185),
-        # )
-
-        # tag_id = tag.getId()
-        # self.text(image, f"id {tag_id}", (c_x, c_y))
 
         # type the translation into the image, in WPI coords (x-forward)
         t = pose.translation()
@@ -101,8 +79,7 @@ class RealDisplay(Display):
 
     @override
     def put(self, img: MatLike) -> None:
-        img_out = resize(img, (self.width, self.height))
-        #img_out = img
+        img_out = resize(img, (self._width, self._height))
         if system() == "Windows":
             self._stream.set_frame(img_out)  # type: ignore
         else:

@@ -19,6 +19,25 @@ class CameraTest {
     private static final double DELTA = 0.01;
 
     @Test
+    void testCalibration0() {
+        // view in camera: straight ahead (z), one meter away, no rotation
+        Blip b = new Blip(0, 0, new Transform3d(0, 0, 1, new Rotation3d()));
+        // x-forward version of that
+        Transform3d cameraToTag = b.blipToTransform();
+        Transform3d robotToTag = new Transform3d(1, 0, 0, new Rotation3d());
+        Transform3d tagToCamera = cameraToTag.inverse();
+        Transform3d robotToCamera = robotToTag.plus(tagToCamera);
+        assertEquals(0, robotToCamera.getX(), DELTA);
+        assertEquals(0, robotToCamera.getY(), DELTA);
+        assertEquals(0, robotToCamera.getZ(), DELTA);
+        Rotation3d or = robotToCamera.getRotation();
+        assertEquals(0, or.getX(), DELTA);
+        assertEquals(0, or.getY(), DELTA);
+        assertEquals(0, or.getZ(), DELTA);
+    }
+    
+
+    @Test
     void testNoRotation() {
         double roll = 0.0; // around X (ahead)
         double pitch = 0.0; // around Y (left)

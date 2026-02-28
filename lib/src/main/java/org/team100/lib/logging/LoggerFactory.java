@@ -12,7 +12,7 @@ import org.team100.lib.geometry.DeltaSE2;
 import org.team100.lib.geometry.GlobalVelocityR2;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.localization.Blip24;
+import org.team100.lib.localization.Blip;
 import org.team100.lib.localization.SwerveState;
 import org.team100.lib.logging.primitive.PrimitiveLogger;
 import org.team100.lib.reference.r1.SetpointsR1;
@@ -889,28 +889,28 @@ public class LoggerFactory {
         return new StateLogger(level, leaf);
     }
 
-    public class Blip24Logger {
+    public class BlipLogger {
         private final Level m_level;
         private final IntLogger m_idLogger;
         private final Transform3dLogger m_transformLogger;
 
-        Blip24Logger(Level level, String leaf) {
+        BlipLogger(Level level, String leaf) {
             m_level = level;
             m_idLogger = intLogger(level, join(leaf, "id"));
             m_transformLogger = transform3dLogger(level, join(leaf, "transform"));
         }
 
-        public void log(Supplier<Blip24> vals) {
+        public void log(Supplier<Blip> vals) {
             if (!allow(m_level))
                 return;
-            Blip24 val = vals.get();
+            Blip val = vals.get();
             m_idLogger.log(val::getId);
             m_transformLogger.log(val::getRawPose);
         }
     }
 
-    public Blip24Logger logBlip24(Level level, String leaf) {
-        return new Blip24Logger(level, leaf);
+    public BlipLogger logBlip(Level level, String leaf) {
+        return new BlipLogger(level, leaf);
     }
 
     public class ConfigLogger {

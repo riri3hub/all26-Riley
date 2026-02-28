@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.DoubleFunction;
 
 import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.state.ModelSE2;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -19,11 +20,8 @@ import edu.wpi.first.math.geometry.Translation2d;
  * see
  * https://www.chiefdelphi.com/t/shoot-on-the-move-from-the-code-perspective/511815/21?u=truher
  */
-public class TimeOfFlightRecursion {
+public class TimeOfFlightRecursion implements Solver {
     private static final boolean DEBUG = false;
-
-    public record Solution(Rotation2d azimuth, Rotation2d elevation) {
-    }
 
     /** Look up solution parameters for range. */
     private final DoubleFunction<FiringParameters> m_inverseRange;
@@ -36,16 +34,19 @@ public class TimeOfFlightRecursion {
      *                     in seconds
      */
     public TimeOfFlightRecursion(
-            DoubleFunction<FiringParameters> inverseRange, double tolerance) {
+            DoubleFunction<FiringParameters> inverseRange,
+            double tolerance) {
         m_inverseRange = inverseRange;
         m_tolerance = tolerance;
     }
 
+    @Override
     public Optional<Solution> solve(
-            Translation2d robotPosition,
-            GlobalVelocityR2 robotVelocity,
+            ModelSE2 state,
             Translation2d targetPosition,
             GlobalVelocityR2 targetVelocity) {
+        Translation2d robotPosition = state.translation();
+        GlobalVelocityR2 robotVelocity = state.velocityR2();
         // Target relative to robot
         Translation2d T0 = targetPosition.minus(robotPosition);
         // Target velocity relative to robot
@@ -55,13 +56,19 @@ public class TimeOfFlightRecursion {
         double tof = m_inverseRange.apply(range).tof();
         double iter = 100;
         while (iter-- > 0) {
-            Translation2d T = vT.integrate(T0, tof);
-            range = T.getNorm();
+            Translation2d impact = vT.integrate(T0, tof);
+            range = impact.getNorm();
             FiringParameters p2 = m_inverseRange.apply(range);
             if (DEBUG)
                 System.out.printf("range %f elevation %f tof %f\n", range, p2.elevation(), p2.tof());
-            if (Math.abs(tof - p2.tof()) < m_tolerance)
-                return Optional.of(new Solution(T.getAngle(), new Rotation2d(p2.elevation())));
+            if (Math.abs(tof - p2.tof()) < m_tolerance) {
+                // Found a good solution!
+                double targetMotion = TargetUtil.targetMotion(state, impact);
+                return Optional.of(new Solution(
+                        impact.getAngle(),
+                        targetMotion,
+                        new Rotation2d(p2.elevation())));
+            }
             tof = p2.tof();
         }
         return Optional.empty();

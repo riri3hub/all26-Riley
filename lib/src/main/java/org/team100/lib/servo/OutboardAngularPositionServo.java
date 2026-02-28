@@ -5,8 +5,7 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ControlR1Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.mechanism.RotaryMechanism;
-import org.team100.lib.motor.BareMotor;
-import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.reference.r1.SetpointsR1;
 import org.team100.lib.state.ControlR1;
 
@@ -28,33 +27,11 @@ public class OutboardAngularPositionServo extends AngularPositionServoImpl {
     public OutboardAngularPositionServo(
             LoggerFactory parent,
             RotaryMechanism mech,
-            ProfileReferenceR1 ref) {
+            ReferenceR1 ref) {
         super(parent, mech, ref);
         LoggerFactory log = parent.type(this);
         m_log_ff_torque = log.doubleLogger(Level.TRACE, "Feedforward Torque (Nm)");
         m_log_control = log.ControlR1Logger(Level.TRACE, "setpoint (rad)");
-    }
-
-    /**
-     * Use the suplied motor with the matching encoder, a rotary mechanism with the
-     * specified initial position, gearing, and limits, and return an outboard
-     * angular position servo that controls them.
-     */
-    public static OutboardAngularPositionServo make(
-            LoggerFactory log,
-            BareMotor motor,
-            ProfileReferenceR1 ref,
-            double initialPositionRad,
-            double gearRatio,
-            double minPositionRad,
-            double maxPositionRad) {
-        return new OutboardAngularPositionServo(log,
-                new RotaryMechanism(log, motor, motor.encoder(),
-                        initialPositionRad,
-                        gearRatio,
-                        minPositionRad,
-                        maxPositionRad),
-                ref);
     }
 
     /**

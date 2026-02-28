@@ -75,12 +75,4 @@ public class SimpleDynamics {
             }
         }
     }
-
-    public static SimpleDynamics zero(LoggerFactory log) {
-        return new SimpleDynamics(log, 0, 0);
-    }
-
-    public static SimpleDynamics test(LoggerFactory log) {
-        return new SimpleDynamics(log, 0.100, 0.100);
-    }
 }

@@ -9,7 +9,7 @@ There are two dimensionalities:
 
 The reference sources can wrap two different suppliers:
 
-* Profiles (either timed or incremental)
+* Profiles
 * Trajectories
 
 The reason for this layer is to decouple the controller code from

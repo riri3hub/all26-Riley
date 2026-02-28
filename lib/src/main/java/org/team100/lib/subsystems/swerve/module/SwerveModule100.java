@@ -7,13 +7,15 @@ import org.team100.lib.coherence.Takt;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.music.Player;
 import org.team100.lib.servo.AngularPositionServo;
 import org.team100.lib.servo.LinearVelocityServo;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModulePosition100;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleState100;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
@@ -27,8 +29,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * motion of this shaft and the steering axis itself. So when the steering axis
  * moves, it affects the relative position of the drive motor and the drive
  * wheel.
- * 
- * TODO: Verify the coupling
  * 
  * There is some discussion of this topic here:
  * https://www.chiefdelphi.com/t/kcoupleratio-in-ctre-swerve/483380
@@ -47,6 +47,13 @@ public abstract class SwerveModule100 implements Player {
      */
     private final double m_finalDriveRatio;
 
+    /** For playing sounds */
+    private final List<Player> m_players;
+
+    private final DoubleLogger m_log_dt;
+    private final DoubleLogger m_log_speed;
+    private final DoubleLogger m_log_omega;
+
     /**
      * The previous desired angle, used if the current desired angle is empty (i.e.
      * the module is motionless) and to calculate steering velocity.
@@ -56,13 +63,15 @@ public abstract class SwerveModule100 implements Player {
     private Rotation2d m_previousDesiredWrappedAngle;
     private double m_previousTime;
 
-    private final List<Player> m_players;
-
     protected SwerveModule100(
+            LoggerFactory log,
             LinearVelocityServo driveServo,
             AngularPositionServo turningServo,
             double wheelDiameterM,
             double finalDriveRatio) {
+        m_log_dt = log.doubleLogger(Level.TRACE, "dt");
+        m_log_speed = log.doubleLogger(Level.TRACE, "speed");
+        m_log_omega = log.doubleLogger(Level.TRACE, "omega");
         m_driveServo = driveServo;
         m_turningServo = turningServo;
         m_wheelRadiusM = wheelDiameterM / 2;
@@ -110,7 +119,7 @@ public abstract class SwerveModule100 implements Player {
         actuate(desired);
     }
 
-    /** Make sure the setpoint and measurement are the same. */
+    /** Set turning setpoint to measurement, zero drive encoder. */
     void reset() {
         m_turningServo.reset();
         m_driveServo.reset();
@@ -149,10 +158,6 @@ public abstract class SwerveModule100 implements Player {
                 Optional.of(new Rotation2d(unwrappedAngleRad)));
     }
 
-    double turningPosition() {
-        return m_turningServo.getWrappedPositionRad();
-    }
-
     boolean atSetpoint() {
         return m_turningServo.atSetpoint();
     }
@@ -168,65 +173,51 @@ public abstract class SwerveModule100 implements Player {
         m_turningServo.periodic();
     }
 
-    static double reduceCrossTrackError(
-            double measuredWrappedAngleRad, double desiredSpeed, Rotation2d desiredWrappedAngle) {
-        double error = MathUtil.angleModulus(desiredWrappedAngle.getRadians() - measuredWrappedAngleRad);
-        // cosine is pretty forgiving of misalignment
-        // double scale = Math.abs(Math.cos(error));
-        // gaussian is much less forgiving. note the adjustable factor. The value of
-        // 4 means there is almost no motion past about 60 degrees of error.
-        final double width = 4.0;
-        double scale = Math.exp(-width * error * error);
-        return scale * desiredSpeed;
-    }
-
-    /////////////////////////////////////////////////////////////////
-
     /**
      * Turning servo commands compute the velocity based on the previous desired
      * angle.
      * 
      * @param nextWrapped for now+dt, i.e. "next"
      */
-    private void actuate(SwerveModuleState100 nextWrapped) {
-        double nextSpeed = nextWrapped.speedMetersPerSecond();
+    void actuate(SwerveModuleState100 nextWrapped) {
         if (nextWrapped.angle().isEmpty())
             throw new IllegalArgumentException("actuation needs a real angle");
 
         Rotation2d nextWrappedAngle = nextWrapped.angle().get();
         double dt = dt();
+        // is there noise in dt?
+        m_log_dt.log(() -> dt);
         double nextOmega = omega(nextWrappedAngle, dt);
+        // is there noise in omega?
+        m_log_omega.log(() -> nextOmega);
 
-        if (Experiments.instance.enabled(Experiment.CorrectSpeedForSteering)) {
-            // help drive motors overcome steering.
-            nextSpeed = correctSpeedForSteering(nextSpeed, nextOmega, dt);
-        }
-        if (Experiments.instance.enabled(Experiment.ReduceCrossTrackError)) {
-            double measuredAngleRad = m_turningServo.getWrappedPositionRad();
-            nextSpeed = reduceCrossTrackError(measuredAngleRad, nextSpeed, nextWrappedAngle);
+        // help drive motors overcome steering.
 
-        }
-
-        if (Experiments.instance.enabled(Experiment.SwerveModuleDeadband)) {
-            if (nextSpeed < 0.001) {
-                nextSpeed = 0;
-                nextWrappedAngle = m_previousDesiredWrappedAngle;
-                nextOmega = 0;
-            }
-        }
-
-        m_driveServo.setVelocity(nextSpeed);
-
-        if (Experiments.instance.enabled(Experiment.UnprofiledSteering)) {
-            // no profile, just low-level position. Note the omega here may show up as
-            // noise.
-            m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), nextOmega, 0);
+        double nextSpeed = correctSpeedForSteering(
+                nextWrapped.speedMetersPerSecond(),
+                nextOmega,
+                dt);
+        // is there noise in speed?
+        m_log_speed.log(() -> nextSpeed);
+        if (Experiments.instance.enabled(Experiment.DriveWithoutAccel)) {
+            m_driveServo.setVelocityDirect(nextSpeed, 0);
         } else {
-            // use the profile
-            m_turningServo.setPositionProfiled(nextWrappedAngle.getRadians(), 0);
+            // The old way.
+            m_driveServo.setVelocityDirect(nextSpeed);
+        }
+
+        // Direct actuation uses more current than a profile, but only briefly,
+        // and it's much faster, and avoids the oscillation that the profile can produce
+        // around the goal.
+        if (Experiments.instance.enabled(Experiment.SteerWithoutVelocity)) {
+            m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), 0, 0);
+        } else {
+            m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), nextOmega, 0);
         }
         m_previousDesiredWrappedAngle = nextWrappedAngle;
     }
+
+    /////////////////////////////////////////////////////////////////
 
     /**
      * Correct the desired speed for steering coupling.
@@ -260,6 +251,8 @@ public abstract class SwerveModule100 implements Player {
      * @returns rad/s
      */
     private double omega(Rotation2d desiredWrappedAngle, double dt) {
+        if (dt < 1e-6)
+            return 0;
         // dtheta is definitely a lot less than 2pi so wrapped is fine.
         Rotation2d dthetaWrapped = desiredWrappedAngle.minus(m_previousDesiredWrappedAngle);
         return dthetaWrapped.getRadians() / dt;
@@ -270,7 +263,6 @@ public abstract class SwerveModule100 implements Player {
      */
     private double correctPositionForSteering(double drive_M, double unwrappedAngleRad) {
         // steering opposes driving.
-        // TODO: double-check that.
         return drive_M - m_wheelRadiusM * unwrappedAngleRad / m_finalDriveRatio;
     }
 

@@ -4,7 +4,7 @@ import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.mechanism.RotaryMechanism;
-import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.reference.r1.SetpointsR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
@@ -23,8 +23,9 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
     private static final double POSITION_TOLERANCE = 0.02;
     private static final double VELOCITY_TOLERANCE = 0.02;
     protected final RotaryMechanism m_mechanism;
-    private final ProfileReferenceR1 m_ref;
+    private final ReferenceR1 m_ref;
     private final DoubleLogger m_log_goal;
+    private final DoubleLogger m_log_velocity;
 
     /**
      * Goal is "unwrapped" i.e. it's it's [-inf, inf], not [-pi,pi]
@@ -47,12 +48,12 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
     protected AngularPositionServoImpl(
             LoggerFactory parent,
             RotaryMechanism mechanism,
-            ProfileReferenceR1 ref) {
+            ReferenceR1 ref) {
         m_mechanism = mechanism;
         m_ref = ref;
         LoggerFactory log = parent.type(this);
         m_log_goal = log.doubleLogger(Level.TRACE, "goal (rad)");
-
+        m_log_velocity = log.doubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
     abstract void actuate(SetpointsR1 wrappedSetpoints, double torqueNm);
@@ -74,6 +75,7 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
 
     @Override
     public void setPositionDirect(double wrappedGoalRad, double velocityRad_S, double torqueNm) {
+        m_log_velocity.log(() -> velocityRad_S);
         // make sure the reference gets reinitialized if required later
         m_unwrappedGoal = null;
         m_validSetpoint = true;
@@ -178,7 +180,8 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
         m_mechanism.play(freq);
     }
 
-    private void actuateWithProfile(double unwrappedGoalX, double torqueNm) {
+    @Override
+    public void actuateWithProfile(double unwrappedGoalX, double torqueNm) {
         initReference(new ModelR1(unwrappedGoalX, 0));
         SetpointsR1 unwrappedSetpoint = m_ref.get();
         m_nextUnwrappedSetpoint = unwrappedSetpoint.next();

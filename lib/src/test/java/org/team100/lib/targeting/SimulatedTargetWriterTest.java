@@ -32,7 +32,7 @@ public class SimulatedTargetWriterTest implements Timeless {
         stepTime();
 
         ModelSE2 p = new ModelSE2();
-        Targets reader = new Targets(logger, logger, x -> p);
+        Targets reader = new Targets(logger, logger, 100, x -> p);
         Thread.sleep(100);
         SimulatedTargetWriter writer = new SimulatedTargetWriter(
                 logger,

@@ -14,7 +14,7 @@ import org.team100.lib.config.Camera;
 import org.team100.lib.geometry.Metrics;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.uncertainty.IsotropicNoiseSE2;
-import org.team100.lib.uncertainty.Uncertainty;
+import org.team100.lib.uncertainty.VisionNoise;
 
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -31,11 +31,19 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
- * Publishes AprilTag Blip24 sightings on Network Tables, just like real
+ * Publishes AprilTag Blip sightings on Network Tables, just like real
  * cameras would.
  * 
  * This uses a separate client NT instance, so there will be weird delays due to
  * NT rate-limiting -- these are realistic and so should be handled correctly.
+ * 
+ * TODO: I made the mistake of modeling *error* as *noise* in this class, which
+ * is wrong.
+ * 
+ * The cameras have pretty low noise and pretty high repeatability but also
+ * nontrivial error.
+ * 
+ * So fix that.
  */
 public class SimulatedTagDetector {
     private static final boolean DEBUG = false;
@@ -50,18 +58,24 @@ public class SimulatedTagDetector {
     // https://docs.google.com/spreadsheets/d/1x2_58wyVb5e9HJW8WgakgYcOXgPaJe0yTIHew206M-M
     private static final double HFOV = 0.8;
     private static final double VFOV = 0.6;
-    private static final int TAG_COUNT = 22;
     // past about 80 degrees, you can't see the tag.
     private static final double OBLIQUE_LIMIT_RAD = 1.4;
     // camera frame is from 85 ms ago, more or less
     private static final double MEAN_DELAY = 0.085;
     private static final double STDEV_DELAY = 0.02;
 
+    /**
+     * This is an awful hack that scales the "accuracy" from Wang2016 to obtain a
+     * "noise" level.
+     * TODO: measure the actual (low) noise, and model the accuracy correctly here.
+     */
+    private static final double NOISE_RATIO = 0.25;
+
     private final List<Camera> m_cameras;
     private final AprilTagFieldLayoutWithCorrectOrientation m_layout;
     private final DoubleFunction<ModelSE2> m_history;
 
-    private final Map<Camera, StructArrayPublisher<Blip24>> m_publishers;
+    private final Map<Camera, StructArrayPublisher<Blip>> m_publishers;
     /** client instance, not the default */
     private final NetworkTableInstance m_inst;
     private final Random m_rand;
@@ -88,11 +102,12 @@ public class SimulatedTagDetector {
         m_rand = new Random();
         for (Camera camera : m_cameras) {
             // see tag_detector.py
-            String name = "vision/" + camera.getSerial() + "/0/blips";
+            // name is "vision/{IDENTITY}/blips"
+            String name = "vision/" + camera.getSerial() + "/blips";
             m_publishers.put(
                     camera,
                     m_inst.getStructArrayTopic(
-                            name, Blip24.struct).publish(PubSubOption.keepDuplicates(true)));
+                            name, Blip.struct).publish(PubSubOption.keepDuplicates(true)));
         }
     }
 
@@ -104,12 +119,7 @@ public class SimulatedTagDetector {
         } else {
             // In simulation, we want the real simulated tag detector.
             SimulatedTagDetector sim = new SimulatedTagDetector(
-                    List.of(
-                            Camera.SWERVE_LEFT,
-                            Camera.SWERVE_RIGHT,
-                            Camera.FUNNEL,
-                            Camera.CORAL_LEFT,
-                            Camera.CORAL_RIGHT),
+                    List.of(Camera.SIM0, Camera.SIM1, Camera.SIM2, Camera.SIM3),
                     layout,
                     history);
             return sim::periodic;
@@ -128,6 +138,9 @@ public class SimulatedTagDetector {
         double timestampS = Takt.get() - actualDelay;
         Pose2d pose = m_history.apply(timestampS).pose();
 
+        // Use exactly the history lookup timestamp.
+        long time = (long) (timestampS * 1000000.0);
+
         Pose3d robotPose3d = new Pose3d(pose);
         if (DEBUG) {
             System.out.printf("robot pose X %6.2f Y %6.2f Z %6.2f R %6.2f P %6.2f Y %6.2f \n",
@@ -135,16 +148,16 @@ public class SimulatedTagDetector {
                     robotPose3d.getTranslation().getZ(), robotPose3d.getRotation().getX(),
                     robotPose3d.getRotation().getY(), robotPose3d.getRotation().getZ());
         }
-        for (Map.Entry<Camera, StructArrayPublisher<Blip24>> entry : m_publishers.entrySet()) {
+        for (Map.Entry<Camera, StructArrayPublisher<Blip>> entry : m_publishers.entrySet()) {
             Camera camera = entry.getKey();
-            StructArrayPublisher<Blip24> publisher = entry.getValue();
+            StructArrayPublisher<Blip> publisher = entry.getValue();
 
-            List<Blip24> blips = new ArrayList<>();
+            List<Blip> blips = new ArrayList<>();
             Transform3d cameraOffset = camera.getOffset();
             Pose3d cameraPose3d = robotPose3d.plus(cameraOffset);
             Alliance alliance = opt.get();
 
-            for (int tagId = 1; tagId <= TAG_COUNT; ++tagId) {
+            for (int tagId = 1; tagId <= m_layout.size(alliance); ++tagId) {
                 if (DEBUG) {
                     System.out.printf("alliance %s camera %12s ", alliance.name(), camera.name());
                 }
@@ -157,12 +170,13 @@ public class SimulatedTagDetector {
                 }
                 Transform3d tagInCamera = tagInCamera(
                         () -> m_rand.nextGaussian(), cameraPose3d, tagPose);
+
                 if (visible(tagInCamera)) {
                     // publish it
                     if (DEBUG) {
                         System.out.print("VISIBLE ");
                     }
-                    blips.add(Blip24.fromXForward(tagId, tagInCamera));
+                    blips.add(Blip.fromXForward(time, tagId, tagInCamera));
                 } else {
                     // ignore it
                     if (DEBUG) {
@@ -181,13 +195,10 @@ public class SimulatedTagDetector {
                             tagTranslationInCamera.getZ(), tagRotationInCamera.getX(), tagRotationInCamera.getY(),
                             tagRotationInCamera.getZ());
                 }
-
             }
 
-            // Use exactly the history lookup timestamp.
-            long time = (long) (timestampS * 1000000.0);
             publisher.set(
-                    blips.toArray(new Blip24[0]), time);
+                    blips.toArray(new Blip[0]), time);
             if (PUBLISH_DEBUG) {
                 System.out.printf("%s\n", blips);
             }
@@ -197,6 +208,8 @@ public class SimulatedTagDetector {
 
     /**
      * Return the transform from the camera pose to the tag pose.
+     * 
+     * This is the normal "x-forward" WPI style.
      * 
      * New! Includes noise.
      * 
@@ -209,19 +222,31 @@ public class SimulatedTagDetector {
     static Transform3d tagInCamera(
             DoubleSupplier rand, Pose3d cameraPose3d, Pose3d tagPose) {
         Transform3d tagInCamera = new Transform3d(cameraPose3d, tagPose);
-        IsotropicNoiseSE2 n = Uncertainty.visionMeasurementStdDevs(
+        IsotropicNoiseSE2 n = VisionNoise.get(
                 tagInCamera.getTranslation().getNorm(),
                 Metrics.offAxisAngleRad(tagInCamera));
         Translation3d t = tagInCamera.getTranslation();
-        t = new Translation3d(
-                t.getX() + n.cartesian() * rand.getAsDouble(),
-                t.getY() + n.cartesian() * rand.getAsDouble(),
-                t.getZ() + n.cartesian() * rand.getAsDouble());
+        Translation3d tnoise = new Translation3d(
+                n.cartesian() * rand.getAsDouble(),
+                n.cartesian() * rand.getAsDouble(),
+                0)
+                .times(NOISE_RATIO);
+        // We really only have XY noise.
+        t = t.plus(tnoise);
+        // t = new Translation3d(
+        // t.getX() + n.cartesian() * rand.getAsDouble(),
+        // t.getY() + n.cartesian() * rand.getAsDouble(),
+        // t.getZ() + n.cartesian() * rand.getAsDouble());
         Rotation3d r = tagInCamera.getRotation();
-        r = new Rotation3d(
-                r.getX() + n.rotation() * rand.getAsDouble(),
-                r.getY() + n.rotation() * rand.getAsDouble(),
-                r.getZ() + n.rotation() * rand.getAsDouble());
+        // We really only have yaw noise.
+        Rotation3d rnoise = new Rotation3d(
+                0, 0, n.rotation() * rand.getAsDouble())
+                .times(NOISE_RATIO);
+        r = r.plus(rnoise);
+        // r = new Rotation3d(
+        // r.getX() + n.rotation() * rand.getAsDouble(),
+        // r.getY() + n.rotation() * rand.getAsDouble(),
+        // r.getZ() + n.rotation() * rand.getAsDouble());
         return new Transform3d(t, r);
     }
 

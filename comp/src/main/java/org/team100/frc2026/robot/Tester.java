@@ -46,9 +46,11 @@ public class Tester {
                 show("ahead slow"),
                 m_machinery.m_beeper.progress(),
                 m_machinery.m_drive.aheadSlow().withTimeout(1),
+                m_machinery.m_drive.stopCommand(),
                 show("rightward slow"),
                 m_machinery.m_beeper.progress(),
                 m_machinery.m_drive.rightwardSlow().withTimeout(1),
+                m_machinery.m_drive.stopCommand(),
                 show("done"),
                 m_machinery.m_beeper.done())
                 .withName("test all movements");

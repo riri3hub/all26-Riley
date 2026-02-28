@@ -149,7 +149,6 @@ public class ModelSE2 {
     }
 
     public String toString() {
-        return "SwerveModel(" + m_x + ", " + m_y + ", " + m_theta + ")";
+        return "ModelSE2(" + m_x + ", " + m_y + ", " + m_theta + ")";
     }
-
 }

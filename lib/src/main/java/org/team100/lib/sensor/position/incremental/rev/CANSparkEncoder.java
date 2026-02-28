@@ -24,10 +24,11 @@ public class CANSparkEncoder implements IncrementalBareEncoder {
         m_log_velocity = log.doubleLogger(Level.TRACE, "velocity (rad_s)");
     }
 
-    @Override
-    public void reset() {
-        m_motor.resetEncoderPosition();
-    }
+    // TODO: I think this is unnecessary.
+    // @Override
+    // public void reset() {
+    // m_motor.resetEncoderPosition();
+    // }
 
     @Override
     public void close() {

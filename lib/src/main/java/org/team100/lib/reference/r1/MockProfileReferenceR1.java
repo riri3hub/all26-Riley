@@ -2,7 +2,7 @@ package org.team100.lib.reference.r1;
 
 import org.team100.lib.state.ModelR1;
 
-public class MockProfileReferenceR1 implements ProfileReferenceR1 {
+public class MockProfileReferenceR1 implements ReferenceR1 {
 
     @Override
     public void setGoal(ModelR1 goal) {

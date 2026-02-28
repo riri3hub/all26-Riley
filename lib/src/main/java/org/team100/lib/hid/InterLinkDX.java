@@ -51,17 +51,19 @@ import edu.wpi.first.wpilibj.GenericHID;
  * button 25: right side trim down
  * button 26: right side trim up
  * button 27: ??
+ * 
+ * @see https://my.spektrumrc.com/ProdInfo/Files/SPMRFTX1-Manual-EN.pdf
  */
 
-public class InterLinkDX  {
+public class InterLinkDX {
     private static final double DEADBAND = 0.02;
     private static final double EXPO = 0.5;
     private static final double SLOW = 0.25;
 
     private final GenericHID m_hid;
 
-    public InterLinkDX() {
-        m_hid = new GenericHID(0);
+    public InterLinkDX(int port) {
+        m_hid = new GenericHID(port);
     }
 
     public Velocity velocity() {
@@ -82,9 +84,35 @@ public class InterLinkDX  {
         return new Velocity(dx, dy, dtheta);
     }
 
-    public boolean resetRotation0() {
+    /** "A" is on the left side on the back corner. 1 is up/in. */
+    public boolean a1() {
+        return button(1);
+    }
+
+    /** "C" is on the left side on the front face. 0 is up/forward. */
+    public boolean c0() {
+        return button(4);
+    }
+
+    /** "C" is on the left side on the front face. 2 is down/back. */
+    public boolean c2() {
+        return button(5);
+    }
+
+    /** "I" is the button on the upper left, on the top face. */
+    public boolean i() {
+        return button(13);
+    }
+
+    public boolean reset() {
         return button(14);
     }
+
+    public boolean cancel() {
+        return button(15);
+    }
+
+    ////////////////////////////////////////////////////////////
 
     private double axis(int axis) {
         return m_hid.getRawAxis(axis);

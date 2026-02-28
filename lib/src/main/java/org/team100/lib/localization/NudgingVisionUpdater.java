@@ -5,6 +5,7 @@ import org.team100.lib.fusion.CovarianceInflation;
 import org.team100.lib.fusion.Fusor;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.IsotropicNoiseSE2Logger;
 import org.team100.lib.logging.LoggerFactory.SwerveStateLogger;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.uncertainty.IsotropicNoiseSE2;
@@ -33,6 +34,10 @@ public class NudgingVisionUpdater implements VisionUpdater {
     private final Fusor m_rotationFusor;
     private final SwerveStateLogger m_logState;
 
+    private final IsotropicNoiseSE2Logger m_log_prevNoise;
+    private final IsotropicNoiseSE2Logger m_log_updateNoise;
+    private final IsotropicNoiseSE2Logger m_log_newNoise;
+
     /** To measure time since last update, for indicator. */
     private double m_latestTimeS;
 
@@ -44,6 +49,9 @@ public class NudgingVisionUpdater implements VisionUpdater {
         m_history = history;
         m_odometryUpdater = odometryUpdater;
         m_logState = log.swerveStateLogger(Level.TRACE, "state");
+        m_log_prevNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "previous noise");
+        m_log_updateNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "update noise");
+        m_log_newNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "new noise");
         m_cartesianFusor = new CovarianceInflation(0.02, 0.003);
         m_rotationFusor = new CovarianceInflation(0.02, 0.003);
         m_latestTimeS = 0;
@@ -179,9 +187,7 @@ public class NudgingVisionUpdater implements VisionUpdater {
                 stateSigma.rotationVariance());
         VariableR1 measurementRV = VariableR1.fromVariance(
                 deltaRotation.getRadians(), measurementSigma.rotationVariance());
-        // TODO: use covariance inflation
 
-        // VariableR1 rotation = InverseVarianceWeighting.fuse(sampleRV, measurementRV);
         VariableR1 rotation = m_rotationFusor.fuse(sampleRV, measurementRV);
 
         Rotation2d scaledRotation = new Rotation2d(rotation.mean());
@@ -193,6 +199,10 @@ public class NudgingVisionUpdater implements VisionUpdater {
         IsotropicNoiseSE2 noise = IsotropicNoiseSE2.fromVariance(
                 cartesian.variance(),
                 rotation.variance());
+
+        m_log_prevNoise.log(() -> stateSigma);
+        m_log_updateNoise.log(() -> measurementSigma);
+        m_log_newNoise.log(() -> noise);
 
         return new NoisyPose2d(result, noise);
     }

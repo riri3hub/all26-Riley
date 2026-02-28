@@ -1,8 +1,8 @@
 package org.team100.lib.subsystems.lynxmotion_arm;
 
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidProfileWPI;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.WPITrapezoidProfileR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
 
@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class MoveZ extends Command {
     private final LynxArm m_arm;
     private final double m_goal;
-    private final IncrementalProfile m_profile;
+    private final ProfileR1 m_profile;
     private final Timer m_timer;
 
     private ControlR1 m_setpoint;
@@ -27,7 +27,7 @@ public class MoveZ extends Command {
     public MoveZ(LynxArm arm, double goal) {
         m_arm = arm;
         m_goal = goal;
-        m_profile = new TrapezoidProfileWPI(1, 1);
+        m_profile = new WPITrapezoidProfileR1(1, 1);
         m_timer = new Timer();
         addRequirements(arm);
     }

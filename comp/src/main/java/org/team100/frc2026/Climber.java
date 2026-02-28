@@ -11,10 +11,10 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.KrakenX60Motor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
-import org.team100.lib.reference.r1.IncrementalProfileReferenceR1;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.sensor.position.incremental.IncrementalBareEncoder;
 import org.team100.lib.servo.AngularPositionServo;
 import org.team100.lib.servo.OutboardAngularPositionServo;
@@ -32,8 +32,8 @@ public class Climber extends SubsystemBase {
 
     public Climber(LoggerFactory parent, CanId CanId) {
         LoggerFactory log = parent.type(this);
-        IncrementalProfile profile = new TrapezoidIncrementalProfile(log, 1, 2, 0.05);
-        ProfileReferenceR1 ref = new IncrementalProfileReferenceR1(log, () -> profile, 0.05, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(log, 1, 2, 0.05);
+        ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
         double gearRatio = 2;
         double initialPosition = 0;
 

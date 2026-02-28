@@ -19,8 +19,8 @@ public class RotaryMechanismTest implements Timeless {
     /** Show that the limits have effect. */
     @Test
     void testLimits() {
-        SimpleDynamics ff = SimpleDynamics.test(logger);
-        Friction friction = Friction.test(logger);
+        SimpleDynamics ff = new SimpleDynamics(logger, 0.100, 0.100);
+        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(ff, friction);
         MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
         double gearRatio = 1;
@@ -58,8 +58,8 @@ public class RotaryMechanismTest implements Timeless {
     /** Same cases as above, but unlimited */
     @Test
     void testUnlimited() {
-        SimpleDynamics ff = SimpleDynamics.test(logger);
-        Friction friction = Friction.test(logger);
+        SimpleDynamics ff = new SimpleDynamics(logger, 0.100, 0.100);
+        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(ff, friction);
         MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
         double gearRatio = 1;
@@ -98,8 +98,8 @@ public class RotaryMechanismTest implements Timeless {
     @Test
     void testWrapNearMeasurement() {
         LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
-        SimpleDynamics ff = SimpleDynamics.test(log);
-        Friction friction = Friction.test(log);
+        SimpleDynamics ff = new SimpleDynamics(logger, 0.100, 0.100);
+        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(ff, friction);
         MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
         RotaryMechanism mech = new RotaryMechanism(

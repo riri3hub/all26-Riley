@@ -3,7 +3,7 @@ package org.team100.frc2026;
 import java.util.function.DoubleFunction;
 
 import org.team100.lib.coherence.Takt;
-import org.team100.lib.localization.Blip24;
+import org.team100.lib.localization.Blip;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -22,7 +22,7 @@ public class SimulatedCamera implements Runnable {
 
     /** client instance, not the default */
     private final NetworkTableInstance m_inst;
-    private final StructArrayPublisher<Blip24> m_pub;
+    private final StructArrayPublisher<Blip> m_pub;
 
     public SimulatedCamera(DoubleFunction<Rotation2d> truth) {
         m_truth = truth;
@@ -30,7 +30,7 @@ public class SimulatedCamera implements Runnable {
         // This is a client just like the camera is a client.
         m_inst.setServer("localhost");
         m_inst.startClient4("SimulatedTagDetector");
-        m_pub = m_inst.getStructArrayTopic("vision/0/0/blips", Blip24.struct)
+        m_pub = m_inst.getStructArrayTopic("vision/0/0/blips", Blip.struct)
                 .publish(PubSubOption.keepDuplicates(true));
     }
 
@@ -44,11 +44,12 @@ public class SimulatedCamera implements Runnable {
         Transform3d t = new Transform3d(
                 Translation3d.kZero,
                 new Rotation3d(0, 0, pastValue.getRadians()));
-        Blip24 b = new Blip24(1, t);
-
         // Past time in microseconds.
         long pastUs = (long) (past * 1000000.0);
-        m_pub.set(new Blip24[] { b }, pastUs);
+
+        Blip b = new Blip(pastUs, 1, t);
+
+        m_pub.set(new Blip[] { b }, pastUs);
     }
 
 }

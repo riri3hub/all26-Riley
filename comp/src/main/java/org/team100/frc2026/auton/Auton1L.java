@@ -45,15 +45,19 @@ public class Auton1L implements AnnotatedCommand {
         this.controller = controller;
         this.machinery = machinery;
         constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
-       // In meters/second
+        // In meters/second
         double maxBumpVelocity = 1;
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
-         
+
         // create a new VelocityRegionContstraint `slow_bump_zone`
-        VelocityLimitRegionConstraint slow_bump_zone = new VelocityLimitRegionConstraint(log, BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone2 = new VelocityLimitRegionConstraint(log, BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone3 = new VelocityLimitRegionConstraint(log, BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone4 = new VelocityLimitRegionConstraint(log, BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone = new VelocityLimitRegionConstraint(
+                log.name("zone1"), BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone2 = new VelocityLimitRegionConstraint(
+                log.name("zone2"), BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone3 = new VelocityLimitRegionConstraint(
+                log.name("zone3"), BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone4 = new VelocityLimitRegionConstraint(
+                log.name("zone4"), BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
         new_constraints.add(slow_bump_zone);
         new_constraints.add(slow_bump_zone2);
         new_constraints.add(slow_bump_zone3);
@@ -106,7 +110,7 @@ public class Auton1L implements AnnotatedCommand {
                         new DirectionSE2(-1, -1, 0), 1));
         return planner.restToRest(waypoints);
     }
-    
+
     @Override
     public Command command() {
         DriveWithTrajectoryFunction IntakeSetUp = new DriveWithTrajectoryFunction(
@@ -122,31 +126,31 @@ public class Auton1L implements AnnotatedCommand {
                 log, machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t4);
 
-        // Intake, score, climb.         
+        // Intake, score, climb.
         return sequence(
                 parallel(
-                IntakeSetUp.until(IntakeSetUp::isDone),
-                // Assumed that the intake shouldn't deploy over the bump
-                waitSeconds(1).andThen(machinery.m_extender.goToExtendedPosition())), 
+                        IntakeSetUp.until(IntakeSetUp::isDone),
+                        // Assumed that the intake shouldn't deploy over the bump
+                        waitSeconds(1).andThen(machinery.m_extender.goToExtendedPosition())),
                 waitSeconds(1),
 
                 parallel(
-                    IntakeBalls,
-                    machinery.m_intake.intake()
+                        IntakeBalls
+                // machinery.m_intake.intake()
                 ).until(IntakeBalls::isDone),
                 // Without telling it to, the intake would only stop spinning
                 // at the end of the auton. Without the timeout, the robot
                 // would not continue the rest of the auton
-                machinery.m_intake.stop().withTimeout(1),
+                // machinery.m_intake.stop().withTimeout(1),
                 waitSeconds(1),
 
                 ScoreSetUp.until(ScoreSetUp::isDone),
-                machinery.m_shooter.shoot().withTimeout(1),
+                // machinery.m_shooter.shoot().withTimeout(1),
                 waitSeconds(2),
-                machinery.m_shooter.stop().withTimeout(1),
+                // machinery.m_shooter.stop().withTimeout(1),
 
                 ClimbSetUp.until(ClimbSetUp::isDone));
-        }
+    }
 
     @Override
     public Pose2d start() {

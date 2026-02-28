@@ -9,13 +9,16 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.optimization.NumericalJacobian100;
+import org.team100.lib.state.ModelSE2;
 import org.team100.lib.util.StrUtil;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N2;
@@ -78,16 +81,12 @@ public class ShootingMethodTest {
         // tight tolerance for testing
         // note this tolerance is smaller than the range accuracy
         IRange ir = (e) -> rangeSolver.getSolution(v, 0, e);
-        ShootingMethod m = new ShootingMethod(ir, 0.001);
-        Translation2d robotPosition = new Translation2d();
-        GlobalVelocityR2 robotVelocity = GlobalVelocityR2.ZERO;
+        ShootingMethod m = new ShootingMethod(ir, 0.001, 0.1);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        double initialElevation = 0.1;
-        Optional<ShootingMethod.Solution> o = m.solve(
-                robotPosition, robotVelocity, targetPosition, targetVelocity, initialElevation);
-        ShootingMethod.Solution x = o.orElseThrow();
+        Optional<Solution> o = m.solve(new ModelSE2(), targetPosition, targetVelocity);
+        Solution x = o.orElseThrow();
 
         double azimuth = 0;
         double elevation = 0.206;
@@ -113,16 +112,12 @@ public class ShootingMethodTest {
 
         // tight tolerance for testing
         // note this tolerance is smaller than the range accuracy
-        ShootingMethod m = new ShootingMethod(ir, 0.001);
-        Translation2d robotPosition = new Translation2d();
-        GlobalVelocityR2 robotVelocity = GlobalVelocityR2.ZERO;
+        ShootingMethod m = new ShootingMethod(ir, 0.001, 0.1);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        double initialElevation = 0.1;
-        Optional<ShootingMethod.Solution> o = m.solve(
-                robotPosition, robotVelocity, targetPosition, targetVelocity, initialElevation);
-        ShootingMethod.Solution x = o.orElseThrow();
+        Optional<Solution> o = m.solve(new ModelSE2(), targetPosition, targetVelocity);
+        Solution x = o.orElseThrow();
 
         double azimuth = 0;
         // higher elevation than the zero-drag case
@@ -142,17 +137,15 @@ public class ShootingMethodTest {
         RangeSolver rangeSolver = new RangeSolver(d, 0);
         IRange ir = (e) -> rangeSolver.getSolution(7, 0, e);
         // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.0001);
-        Translation2d robotPosition = new Translation2d();
-        // driving towards the target
-        GlobalVelocityR2 robotVelocity = new GlobalVelocityR2(1, 0);
+        ShootingMethod m = new ShootingMethod(ir, 0.0001, 0.1);
+
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        double initialElevation = 0.1;
-        Optional<ShootingMethod.Solution> o = m.solve(
-                robotPosition, robotVelocity, targetPosition, targetVelocity, initialElevation);
-        ShootingMethod.Solution x = o.orElseThrow();
+        Optional<Solution> o = m.solve(
+                new ModelSE2(new Pose2d(), new VelocitySE2(1, 0, 0)),
+                targetPosition, targetVelocity);
+        Solution x = o.orElseThrow();
 
         double azimuth = 0;
         // lower elevation than the motionless case.
@@ -174,17 +167,14 @@ public class ShootingMethodTest {
         IRange ir = (e) -> rangeSolver.getSolution(10, 0, e);
         // velocity is higher because the target is receding.
         // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.0001);
-        Translation2d robotPosition = new Translation2d();
-        // driving away from the target
-        GlobalVelocityR2 robotVelocity = new GlobalVelocityR2(-2, 0);
+        ShootingMethod m = new ShootingMethod(ir, 0.0001, 0.1);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        double initialElevation = 0.1;
-        Optional<ShootingMethod.Solution> o = m.solve(
-                robotPosition, robotVelocity, targetPosition, targetVelocity, initialElevation);
-        ShootingMethod.Solution x = o.orElseThrow();
+        Optional<Solution> o = m.solve(
+                new ModelSE2(new Pose2d(), new VelocitySE2(-2, 0, 0)),
+                targetPosition, targetVelocity);
+        Solution x = o.orElseThrow();
 
         double azimuth = 0;
         // higher elevation (in addition to higher velocity)
@@ -204,16 +194,13 @@ public class ShootingMethodTest {
         RangeSolver rangeSolver = new RangeSolver(d, 0);
         IRange ir = (e) -> rangeSolver.getSolution(10, 0, e);
         // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.0001);
-        Translation2d robotPosition = new Translation2d();
-        // driving fast away from the target
-        GlobalVelocityR2 robotVelocity = new GlobalVelocityR2(-10, 0);
+        ShootingMethod m = new ShootingMethod(ir, 0.0001, 0.1);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        double initialElevation = 0.1;
-        Optional<ShootingMethod.Solution> o = m.solve(
-                robotPosition, robotVelocity, targetPosition, targetVelocity, initialElevation);
+        Optional<Solution> o = m.solve(
+                new ModelSE2(new Pose2d(), new VelocitySE2(-10, 0, 0)),
+                targetPosition, targetVelocity);
         assertTrue(o.isEmpty());
     }
 
@@ -226,17 +213,14 @@ public class ShootingMethodTest {
         RangeSolver rangeSolver = new RangeSolver(d, 0);
         IRange ir = (e) -> rangeSolver.getSolution(7, 0, e);
         // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.01);
-        Translation2d robotPosition = new Translation2d();
-        // driving to the left
-        GlobalVelocityR2 robotVelocity = new GlobalVelocityR2(0, 2);
+        ShootingMethod m = new ShootingMethod(ir, 0.01, 0.1);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        double initialElevation = 0.1;
-        Optional<ShootingMethod.Solution> o = m.solve(
-                robotPosition, robotVelocity, targetPosition, targetVelocity, initialElevation);
-        ShootingMethod.Solution x = o.orElseThrow();
+        Optional<Solution> o = m.solve(
+                new ModelSE2(new Pose2d(), new VelocitySE2(0, 2, 0)),
+                targetPosition, targetVelocity);
+        Solution x = o.orElseThrow();
 
         // aim to the right
         double azimuth = -0.484;
@@ -269,18 +253,16 @@ public class ShootingMethodTest {
         double v = 7;
         IRange ir = (e) -> rangeSolver.getSolution(v, 0, e);
         // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.0001);
-        Translation2d robotPosition = new Translation2d();
-        GlobalVelocityR2 robotVelocity = GlobalVelocityR2.ZERO;
+        ShootingMethod m = new ShootingMethod(ir, 0.0001, 0.1);
+
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        double initialElevation = 0.1;
 
         int iterations = 10000;
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < iterations; ++i) {
             // this solve takes 7 iterations
-            m.solve(robotPosition, robotVelocity, targetPosition, targetVelocity, initialElevation);
+            m.solve(new ModelSE2(), targetPosition, targetVelocity);
         }
         long finishTime = System.currentTimeMillis();
         if (DEBUG) {
@@ -290,12 +272,12 @@ public class ShootingMethodTest {
 
     }
 
-    private void checkX(ShootingMethod.Solution x, double azimuth, double elevation) {
+    private void checkX(Solution x, double azimuth, double elevation) {
         assertEquals(azimuth, x.azimuth().getRadians(), 0.001);
         assertEquals(elevation, x.elevation().getRadians(), 0.001);
     }
 
-    private void checkSolution(IRange range, ShootingMethod.Solution x, double r, double tof) {
+    private void checkSolution(IRange range, Solution x, double r, double tof) {
         FiringSolution s = range.get(x.elevation().getRadians());
         assertEquals(r, s.range(), 0.001);
         assertEquals(tof, s.tof(), 0.001);

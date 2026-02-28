@@ -29,7 +29,6 @@ import org.team100.lib.subsystems.swerve.SwerveDriveSubsystem;
 import org.team100.lib.subsystems.swerve.SwerveLocal;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamicsFactory;
-import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
 import org.team100.lib.subsystems.swerve.module.SwerveModuleCollection;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModulePositions;
 import org.team100.lib.testing.Timeless;
@@ -190,17 +189,15 @@ public class DriveWithTrajectoryTest implements Timeless {
         AprilTagFieldLayoutWithCorrectOrientation layout = new AprilTagFieldLayoutWithCorrectOrientation();
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, 0);
+                logger, fieldLogger, layout, history, visionUpdater);
         FreshSwerveEstimate estimate = new FreshSwerveEstimate(localizer, odometryUpdater, history);
         SwerveLocal swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
-        SwerveLimiter limiter = new SwerveLimiter(logger, swerveKinodynamics, () -> 12);
 
         SwerveDriveSubsystem drive = new SwerveDriveSubsystem(
                 logger,
                 odometryUpdater,
                 estimate,
-                swerveLocal,
-                limiter);
+                swerveLocal);
 
         // initially at rest
         assertEquals(0, collection.states().frontLeft().speedMetersPerSecond(), DELTA);

@@ -64,11 +64,15 @@
         "terminal.integrated.scrollback": 100000,
         "vsintellicode.java.completionsEnabled": true,
         "workbench.colorCustomizations": {
-            "debugConsole.infoForeground": "#ffffff"
+            "debugConsole.infoForeground": "#ffffff",
+            "tab.activeBackground":"#5f5f00",
+            "editor.background":"#000000",
+            "editorCursor.foreground":"#ffffff"
         },
         "workbench.colorTheme": "Default Dark+",
         "workbench.editor.revealIfOpen": true,
         "workbench.tree.enableStickyScroll": false,
+        "editor.cursorWidth":5,
         "editor.multiCursorLimit": 1,
         "java.import.maven.disableTestClasspathFlag": false,
         "java.import.projectSelection": "manual",

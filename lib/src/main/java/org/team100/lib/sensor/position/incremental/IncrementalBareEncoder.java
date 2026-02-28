@@ -29,8 +29,10 @@ public interface IncrementalBareEncoder {
      * Resets position to zero.
      *
      * Caches should also be flushed, so the new value is available immediately.
+     * 
+     * // TODO: I think this is unnecessary.
      */
-    void reset();
+    // void reset();
 
     /**
      * Releases the encoder resource, if necessary (e.g. HAL ports).

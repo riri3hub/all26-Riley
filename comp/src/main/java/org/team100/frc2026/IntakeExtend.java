@@ -1,19 +1,20 @@
 package org.team100.frc2026;
 
+import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.controller.r1.PIDFeedback;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.KrakenX44Motor;
-import org.team100.lib.motor.ctre.KrakenX60Motor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
-import org.team100.lib.reference.r1.IncrementalProfileReferenceR1;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.sensor.position.absolute.sim.SimulatedRotaryPositionSensor;
 import org.team100.lib.sensor.position.incremental.IncrementalBareEncoder;
 import org.team100.lib.sensor.position.incremental.ctre.Talon6Encoder;
@@ -29,31 +30,31 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class IntakeExtend extends SubsystemBase {
     private final AngularPositionServo m_servo;
 
-    public IntakeExtend(LoggerFactory parent, CanId canID) {
+    public IntakeExtend(LoggerFactory parent) {
         LoggerFactory log = parent.type(this);
 
         switch (Identity.instance) {
 
-            case TEST_BOARD_B0 -> {
-                float gearRatio = 10;
+            case COMP_BOT -> {
+                double gearRatio = 15.3;
                 PIDConstants PID = PIDConstants.makePositionPID(log, 1);
-                double supplyLimit = 50;
-                double statorLimit = 20;
+                double supplyLimit = 4;
+                double statorLimit = 80;
                 KrakenX44Motor m_motor = new KrakenX44Motor(
                         log, // LoggerFactor y parent,
-                        canID, // CanId canId,
+                        new CanId(16), // CanId canId,
                         NeutralMode100.COAST, // NeutralMode neutral,
                         MotorPhase.REVERSE, // MotorPhase motorPhase,
                         supplyLimit, // og 50 //double supplyLimit,
                         statorLimit, // og 2 //double statorLimit,
-                        KrakenX60Motor.highFrictionFF(log), // Feedforward100 ff
-                        KrakenX60Motor.highFriction(log),
+                        new SimpleDynamics(log, 0.0, 0.0), // Feedforward100 ff
+                        new Friction(log, 1.26, 1.26, 0.006, 0.5),
                         PID // PIDConstants pid,
                 );
                 Talon6Encoder encoder = m_motor.encoder();
 
-                TrapezoidIncrementalProfile profile = new TrapezoidIncrementalProfile(log, 1, 2, 0.05);
-                ProfileReferenceR1 ref = new IncrementalProfileReferenceR1(log, () -> profile, 0.05, 0.05);
+                TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 8, 8, 0.05);
+                ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
                 double initialPosition = 0;
                 RotaryMechanism climberMech = new RotaryMechanism(
                         log, m_motor, encoder, initialPosition, gearRatio,
@@ -65,8 +66,8 @@ public class IntakeExtend extends SubsystemBase {
             default -> {
                 SimulatedBareMotor m_motor = new SimulatedBareMotor(log, 600);
 
-                IncrementalProfile profile = new TrapezoidIncrementalProfile(log, 1, 2, 0.05);
-                ProfileReferenceR1 ref = new IncrementalProfileReferenceR1(log, () -> profile, 0.05, 0.05);
+                ProfileR1 profile = new TrapezoidProfileR1(log, 100, 100, 0.05);
+                ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
                 PIDFeedback feedback = new PIDFeedback(log, 5, 0, 0, false, 0.05, 0.1);
 
                 IncrementalBareEncoder encoder = m_motor.encoder();
@@ -89,7 +90,7 @@ public class IntakeExtend extends SubsystemBase {
     public Command goToExtendedPosition() {
         return new FunctionalCommand(
                 () -> reset(), // onInit
-                () -> setAngle(Math.PI / 2), // onExecute
+                () -> setAngle(3), // onExecute
                 interrupted -> { // onEnd
                 },
                 () -> m_servo.atGoal(), // isFinished
@@ -116,7 +117,7 @@ public class IntakeExtend extends SubsystemBase {
 
     /** Use a profile to set the position. */
     private void setAngle(double value) {
-        m_servo.setPositionProfiled(value, 0);
+        m_servo.actuateWithProfile(value, 0);
     }
 
 }

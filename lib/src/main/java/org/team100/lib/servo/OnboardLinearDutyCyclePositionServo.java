@@ -6,7 +6,7 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ControlR1Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.mechanism.LinearMechanism;
-import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.reference.r1.SetpointsR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
@@ -20,7 +20,7 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
     private static final double POSITION_TOLERANCE = 0.01;
     private static final double VELOCITY_TOLERANCE = 0.01;
     private final LinearMechanism m_mechanism;
-    private final ProfileReferenceR1 m_ref;
+    private final ReferenceR1 m_ref;
     private final FeedbackR1 m_feedback;
     private final double m_kV;
     private final DoubleLogger m_log_goal;
@@ -40,7 +40,7 @@ public class OnboardLinearDutyCyclePositionServo implements LinearPositionServo 
     public OnboardLinearDutyCyclePositionServo(
             LoggerFactory parent,
             LinearMechanism mechanism,
-            ProfileReferenceR1 ref,
+            ReferenceR1 ref,
             FeedbackR1 feedback,
             double kV) {
         LoggerFactory log = parent.type(this);

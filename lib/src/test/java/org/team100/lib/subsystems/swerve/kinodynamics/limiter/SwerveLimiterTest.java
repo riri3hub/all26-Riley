@@ -9,8 +9,8 @@ import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
@@ -329,7 +329,7 @@ public class SwerveLimiterTest implements Timeless {
     @Test
     void testProfile() {
         // profile v and a constraints match the limits
-        IncrementalProfile profile = new TrapezoidIncrementalProfile(logger, 3, 5, 0.01);
+        ProfileR1 profile = new TrapezoidProfileR1(logger, 3, 5, 0.01);
         final ModelR1 goal = new ModelR1(5, 0);
         final ModelR1 initial = new ModelR1(0, 0);
 

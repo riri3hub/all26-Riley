@@ -2,9 +2,9 @@ package org.team100.lib.profile.se2;
 
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.profile.r1.CurrentLimitedExponentialProfile;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidProfileWPI;
+import org.team100.lib.profile.r1.DualProfileR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
+import org.team100.lib.profile.r1.WPITrapezoidProfileR1;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 
 public class HolonomicProfileFactory {
@@ -71,9 +71,9 @@ public class HolonomicProfileFactory {
             double maxOmega,
             double maxAlpha) {
         return new HolonomicProfile(
-                new TrapezoidProfileWPI(maxXYVel, maxXYAccel),
-                new TrapezoidProfileWPI(maxXYVel, maxXYAccel),
-                new TrapezoidProfileWPI(maxOmega, maxAlpha));
+                new WPITrapezoidProfileR1(maxXYVel, maxXYAccel),
+                new WPITrapezoidProfileR1(maxXYVel, maxXYAccel),
+                new WPITrapezoidProfileR1(maxOmega, maxAlpha));
     }
 
     public static HolonomicProfile trapezoidal(
@@ -85,9 +85,9 @@ public class HolonomicProfileFactory {
             double maxAlpha,
             double angularTolerance) {
         return new HolonomicProfile(
-                new TrapezoidIncrementalProfile(log.name("x"), maxXYVel, maxXYAccel, xyTolerance),
-                new TrapezoidIncrementalProfile(log.name("y"), maxXYVel, maxXYAccel, xyTolerance),
-                new TrapezoidIncrementalProfile(log.name("theta"), maxOmega, maxAlpha, angularTolerance));
+                new TrapezoidProfileR1(log.name("x"), maxXYVel, maxXYAccel, xyTolerance),
+                new TrapezoidProfileR1(log.name("y"), maxXYVel, maxXYAccel, xyTolerance),
+                new TrapezoidProfileR1(log.name("theta"), maxOmega, maxAlpha, angularTolerance));
     }
 
     public static HolonomicProfile currentLimitedExponential(
@@ -98,9 +98,9 @@ public class HolonomicProfileFactory {
             double limitedAlpha,
             double stallAlpha) {
         return new HolonomicProfile(
-                new CurrentLimitedExponentialProfile(maxXYVel, limitedXYAccel, stallXYAccel),
-                new CurrentLimitedExponentialProfile(maxXYVel, limitedXYAccel, stallXYAccel),
-                new CurrentLimitedExponentialProfile(maxOmega, limitedAlpha, stallAlpha));
+                new DualProfileR1(maxXYVel, limitedXYAccel, stallXYAccel),
+                new DualProfileR1(maxXYVel, limitedXYAccel, stallXYAccel),
+                new DualProfileR1(maxOmega, limitedAlpha, stallAlpha));
     }
 
     public static FreeRotationProfile freeRotationCurrentLimitedExponential(
@@ -111,9 +111,9 @@ public class HolonomicProfileFactory {
             double limitedAlpha,
             double stallAlpha) {
         return new FreeRotationProfile(
-                new CurrentLimitedExponentialProfile(maxXYVel, limitedXYAccel, stallXYAccel),
-                new CurrentLimitedExponentialProfile(maxXYVel, limitedXYAccel, stallXYAccel),
-                new CurrentLimitedExponentialProfile(maxOmega, limitedAlpha, stallAlpha));
+                new DualProfileR1(maxXYVel, limitedXYAccel, stallXYAccel),
+                new DualProfileR1(maxXYVel, limitedXYAccel, stallXYAccel),
+                new DualProfileR1(maxOmega, limitedAlpha, stallAlpha));
     }
 
     public static HolonomicProfile currentLimitedExponential(

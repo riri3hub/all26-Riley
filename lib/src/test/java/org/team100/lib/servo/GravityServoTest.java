@@ -16,11 +16,11 @@ import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MockBareMotor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
-import org.team100.lib.profile.r1.IncrementalProfile;
-import org.team100.lib.profile.r1.TrapezoidIncrementalProfile;
-import org.team100.lib.reference.r1.IncrementalProfileReferenceR1;
+import org.team100.lib.profile.r1.ProfileR1;
+import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.reference.r1.MockProfileReferenceR1;
 import org.team100.lib.reference.r1.ProfileReferenceR1;
+import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.sensor.position.absolute.MockRotaryPositionSensor;
 import org.team100.lib.sensor.position.absolute.sim.SimulatedRotaryPositionSensor;
 import org.team100.lib.sensor.position.incremental.IncrementalBareEncoder;
@@ -35,8 +35,8 @@ class GravityServoTest implements Timeless {
     void testSetPosition() {
         FeedbackR1 pivotFeedback = new PIDFeedback(
                 logger, 4.5, 0.0, 0.000, false, 0.05, 1);
-        IncrementalProfile profile = new TrapezoidIncrementalProfile(logger, 8, 8, 0.001);
-        IncrementalProfileReferenceR1 ref = new IncrementalProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(logger, 8, 8, 0.001);
+        ProfileReferenceR1 ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         // motor speed is rad/s
         SimulatedBareMotor simMotor = new SimulatedBareMotor(logger, 600);
         IncrementalBareEncoder encoder = simMotor.encoder();
@@ -67,14 +67,14 @@ class GravityServoTest implements Timeless {
     /** For refactoring the gravity servo */
     @Test
     void testGravity() {
-        SimpleDynamics ff = SimpleDynamics.test(logger);
-        Friction friction = Friction.test(logger);
+        SimpleDynamics ff = new SimpleDynamics(logger, 0.100, 0.100);
+        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(ff, friction);
         MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
         RotaryMechanism mech = new RotaryMechanism(
                 logger, motor, sensor, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         FeedbackR1 fb = new ZeroFeedback(false, 0.01, 0.01);
-        ProfileReferenceR1 ref = new MockProfileReferenceR1();
+        ReferenceR1 ref = new MockProfileReferenceR1();
         OnboardAngularPositionServo servo = new OnboardAngularPositionServo(logger, mech, ref, fb);
         // these constants were used in Wrist2.
         // negative force means pull in
