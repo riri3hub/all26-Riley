@@ -27,13 +27,16 @@ public class SerializerUpper extends SubsystemBase {
     private final OutboardLinearVelocityServo m_servo1;
     private final OutboardLinearVelocityServo m_servo2;
 
+    private final Shooter m_Shooter;
+
     private final double m_speed = 30;
 
-    public SerializerUpper(LoggerFactory parent) {
+    public SerializerUpper(LoggerFactory parent, Shooter shooter) {
         LoggerFactory log = parent.type(this);
         LoggerFactory log1 = log.name("SerializerUpper1");
         LoggerFactory log2 = log.name("SerializerUpper2");
 
+        m_Shooter = shooter;
         // first parameter is actually accel
         // second parameter is actually jerk
         ProfileR1 profile = new TrapezoidProfileR1(
@@ -95,7 +98,7 @@ public class SerializerUpper extends SubsystemBase {
         m_servo2.periodic();
     }
 
-    public Command shooterFullspeed() {
+    public Command serializerUpperFullspeed() {
         return run(this::fullSpeed).withName(" to Shooter full speed");
     }
 
@@ -110,8 +113,14 @@ public class SerializerUpper extends SubsystemBase {
 
     private void fullSpeed() {
         double Velocity = 0.5;
-        m_servo1.setVelocityProfiled(Velocity);
-        m_servo2.setVelocityProfiled(Velocity);
+        double Zero = 0;
+        if (m_Shooter.atSpeed()) {
+            m_servo1.setVelocityProfiled(Velocity);
+            m_servo2.setVelocityProfiled(Velocity);
+        } else {
+            m_servo1.setVelocityProfiled(Zero);
+            m_servo2.setVelocityProfiled(Zero);
+        }
     }
 
     public void setSpeed(double Velocity) {

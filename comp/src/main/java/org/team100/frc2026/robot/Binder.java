@@ -71,6 +71,8 @@ public class Binder {
         m_machinery.m_serializer.setDefaultCommand(
             m_machinery.m_serializer.stop()
         );
+        m_machinery.m_serializerUpper.setDefaultCommand(
+            m_machinery.m_serializerUpper.stop());
 
         ////////////////////////////////////////////////////
         ///
@@ -167,11 +169,13 @@ public class Binder {
         Command runshooter = m_machinery.m_shooter.shooterFullspeed();
         Command runhood = m_machinery.m_shooterHood.position();
         Command runserial = m_machinery.m_serializer.serialize();
+        Command runSerialUpper = m_machinery.m_serializerUpper.serializerUpperFullspeed();
         // TODO: maybe add a delay between runhood and runshooter?
         whileTrue(driver::rightTrigger,
                 parallel(
                         runshooter,
                         runhood,
+                        runSerialUpper,
                         Commands.repeatingSequence(
                                 waitUntil(m_machinery.m_shooter::atSpeed),
                                 runserial.onlyWhile(m_machinery.m_shooter::atSpeed))));

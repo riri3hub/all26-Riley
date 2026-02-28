@@ -8,6 +8,7 @@ import org.team100.frc2026.ClimberExtension;
 import org.team100.frc2026.Intake;
 import org.team100.frc2026.IntakeExtend;
 import org.team100.frc2026.Serializer;
+import org.team100.frc2026.SerializerUpper;
 import org.team100.frc2026.Shooter;
 import org.team100.frc2026.ShooterHood;
 import org.team100.frc2026.field.FieldConstants2026;
@@ -82,6 +83,7 @@ public class Machinery {
     public final ClimberExtension m_ClimberExtension;
     public final Climber m_Climber;
     public final ControllerSE2 m_holonomicController;
+    public final SerializerUpper m_serializerUpper;
 
     public Machinery() {
 
@@ -172,6 +174,7 @@ public class Machinery {
                 logger, m_drive::getState, FieldConstants2026.HUB::toTranslation2d);
         m_ClimberExtension = new ClimberExtension(logger);
         m_Climber = new Climber(logger, new CanId(32));
+        m_serializerUpper = new SerializerUpper(logger, m_shooter);
 
         ////////////////////////////////////////////////////////////
         ///
