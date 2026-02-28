@@ -70,6 +70,17 @@ class Distortion:
                         ]
                     ]
                 )
+            case Identity.GLOBAL_GAME_PIECE:
+                return np.array(
+                    [
+                        [
+                            -0.291773408,
+                            0.09223526926,
+                            0.0001767030772,
+                            -8.758271042e-05,
+                        ]
+                    ]
+                )
             case _:
                 print("###########################################")
                 print("#                                         #")

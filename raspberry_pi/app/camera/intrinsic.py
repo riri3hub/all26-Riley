@@ -87,6 +87,15 @@ class Intrinsic:
                         [0, 0, 1],
                     ]
                 )
+            case Identity.GLOBAL_GAME_PIECE:
+                return np.array(
+                    [
+                        [943.2920845, 0.0, 681.6154074],
+                        [0.0, 943.3584029,529.4306382],
+                        [0,0,1]             
+                    ]   
+                )
+                
             case _:
                 # Default GS model intrinsic matrix
                 print("##########################################")
