@@ -75,7 +75,7 @@
         "editor.cursorWidth":2,
         "editor.multiCursorLimit": 1,
         "java.import.maven.disableTestClasspathFlag": false,
-        "java.import.projectSelection": "manual",
+        "java.import.projectSelection": "automatic",
         "debug.console.maximumLines": 20000
     }
 }
