@@ -38,18 +38,19 @@ class InterpreterFactory:
                     object_higher,
                 )
             case (
-                Identity.RIGHTAMP
+                Identity. CORAL_LEFT
+                | Identity.DEV
+                | Identity.DIST_TEST
                 | Identity.LEFTAMP
-                | Identity.SHOOTER
                 | Identity.GLOBAL_GAME_PIECE
+                | Identity.JOELS_TEST
+                | Identity.RIGHTAMP
+                | Identity.SHOOTER
                 | Identity.SWERVE_RIGHT
                 | Identity.SWERVE_LEFT
-                | Identity.DIST_TEST
-                | Identity.JOELS_TEST
-                | Identity.DEV
             ):
                 return TagDetector(identity, cam, display, network)
-            case Identity.DEV2 | Identity.CORAL_RIGHT | Identity.CORAL_LEFT:
+            case Identity.DEV2 | Identity.CORAL_RIGHT:
                 return CombinedDetector(
                     identity,
                     cam,

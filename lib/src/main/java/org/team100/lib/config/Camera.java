@@ -49,7 +49,7 @@ public enum Camera {
                     new Rotation3d(0, Math.toRadians(31.5), Math.PI))),
 
     /**
-     * Camera bot intake
+     * Camera bot rear facing
      */
     GLOBAL_GAME_PIECE("d44649628c20d4d4",
             new Transform3d(
@@ -83,7 +83,7 @@ public enum Camera {
                     new Rotation3d(0.07, 0.48, 0.20).unaryMinus().plus(new Rotation3d(0, 0, Math.PI)))),
 
     /**
-     * Coral reef left
+     * Camera bot front facing
      */
     CORAL_LEFT("8ddb2ed6c49a9bce",
             new Transform3d(
