@@ -48,17 +48,17 @@ class Distortion:
     def __dist_gs(identity: Identity) -> NDArray[np.float32]:
         """Distortion matrices for the 3.2 mm lens only.  Do not use the 6 mm lens."""
         match identity:
-            case Identity.CORAL_LEFT:
-                return np.array(
-                    [
-                        [
-                            -0.2883685917,
-                            0.08640059653,
-                            -0.0003167335742,
-                            0.0004112607248,
-                        ]
-                    ]
-                )
+            # case Identity.CORAL_LEFT:
+            #     return np.array(
+            #         [
+            #             [
+            #                 -0.2883685917,
+            #                 0.08640059653,
+            #                 -0.0003167335742,
+            #                 0.0004112607248,
+            #             ]
+            #         ]
+            #     )
             case Identity.CORAL_RIGHT:
                 return np.array(
                     [

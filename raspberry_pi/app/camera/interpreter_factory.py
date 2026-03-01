@@ -38,11 +38,11 @@ class InterpreterFactory:
                     object_higher,
                 )
             case (
-                Identity. CORAL_LEFT
+                Identity.CAMERA_FRONT
                 | Identity.DEV
                 | Identity.DIST_TEST
                 | Identity.LEFTAMP
-                | Identity.GLOBAL_GAME_PIECE
+                | Identity.CAMERA_BACK
                 | Identity.JOELS_TEST
                 | Identity.RIGHTAMP
                 | Identity.SHOOTER

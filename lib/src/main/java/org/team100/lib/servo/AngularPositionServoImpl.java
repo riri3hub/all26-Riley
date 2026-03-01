@@ -2,6 +2,7 @@ package org.team100.lib.servo;
 
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.ControlR1Logger;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.reference.r1.ReferenceR1;
@@ -26,6 +27,9 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
     private final ReferenceR1 m_ref;
     private final DoubleLogger m_log_goal;
     private final DoubleLogger m_log_velocity;
+    private final ControlR1Logger m_log_setpoint;
+    private final DoubleLogger m_log_position_error;
+    private final DoubleLogger m_log_velocity_error;
 
     /**
      * Goal is "unwrapped" i.e. it's it's [-inf, inf], not [-pi,pi]
@@ -54,6 +58,9 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
         LoggerFactory log = parent.type(this);
         m_log_goal = log.doubleLogger(Level.TRACE, "goal (rad)");
         m_log_velocity = log.doubleLogger(Level.TRACE, "velocity (rad_s)");
+        m_log_setpoint = log.ControlR1Logger(Level.TRACE, "setpoint");
+        m_log_position_error = log.doubleLogger(Level.TRACE, "position error");
+        m_log_velocity_error = log.doubleLogger(Level.TRACE, "velocity error");
     }
 
     abstract void actuate(SetpointsR1 wrappedSetpoints, double torqueNm);
@@ -182,6 +189,7 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
 
     @Override
     public void actuateWithProfile(double unwrappedGoalX, double torqueNm) {
+        m_validSetpoint = true;
         initReference(new ModelR1(unwrappedGoalX, 0));
         SetpointsR1 unwrappedSetpoint = m_ref.get();
         m_nextUnwrappedSetpoint = unwrappedSetpoint.next();
@@ -239,12 +247,20 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
      */
     @Override
     public boolean atSetpoint() {
-        if (!m_validSetpoint)
+        if (!m_validSetpoint) {
+            if (DEBUG)
+                System.out.println("NO SETPOINT");
             return false;
-        if (m_nextUnwrappedSetpoint == null)
+        }
+        if (m_nextUnwrappedSetpoint == null) {
+            if (DEBUG)
+                System.out.println("NO SETPOINT 2222");
             return false;
+        }
         double positionError = MathUtil.angleModulus(m_nextUnwrappedSetpoint.x() - m_mechanism.getWrappedPositionRad());
         double velocityError = m_nextUnwrappedSetpoint.v() - m_mechanism.getVelocityRad_S();
+        m_log_position_error.log(() -> positionError);
+        m_log_velocity_error.log(() -> velocityError);
         return Math.abs(positionError) < POSITION_TOLERANCE
                 && Math.abs(velocityError) < VELOCITY_TOLERANCE;
     }
@@ -278,6 +294,7 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
     @Override
     public void periodic() {
         m_mechanism.periodic();
+        m_log_setpoint.log(() -> m_nextUnwrappedSetpoint);
     }
 
 }

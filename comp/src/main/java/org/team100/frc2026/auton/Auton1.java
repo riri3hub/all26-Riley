@@ -25,6 +25,7 @@ import org.team100.lib.trajectory.path.PathSE2Factory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 /** An example of a simple sequence */
 public class Auton1 implements AnnotatedCommand {
@@ -114,36 +115,38 @@ public class Auton1 implements AnnotatedCommand {
     @Override
     public Command command() {
         DriveWithTrajectoryFunction IntakeSetUp = new DriveWithTrajectoryFunction(
-                log, machinery.m_drive, controller,
+                log.name("IntakeSetUp"), machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t1);
         DriveWithTrajectoryFunction IntakeBalls = new DriveWithTrajectoryFunction(
-                log, machinery.m_drive, controller,
+                log.name("IntakeBalls"), machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t2);
         DriveWithTrajectoryFunction ScoreSetUp = new DriveWithTrajectoryFunction(
-                log, machinery.m_drive, controller,
+                log.name("scoreSetup"), machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t3);
         DriveWithTrajectoryFunction ClimbSetUp = new DriveWithTrajectoryFunction(
-                log, machinery.m_drive, controller,
+                log.name("ClimbSetup"), machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t4);
 
         // Intake, score, climb.
         return sequence(
+                Commands.print("foo"),
                 parallel(
                         IntakeSetUp.until(IntakeSetUp::isDone),
                         // Assumed that the intake shouldn't deploy over the bump
                         waitSeconds(1).andThen(machinery.m_extender.goToExtendedPosition())),
+                Commands.print("foo2"),
                 waitSeconds(1),
-
+                Commands.print("foo3"),
                 parallel(
-                        IntakeBalls
-                // machinery.m_intake.intake()
-                ).until(IntakeBalls::isDone),
+                        IntakeBalls,
+                        machinery.m_intake.intake()).until(IntakeBalls::isDone),
+                Commands.print("foo4"),
                 // Without telling it to, the intake would only stop spinning
                 // at the end of the auton. Without the timeout, the robot
                 // would not continue the rest of the auton
-                // machinery.m_intake.stop().withTimeout(1),
+                machinery.m_intake.stop().withTimeout(1),
+                Commands.print("foo5"),
                 waitSeconds(1),
-
                 ScoreSetUp.until(ScoreSetUp::isDone),
                 // machinery.m_shooter.shoot().withTimeout(1),
                 waitSeconds(2),

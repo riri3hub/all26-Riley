@@ -68,7 +68,7 @@ public class ControllerFactorySE2 {
             }
             default -> {
                 // this is for simulation, don't use these values
-                return new FullStateControllerSE2(log, 3.0, 3.5, 0.05, 0, 0.017, 0.017, 0.01, 0.01);
+                return new FullStateControllerSE2(log, 3.0, 3.5, 0.05, 0, 0.05, 0.05, 1, 1);
             }
         }
     }

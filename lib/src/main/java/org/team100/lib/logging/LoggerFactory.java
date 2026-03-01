@@ -710,7 +710,11 @@ public class LoggerFactory {
         public void log(Supplier<ControlR1> vals) {
             if (!allow(m_level))
                 return;
+            if (vals == null)
+                return;
             ControlR1 val = vals.get();
+            if (val == null)
+                return;
             m_xLogger.log(val::x);
             m_vLogger.log(val::v);
             m_aLogger.log(val::a);

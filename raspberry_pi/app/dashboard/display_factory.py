@@ -11,14 +11,14 @@ class DisplayFactory:
     def get(identity: Identity, cam: Camera) -> Display:
         match identity:
             case (
-                Identity.CORAL_LEFT
+                Identity.CAMERA_FRONT
                 | Identity.CORAL_RIGHT
                 | Identity.DEV
                 | Identity.DEV2
                 | Identity.DIST_TEST
                 | Identity.FUNNEL
                 | Identity.GAME_PIECE
-                | Identity.GLOBAL_GAME_PIECE
+                | Identity.CAMERA_BACK
                 | Identity.LEFTAMP
                 | Identity.JOELS_TEST
                 | Identity.RIGHTAMP

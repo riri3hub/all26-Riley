@@ -54,7 +54,7 @@
         "java.completion.postfix.enabled": false,
         "java.configuration.updateBuildConfiguration": "automatic",
         "java.import.gradle.annotationProcessing.enabled": false,
-        "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx64G -Xms100m -Xlog:disable",
+        "java.jdt.ls.vmargs": "-XX:+UseParallelGC -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xmx128G -Xms100m -Xlog:disable",
         "java.saveActions.organizeImports": false,
         "java.server.launchMode": "Standard",
         "java.signatureHelp.description.enabled": true,
