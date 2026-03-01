@@ -69,7 +69,7 @@ public class Intake extends SubsystemBase {
     }
 
     public Command intake() {
-        return run(this::fullSpeed).withName("Intake Full Speed");
+        return run(this::intakeFullSpeed).withName("Intake Full Speed");
     }
 
     public Command stop() {
@@ -81,7 +81,7 @@ public class Intake extends SubsystemBase {
         m_motor2.stop();
     }
 
-    private void fullSpeed() {
+    private void intakeFullSpeed() {
         // motor max velocity is 6000 RPM or 100 rev/s or 600 rad/s
         // we want to choose about 75% of that, so 450 rad/s
         double velocityRad_S = 450;

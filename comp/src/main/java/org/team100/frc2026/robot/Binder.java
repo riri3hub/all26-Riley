@@ -69,8 +69,7 @@ public class Binder {
         m_machinery.m_shooterHood.setDefaultCommand(
                 m_machinery.m_shooterHood.stop());
         m_machinery.m_serializer.setDefaultCommand(
-            m_machinery.m_serializer.stop()
-        );
+            m_machinery.m_serializer.stop());
         m_machinery.m_serializerUpper.setDefaultCommand(
             m_machinery.m_serializerUpper.stop());
 
@@ -89,14 +88,12 @@ public class Binder {
         // accuracy.
         HolonomicProfile profile = HolonomicProfileFactory.get(
                 m_log, m_machinery.m_swerveKinodynamics, 1, 0.5, 1, 0.2);
-        onTrue(driver::a,
+        onTrue(driver::b,
                 new DriveToPoseWithProfile(
                         m_log, m_machinery.m_drive, m_machinery.m_holonomicController,
                         profile, () -> new Pose2d(15.387, 3.501, new Rotation2d(0))));
 
-        whileTrue(driver::b, m_machinery.m_shooter.shooterFullspeed());
-        whileTrue(driver::x, m_machinery.m_intake.intake());
-        whileTrue(driver::y, m_machinery.m_serializer.serialize());
+
 
         // whileTrue(driver::leftBumper, m_machinery.m_extender.goToExtendedPosition());
         // whileTrue(driver::rightBumper,
@@ -104,20 +101,21 @@ public class Binder {
         //
         // whileTrue(driver::rightTrigger,
         // m_machinery.m_ClimberExtension.setPosition());
-        // whileTrue(driver::x,
-        // m_machinery.m_ClimberExtension.setPosition()
-        // .andThen(m_machinery.m_Climber.setClimb1()));
-        // whileTrue(driver::b,
-        // m_machinery.m_ClimberExtension.setPosition()
-        // .andThen(m_machinery.m_Climber.setClimb3()));
-        // whileTrue(driver::a,
-        // m_machinery.m_Climber.setClimb0()
-        // .andThen(m_machinery.m_ClimberExtension.setHomePosition()));
+
+        //CLIMBER
+        whileTrue(driver::x,
+        m_machinery.m_ClimberExtension.setPosition()
+        .andThen(m_machinery.m_Climber.setClimb1()));
+        whileTrue(driver::a,
+        m_machinery.m_ClimberExtension.setPosition()
+        .andThen(m_machinery.m_Climber.setClimb3()));
+        whileTrue(driver::y,
+        m_machinery.m_Climber.setClimb0()
+        .andThen(m_machinery.m_ClimberExtension.setHomePosition()));
 
         ////////////////////////////////////////////////////
         ///
         /// INTAKE
-        ///
         whileTrue(driver::leftBumper,
                 m_machinery.m_extender.goToRetractedPosition());
         whileTrue(driver::leftTrigger,
@@ -127,7 +125,6 @@ public class Binder {
         ////////////////////////////////////////////////////
         ///
         /// AIM
-        ///
         FeedbackR1 thetaFeedback = new PIDFeedback(
                 m_log, 3.2, 0, 0, true, 0.05, 1);
         // aim at the hub, button 6 and also in the alliance zone
@@ -165,20 +162,19 @@ public class Binder {
         ////////////////////////////////////////////////////
         ///
         /// SHOOT
-        ///
-        Command runshooter = m_machinery.m_shooter.shooterFullspeed();
-        Command runhood = m_machinery.m_shooterHood.position();
-        Command runserial = m_machinery.m_serializer.serialize();
+        Command runShooter = m_machinery.m_shooter.shooterFullspeed();
+        Command runHood = m_machinery.m_shooterHood.position();
+        Command runSerial = m_machinery.m_serializer.serialize();
         Command runSerialUpper = m_machinery.m_serializerUpper.serializerUpperFullspeed();
-        // TODO: maybe add a delay between runhood and runshooter?
+
         whileTrue(driver::rightTrigger,
                 parallel(
-                        runshooter,
-                        runhood,
+                        runHood,
+                        runShooter,
                         runSerialUpper,
                         Commands.repeatingSequence(
                                 waitUntil(m_machinery.m_shooter::atSpeed),
-                                runserial.onlyWhile(m_machinery.m_shooter::atSpeed))));
+                                runSerial.onlyWhile(m_machinery.m_shooter::atSpeed))));
 
         ////////////////////////////////////////////////////
         //
