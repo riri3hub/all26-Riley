@@ -113,6 +113,9 @@ public class Binder {
         m_machinery.m_Climber.setClimb0()
         .andThen(m_machinery.m_ClimberExtension.setHomePosition()));
 
+        // whileTrue(driver::y, m_machinery.m_shooter.testMotor1Command());
+        // whileTrue(driver::a, m_machinery.m_shooter.testMotor2Command());
+        // whileTrue(driver::x, m_machinery.m_shooter.testMotor3Command());
         ////////////////////////////////////////////////////
         ///
         /// INTAKE

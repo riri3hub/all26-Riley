@@ -22,7 +22,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
-    public static final CanId canID = new CanId(0);
+    public static final CanId canID1 = new CanId(4);
+    public static final CanId canID2 = new CanId(5);
+    public static final CanId canID3 = new CanId(14);
 
     private final OutboardLinearVelocityServo m_servo1;
     private final OutboardLinearVelocityServo m_servo2;
@@ -45,21 +47,21 @@ public class Shooter extends SubsystemBase {
                 PIDConstants PID = PIDConstants.makeVelocityPID(log, 0.1);
                 // two is too low, even for unloaded case
                 double supplyLimit = 50;
-                double statorLimit = 20;
+                double statorLimit = 40;
 
                 SimpleDynamics dynamics = new SimpleDynamics(log, 0.004, 0.002);
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
                 // TODO: set canIDs
                 BareMotor m_motor1 = new KrakenX60Motor(
-                        log1, canID, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        log1, canID1, NeutralMode100.COAST, MotorPhase.FORWARD,
                         supplyLimit, statorLimit, dynamics, friction, PID);
 
                 BareMotor m_motor2 = new KrakenX60Motor(
-                        log2, canID, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        log2, canID2, NeutralMode100.COAST, MotorPhase.REVERSE,
                         supplyLimit, statorLimit, dynamics, friction, PID);
 
                 BareMotor m_motor3 = new KrakenX60Motor(
-                        log3, canID, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        log3, canID3, NeutralMode100.COAST, MotorPhase.FORWARD,
                         supplyLimit, statorLimit, dynamics, friction, PID);
 
                 // verify these numbers
@@ -119,6 +121,18 @@ public class Shooter extends SubsystemBase {
         return run(this::fullSpeed).withName("Shoot full speed");
     }
 
+    public Command testMotor1Command() {
+        return run(this::testMotor1).withName("Motor 1 Spin");
+    }
+
+    public Command testMotor2Command() {
+        return run(this::testMotor2).withName("Motor 2 Spin");
+    }
+
+    public Command testMotor3Command() {
+        return run(this::testMotor3).withName("Motor 3 Spin");
+    }
+
     public Command stop() {
         return run(this::stopMotor).withName("stop Shooter");
     }
@@ -134,6 +148,18 @@ public class Shooter extends SubsystemBase {
         m_servo1.setVelocityProfiled(Velocity);
         m_servo2.setVelocityProfiled(Velocity);
         m_servo3.setVelocityProfiled(Velocity);
+    }
+    
+    private void testMotor1() {
+        m_servo1.setDutyCycle(1);
+    }
+
+    private void testMotor2() {
+        m_servo2.setDutyCycle(1);
+    }
+
+    private void testMotor3() {
+        m_servo3.setDutyCycle(1);
     }
 
     public void setSpeed(double Velocity) {
