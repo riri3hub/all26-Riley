@@ -42,11 +42,10 @@ class RealCamera(Camera):
         print("\n*** CAMERA CONTROLS")
         pprint(self._cam.camera_controls)  # type:ignore
 
+        self._mtx: Intrinsic = Intrinsic(identity)
+        self._dist: Distortion = Distortion(identity)
+
         model: Model = Model.get(self._cam.camera_properties)  # type: ignore
-
-        self._mtx: Intrinsic = Intrinsic(identity, model)
-        self._dist: Distortion = Distortion(identity, model)
-
         self._rolling = Shutter(model).rolling()
         self._size: Size = Size.from_model(model)
 
@@ -114,7 +113,7 @@ class RealCamera(Camera):
             controls={
                 # ANALOGUE GAIN
                 # To minimize blur, set this as high as possible.
-                # TODO: what is the limit here?
+                # TODO: try much larger values, up to 250.
                 "AnalogueGain": 8,
                 #
                 # AUTO EXPOSURE

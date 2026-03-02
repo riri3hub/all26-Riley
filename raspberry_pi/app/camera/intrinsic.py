@@ -3,7 +3,6 @@
 import numpy as np
 from numpy.typing import NDArray
 
-from app.camera.model import Model
 from app.config.identity import Identity
 
 
@@ -12,92 +11,80 @@ class Intrinsic:
 
     This should be measured using mrcal.
 
+    Intrinsic matrix is:
+
+    fx 0 cx
+    0 fy cy
+    0 0 1
+
+    For the GS camera with the 3.2mm lens, typical values are
+
+    * fx and fy (focal length) around 940
+    * cx (center) around 680
+    * cy (center) around 530
+
+    Note the wide variance in cx and cy, which corresponds to variation sensor/lens alignment.
+
     See doc/calibration.md.
     """
 
-    def __init__(self, identity: Identity, model: Model) -> None:
+    def __init__(self, identity: Identity) -> None:
         self._mtx: NDArray[np.float32]
-        match model:
-            case Model.V3_WIDE:
-                self._mtx = Intrinsic.__mtx_v3()
-            case Model.V2:
-                self._mtx = Intrinsic.__mtx_v2()
-            case Model.GS:
-                self._mtx = Intrinsic.__mtx_gs(identity)
-            case _:
+        self._valid: bool = True
+        match identity:
+            #
+            # Camerabot cameras 2026
+            #
+            case Identity.CAMERA_BACK:
+                # Calibrated 2/28/26.
                 self._mtx = np.array(
                     [
-                        [100, 0, 50],
-                        [0, 100, 50],
-                        [0, 0, 1],
-                    ]
-                )
-
-        print("\n*** INTRINSIC")
-        print(self._mtx)
-
-    def get(self) -> NDArray[np.float32]:
-        return self._mtx
-
-    @staticmethod
-    def __mtx_v2() -> NDArray[np.float32]:
-        return np.array(
-            [
-                [660, 0, 426],
-                [0, 660, 303],
-                [0, 0, 1],
-            ]
-        )
-
-    @staticmethod
-    def __mtx_v3() -> NDArray[np.float32]:
-        return np.array(
-            [
-                [498, 0, 584],
-                [0, 498, 316],
-                [0, 0, 1],
-            ]
-        )
-
-    @staticmethod
-    def __mtx_gs(identity: Identity) -> NDArray[np.float32]:
-        """Intrinsic matrices for 3.2 mm lens.  Do not use the 6 mm lens."""
-        match identity:
-            case Identity.DEV:
-                return np.array(
-                    [
-                        [944.3507484, 0.0, 693.7105365],
-                        [0.0, 943.8611003, 498.1103206],
+                        [943.2920845, 0.0, 681.6154074],
+                        [0.0, 943.3584029, 529.4306382],
                         [0, 0, 1],
                     ]
                 )
             case Identity.CAMERA_FRONT:
-                return np.array(
+                # Calibrated 2/28/26.
+                self._mtx = np.array(
                     [
                         [938.1915949, 0.0, 688.2664656],
                         [0.0, 936.4271902, 532.2874067],
                         [0, 0, 1],
                     ]
                 )
+            #
+            # TODO: clean up the entries below
+            #
+
+            #
+            #
+            #
+            case Identity.DEV:
+                self._mtx = np.array(
+                    [
+                        [944.3507484, 0.0, 693.7105365],
+                        [0.0, 943.8611003, 498.1103206],
+                        [0, 0, 1],
+                    ]
+                )
             case Identity.CORAL_RIGHT:
-                return np.array(
+                self._mtx = np.array(
                     [
                         [938.0364397, 0.0, 674.7133631],
                         [0.0, 937.4685798, 548.7346201],
                         [0, 0, 1],
                     ]
                 )
-            case Identity.CAMERA_BACK:
-                return np.array(
-                    [
-                        [943.2920845, 0.0, 681.6154074],
-                        [0.0, 943.3584029,529.4306382],
-                        [0,0,1]             
-                    ]   
-                )
-                
             case _:
-                # Default GS model intrinsic matrix
+                self._mtx = np.array(
+                    [
+                        [944.3507484, 0.0, 693.7105365],
+                        [0.0, 943.8611003, 498.1103206],
+                        [0, 0, 1],
+                    ]
+                )
+                self._valid = False
                 print("##########################################")
                 print("#                                        #")
                 print("#  CAMERA INTRINSIC IS NOT CALIBRATED!   #")
@@ -106,10 +93,11 @@ class Intrinsic:
                 print("#                                        #")
                 print("##########################################")
 
-                return np.array(
-                    [
-                        [944.3507484, 0.0, 693.7105365],
-                        [0.0, 943.8611003, 498.1103206],
-                        [0, 0, 1],
-                    ]
-                )
+        print("\n*** INTRINSIC")
+        print(self._mtx)
+
+    def get(self) -> NDArray[np.float32]:
+        return self._mtx
+
+    def valid(self) -> bool:
+        return self._valid

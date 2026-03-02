@@ -9,7 +9,6 @@
     ],
     "python.testing.pytestEnabled": false,
     "python.testing.unittestEnabled": true,
-    "workbench.colorTheme": "Default Dark+",
     "editor.minimap.enabled": false,
     "python.analysis.typeCheckingMode": "strict",
     "mypy-type-checker.reportingScope": "workspace",
@@ -24,8 +23,17 @@
     "python.analysis.autoImportCompletions": true,
     "python.analysis.diagnosticMode": "workspace",
     "editor.stickyScroll.scrollWithEditor": false,
+    "workbench.colorCustomizations": {
+        "debugConsole.infoForeground": "#ffffff",
+        "tab.activeBackground":"#5f5f00",
+        "editor.background":"#000000",
+        "editorCursor.foreground":"#ffffff"
+    },
+    "workbench.colorTheme": "Default Dark+",
     "workbench.tree.enableStickyScroll": false,
     "editor.stickyScroll.enabled": false,
+    "editor.cursorWidth":2,
+    "editor.multiCursorLimit": 1,
     "workbench.editor.revealIfOpen": true,
     "python.analysis.diagnosticSeverityOverrides": {
         "reportArgumentType": "none",

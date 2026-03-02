@@ -28,7 +28,21 @@ except FileNotFoundError:
 
 @unique
 class Identity(Enum):
-    # 2024 comp bot cameras
+    #
+    # Camera-bot 2026
+    #
+    CAMERA_BACK = "d44649628c20d4d4"
+    """2026 camerabot, 10.1.0.24"""
+    CAMERA_FRONT = "8ddb2ed6c49a9bce"
+    """2026 camerabot, 10.1.0.32"""
+
+    #
+    # TODO: clean up the entries below
+    #
+    
+    #
+    # Comp bot 2024 
+    #
     SHOOTER = "10000000a7a892c0"
     RIGHTAMP = "10000000caeaae82"
     LEFTAMP = "100000004e0a1fb9"
@@ -36,13 +50,9 @@ class Identity(Enum):
     DIST_TEST = "cf206cd348d20bdd"
     DEV2 = "4230a96261f3ab90"
 
-    # camera-bot cameras
-    CAMERA_BACK = "d44649628c20d4d4" #24
-    CAMERA_FRONT = "8ddb2ed6c49a9bce"  # 32
-
-    # comp bot
+    # Comp bot 2025
     FUNNEL = "1e5acbaa5a7f9d10"  # 30
-    
+
     DEV = "364f07fb090a3bf7"  # 31
     SWERVE_LEFT = "8132c256f63bbb4e"  # 33
     SWERVE_RIGHT = "47403d5eafe002a9"  # 34

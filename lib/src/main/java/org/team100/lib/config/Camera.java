@@ -14,6 +14,29 @@ import edu.wpi.first.math.geometry.Translation3d;
  * x is forward, y is left, and z is up
  */
 public enum Camera {
+    //
+    // Camera-bot cameras 2026
+    //
+
+    /**
+     * Camera bot rear facing, 10.1.0.24
+     */
+    CAMERA_BACK("d44649628c20d4d4",
+            fromCalibration(
+                    new Transform3d(0.96, 0.031, 0.57, new Rotation3d(0, 0, Math.PI)),
+                    new Transform3d(0.926, -0.293, -0.165, new Rotation3d(1.599, 0.03, 0.09)))),
+
+    /**
+     * Camera bot front facing
+     */
+    CAMERA_FRONT("8ddb2ed6c49a9bce",
+            fromCalibration(
+                    new Transform3d(0.96, 0.031, 0.57, new Rotation3d(0, 0, 0)),
+                    new Transform3d(1.001, 0.267, -0.044, new Rotation3d(-1.57, -0.02, -0.05)))),
+
+    //
+    // TODO: cleanup the entries below
+    //
 
     C("10000000a7c673d9",
             new Transform3d(new Translation3d(0, 0, 1), new Rotation3d(0, -Math.toRadians(10), 0))),
@@ -49,14 +72,6 @@ public enum Camera {
                     new Rotation3d(0, Math.toRadians(31.5), Math.PI))),
 
     /**
-     * Camera bot rear facing
-     */
-    CAMERA_BACK("d44649628c20d4d4",
-            fromCalibration(
-                    new Transform3d(0.96, 0.031, 0.57, new Rotation3d(0, 0, Math.PI)),
-                    new Transform3d(0.926, -0.293, -0.165, new Rotation3d(1.599, 0.03, 0.09)))),
-
-    /**
      * Right swerve
      */
     SWERVE_RIGHT("47403d5eafe002a9",
@@ -75,20 +90,10 @@ public enum Camera {
     /**
      * Funnel
      */
-
-    // Turn off all rotation, get tag in robot numbers then add unary minus
     FUNNEL("1e5acbaa5a7f9d10",
             new Transform3d(
                     new Translation3d(-0.034, -0.213, 0.902),
                     new Rotation3d(0.07, 0.48, 0.20).unaryMinus().plus(new Rotation3d(0, 0, Math.PI)))),
-
-    /**
-     * Camera bot front facing
-     */
-    CAMERA_FRONT("8ddb2ed6c49a9bce",
-            fromCalibration(
-                    new Transform3d(0.96, 0.031, 0.57, new Rotation3d(0, 0, 0)),
-                    new Transform3d(1.001, 0.267, -0.044, new Rotation3d(-1.57, -0.02, -0.05)))),
 
     /**
      * Coral reef right
@@ -98,6 +103,18 @@ public enum Camera {
                     new Translation3d(-0.29, -0.22, 0.89),
                     new Rotation3d(-0.14, -0.68, 0.23).unaryMinus().plus(new Rotation3d(0, 0, Math.PI)))),
 
+    /**
+     * For prototyping
+     */
+    DEV("364f07fb090a3bf7",
+            new Transform3d(
+                    new Translation3d(0.155, 0.295, 0.372),
+                    new Rotation3d(0.05, -0.14, -.33).unaryMinus())),
+
+    //
+    // For unit tests.
+    //
+    ORIGIN("origin", new Transform3d()),
     TEST4("test4",
             new Transform3d(
                     new Translation3d(0, 0, 1),
@@ -106,12 +123,6 @@ public enum Camera {
             new Transform3d(
                     new Translation3d(0, 0.1, 1),
                     new Rotation3d(0, 0, 0))),
-
-    DEV("364f07fb090a3bf7",
-            new Transform3d(
-                    new Translation3d(0.155, 0.295, 0.372),
-                    new Rotation3d(0.05, -0.14, -.33).unaryMinus())),
-
     TEST6("test6",
             new Transform3d(
                     new Translation3d(0.198, 0.284, 0.811),
@@ -133,7 +144,9 @@ public enum Camera {
                     new Translation3d(),
                     new Rotation3d(0, Math.PI / 6, 0))),
 
-    /** Four directions for simulation, a bit off the floor */
+    //
+    // Four directions for simulation, a bit off the floor.
+    //
     SIM0("sim0",
             new Transform3d(
                     new Translation3d(0, 0, 0.75),
@@ -151,6 +164,9 @@ public enum Camera {
                     new Translation3d(0, 0, 0.75),
                     new Rotation3d(0, 0, -Math.PI / 2))),
 
+    //
+    // This should never be used
+    //
     UNKNOWN(null, new Transform3d());
 
     private static Map<String, Camera> cameras = new HashMap<>();
@@ -170,8 +186,13 @@ public enum Camera {
     public static Camera get(String serialNumber) {
         if (cameras.containsKey(serialNumber))
             return cameras.get(serialNumber);
-        // Always warn about missing camera ID.
-        System.out.printf("*** Using Camera UNKNOWN for serial number %s\n", serialNumber);
+        // throw new IllegalArgumentException(
+        // String.format("unknown camera serial number: \s", serialNumber));
+        System.out.println("#############################################");
+        System.out.println("###");
+        System.out.printf("### Unknown camera serial number: %s\n", serialNumber);
+        System.out.println("###");
+        System.out.println("#############################################");
         return UNKNOWN;
     }
 
