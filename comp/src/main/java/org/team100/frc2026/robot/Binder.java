@@ -90,9 +90,9 @@ public class Binder {
         HolonomicProfile profile = HolonomicProfileFactory.get(
                 m_log, m_machinery.m_swerveKinodynamics, 1, 0.5, 1, 0.2);
         onTrue(driver::b,
-               new DriveToPoseWithProfile(
-                       m_log, m_machinery.m_drive, m_machinery.m_holonomicController,
-                     profile, () -> new Pose2d(15.387, 3.501, new Rotation2d(0))));
+                new DriveToPoseWithProfile(
+                        m_log, m_machinery.m_drive, m_machinery.m_holonomicController,
+                        profile, () -> new Pose2d(15.387, 3.501, new Rotation2d(0))));
 
         // whileTrue(driver::leftBumper, m_machinery.m_extender.goToExtendedPosition());
         // whileTrue(driver::rightBumper,
@@ -102,9 +102,19 @@ public class Binder {
         // m_machinery.m_ClimberExtension.setPosition());
 
         // CLIMBER
+
+        // These are from ClimberExtendTEST
+        // whileTrue(driver::x,
+        // m_machinery.m_ClimberExtension.setPosition());
+        // whileTrue(driver ::y, m_machinery.m_ClimberExtension.setHomePosition());
+        // whileTrue(driver:: a, m_machinery.m_Climber.setClimb3());
+        // whileTrue(driver:: b, m_machinery.m_Climber.setClimb0());
+
+        //
+
         whileTrue(driver::x,
-               m_machinery.m_ClimberExtension.setPosition()
-                      .andThen(m_machinery.m_Climber.setClimb1()));
+                m_machinery.m_ClimberExtension.setPosition()
+                        .andThen(m_machinery.m_Climber.setClimb1()));
         whileTrue(driver::a,
                 sequence(
                         m_machinery.m_ClimberExtension.setPosition().withTimeout(1),
