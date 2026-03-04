@@ -44,8 +44,8 @@ public class SerializerUpper extends SubsystemBase {
         final BareMotor m2;
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
-                double supplyLimit = 50;
-                double statorLimit = 40;
+                double supplyLimit = 120;
+                double statorLimit = 120;
                 SimpleDynamics dynamics = new SimpleDynamics(log, 0.004, 0.002);
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, WHEEL_DIAMETER_M);
