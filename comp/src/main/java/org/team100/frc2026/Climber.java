@@ -40,7 +40,7 @@ public class Climber extends SubsystemBase {
         final BareMotor m1;
         final BareMotor m2;
         switch (Identity.instance) {
-            case COMP_BOT, TEST_BOARD_B0 -> {
+            case TEST_BOARD_B0 -> {
                 int supplyLimit = 60;
                 int statorLimit = 40;
                 SimpleDynamics ff = new SimpleDynamics(log, 0, 0);

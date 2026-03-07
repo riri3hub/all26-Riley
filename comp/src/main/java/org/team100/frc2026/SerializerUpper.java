@@ -83,6 +83,11 @@ public class SerializerUpper extends SubsystemBase {
                 .withName("test to Shooter full speed");
     }
 
+    public Command testSerializerUpperBack() {
+        return run(this::dutyCycleAllBack)
+                .withName("test to Shooter full speed back");
+    }
+
     public Command stop() {
         return run(this::stopMotor)
                 .withName("stop Shooter feed");
@@ -115,5 +120,10 @@ public class SerializerUpper extends SubsystemBase {
     private void dutyCycleAll() {
         m_servo1.setDutyCycle(1);
         m_servo2.setDutyCycle(1);
+    }
+
+    private void dutyCycleAllBack() {
+        m_servo1.setDutyCycle(-1);
+        m_servo2.setDutyCycle(-1);
     }
 }

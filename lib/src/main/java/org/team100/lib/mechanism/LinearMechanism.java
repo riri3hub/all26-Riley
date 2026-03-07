@@ -136,7 +136,6 @@ public class LinearMechanism implements Player {
     /** Nearly cached. */
     public double getPositionM() {
         double positionRad = m_encoder.getUnwrappedPositionRad();
-
         return positionRad * m_wheelRadiusM / m_gearRatio;
     }
 
