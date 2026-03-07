@@ -67,12 +67,12 @@ public class Binder {
                 m_machinery.m_intake.stop());
         m_machinery.m_intakeExtend.setDefaultCommand(
                 m_machinery.m_intakeExtend.stop());
-        m_machinery.m_serializer.setDefaultCommand(
-                m_machinery.m_serializer.stop());
+        m_machinery.m_conveyor.setDefaultCommand(
+                m_machinery.m_conveyor.stop());
         m_machinery.m_shooter.setDefaultCommand(
                 m_machinery.m_shooter.stop());
-        m_machinery.m_serializerUpper.setDefaultCommand(
-                m_machinery.m_serializerUpper.stop());
+        m_machinery.m_feeder.setDefaultCommand(
+                m_machinery.m_feeder.stop());
         m_machinery.m_shooterHood.setDefaultCommand(
                 m_machinery.m_shooterHood.stop());
         m_machinery.m_Climber.setDefaultCommand(
@@ -196,11 +196,11 @@ public class Binder {
 
         Command runShooter = m_machinery.m_shooter.testShooterFullspeed();
         Command runHood = m_machinery.m_shooterHood.position();
-        Command runSerial = m_machinery.m_serializer.testSerialize();
-        Command runSerialBack = m_machinery.m_serializer.testSerializeBack();
-        Command runSerialUpper = m_machinery.m_serializerUpper.testSerializerUpper();
+        Command runConveyor = m_machinery.m_conveyor.testConveyor();
+        Command runConveyorBack = m_machinery.m_conveyor.testConveyorBack();
+        Command runFeeder = m_machinery.m_feeder.testFeed();
         Command runShooter3 = m_machinery.m_shooter.testMotor3Command();
-        Command runSerialUpperBack = m_machinery.m_serializerUpper.testSerializerUpperBack();
+        Command runFeederBack = m_machinery.m_feeder.testFeedBack();
         // whileTrue(driver::rightTrigger,
         // parallel(
         // runHood,
@@ -216,8 +216,8 @@ public class Binder {
         // whileTrue(driver::y, m_machinery.m_shooter.testMotor2Command());
         // whileTrue(driver::a, m_machinery.m_shooter.testMotor3Command());
         // whileTrue(driver::b, parallel(runShooter, runSerial, runSerialUpper));
-        whileTrue(driver::a, parallel(runSerial, runSerialUpper));
-        whileTrue(driver::b, parallel(runSerialBack, runSerialUpperBack));
+        whileTrue(driver::a, parallel(runConveyor, runFeeder));
+        whileTrue(driver::b, parallel(runConveyorBack, runFeederBack));
         whileTrue(driver::x, runShooter);
 
         // whileTrue(driver::rightTrigger, parallel(runSerial, runSerialUpper,

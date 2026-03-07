@@ -65,7 +65,9 @@ public class SwerveModuleCollection implements Player {
         LoggerFactory rearRightLogger = collectionLogger.name("Rear Right");
 
         switch (Identity.instance) {
-            case COMP_BOT:
+            // TODO: turned off while testing
+            // case COMP_BOT:
+            case SWERVE_TWO:
                 System.out.println("************** WCP MODULES w/Duty-Cycle Encoders **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.getKrakenDrive(frontLeftLogger, supplyLimit, statorLimit,
@@ -136,7 +138,6 @@ public class SwerveModuleCollection implements Player {
                                 kinodynamics,
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE));
             case BETA_BOT:
-            case SWERVE_TWO:
             case BLANK:
             default:
                 if (DEBUG)

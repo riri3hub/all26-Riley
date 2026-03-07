@@ -7,8 +7,8 @@ import org.team100.frc2026.Climber;
 import org.team100.frc2026.ClimberExtension;
 import org.team100.frc2026.Intake;
 import org.team100.frc2026.IntakeExtend;
-import org.team100.frc2026.Serializer;
-import org.team100.frc2026.SerializerUpper;
+import org.team100.frc2026.Conveyor;
+import org.team100.frc2026.Feeder;
 import org.team100.frc2026.Shooter;
 import org.team100.frc2026.ShooterHood;
 import org.team100.frc2026.Targeter;
@@ -77,12 +77,12 @@ public class Machinery {
     public final Shooter m_shooter;
     public final Intake m_intake;
     public final IntakeExtend m_intakeExtend;
-    public final Serializer m_serializer;
+    public final Conveyor m_conveyor;
     public final ShooterHood m_shooterHood;
     public final ClimberExtension m_ClimberExtension;
     public final Climber m_Climber;
     public final ControllerSE2 m_holonomicController;
-    public final SerializerUpper m_serializerUpper;
+    public final Feeder m_feeder;
 
     public Machinery() {
 
@@ -171,9 +171,9 @@ public class Machinery {
         m_intake = new Intake(logger);
         m_intakeExtend = new IntakeExtend(logger);
 
-        m_serializer = new Serializer(logger);
+        m_conveyor = new Conveyor(logger);
         m_shooter = new Shooter(logger, targeter::speed);
-        m_serializerUpper = new SerializerUpper(logger, m_shooter);
+        m_feeder = new Feeder(logger, m_shooter);
         m_shooterHood = new ShooterHood(logger, targeter::angle);
 
         m_ClimberExtension = new ClimberExtension(logger);

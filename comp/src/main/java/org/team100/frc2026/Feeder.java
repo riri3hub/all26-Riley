@@ -20,28 +20,28 @@ import org.team100.lib.util.CanId;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Serializer extends SubsystemBase {
-    private static final CanId canID1 = new CanId(19);
-    private static final CanId canID2 = new CanId(20);
-    private static final double TOLERANCE_M_S = 1;
-    private static final double GEAR_RATIO = 3;
-    private static final double WHEEL_DIAMETER_M = 0.1;
+public class Feeder extends SubsystemBase {
+    public static final CanId canID1 = new CanId(8);
+    public static final CanId canID2 = new CanId(9);
+    private static final double TOLERANCE_M_S = 1.0;
+    private static final double GEAR_RATIO = 1.0;
+    private static final double WHEEL_DIAMETER_M = 0.05;
 
     private final OutboardLinearVelocityServo m_servo1;
     private final OutboardLinearVelocityServo m_servo2;
 
-    public Serializer(LoggerFactory parent) {
-        LoggerFactory log = parent.type(this);
-        LoggerFactory log1 = log.name("Serializer1");
-        LoggerFactory log2 = log.name("Serializer2");
+    private final Shooter m_Shooter;
 
+    public Feeder(LoggerFactory parent, Shooter shooter) {
+        LoggerFactory log = parent.type(this);
+        LoggerFactory log1 = log.name("Feeder1");
+        LoggerFactory log2 = log.name("Feeder2");
+        m_Shooter = shooter;
         VelocityProfileR1 profile = new AccelLimitedVelocityProfileR1(10);
         VelocityReferenceR1 ref = new VelocityProfileReferenceR1(
                 log, () -> profile, 1);
-
         final BareMotor m1;
         final BareMotor m2;
-
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
                 double supplyLimit = 120;
@@ -50,10 +50,10 @@ public class Serializer extends SubsystemBase {
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
                 m1 = new KrakenX44Motor(
-                        log1, canID1, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        log1, canID1, NeutralMode100.COAST, MotorPhase.FORWARD,
                         supplyLimit, statorLimit, dynamics, friction, pid);
                 m2 = new KrakenX44Motor(
-                        log2, canID2, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        log2, canID2, NeutralMode100.COAST, MotorPhase.FORWARD,
                         supplyLimit, statorLimit, dynamics, friction, pid);
             }
             default -> {
@@ -73,27 +73,27 @@ public class Serializer extends SubsystemBase {
         m_servo2.periodic();
     }
 
-    public Command serialize() {
-        return startRun(this::reset, () -> setVelocityProfiled(0.5))
-                .withName("Serialize");
+    public Command fullspeed() {
+        return startRun(this::reset, this::feedWhenReady)
+                .withName("to Shooter full speed");
     }
 
-    public Command testSerialize() {
+    public Command testFeed() {
         return run(this::dutyCycleAll)
-                .withName("Test Serialize");
+                .withName("test to Shooter full speed");
     }
 
-    public Command testSerializeBack() {
-        return run(this::dutyCycleBackAll)
-                .withName("Test Back Serialize");
+    public Command testFeedBack() {
+        return run(this::dutyCycleAllBack)
+                .withName("test to Shooter full speed back");
     }
 
     public Command stop() {
         return run(this::stopMotor)
-                .withName("stop serializing");
+                .withName("stop Shooter feed");
     }
 
-    //////////////////////////////////////////
+    ///////////////////////////////////////////////////////
 
     private void reset() {
         m_servo1.reset();
@@ -105,9 +105,16 @@ public class Serializer extends SubsystemBase {
         m_servo2.stop();
     }
 
-    private void setVelocityProfiled(double goalM_S) {
-        m_servo1.setVelocityProfiled(goalM_S);
-        m_servo2.setVelocityProfiled(goalM_S);
+    private void feedWhenReady() {
+        if (m_Shooter.atSpeed()) {
+            double Velocity = 5.0;
+            m_servo1.setVelocityProfiled(Velocity);
+            m_servo2.setVelocityProfiled(Velocity);
+        } else {
+            double Zero = 0;
+            m_servo1.setVelocityProfiled(Zero);
+            m_servo2.setVelocityProfiled(Zero);
+        }
     }
 
     private void dutyCycleAll() {
@@ -115,7 +122,7 @@ public class Serializer extends SubsystemBase {
         m_servo2.setDutyCycle(1);
     }
 
-    private void dutyCycleBackAll() {
+    private void dutyCycleAllBack() {
         m_servo1.setDutyCycle(-1);
         m_servo2.setDutyCycle(-1);
     }
