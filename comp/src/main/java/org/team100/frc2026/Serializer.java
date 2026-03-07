@@ -74,13 +74,18 @@ public class Serializer extends SubsystemBase {
     }
 
     public Command serialize() {
-        return startRun(this::reset, ()->setVelocityProfiled(0.5))
+        return startRun(this::reset, () -> setVelocityProfiled(0.5))
                 .withName("Serialize");
     }
 
     public Command testSerialize() {
         return run(this::dutyCycleAll)
                 .withName("Test Serialize");
+    }
+
+    public Command testSerializeBack() {
+        return run(this::dutyCycleBackAll)
+                .withName("Test Back Serialize");
     }
 
     public Command stop() {
@@ -108,5 +113,10 @@ public class Serializer extends SubsystemBase {
     private void dutyCycleAll() {
         m_servo1.setDutyCycle(1);
         m_servo2.setDutyCycle(1);
+    }
+
+    private void dutyCycleBackAll() {
+        m_servo1.setDutyCycle(-1);
+        m_servo2.setDutyCycle(-1);
     }
 }

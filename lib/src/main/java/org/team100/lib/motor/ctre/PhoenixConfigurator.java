@@ -20,7 +20,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 /** Utilities for CTRE Phoenix motors: Falcon, Kraken. */
 public class PhoenixConfigurator {
     private static final boolean DEBUG = false;
-    private static final boolean ACTUALLY_CRASH = true;
+    private static final boolean ACTUALLY_CRASH = false;
     /**
      * The default is 0.05. This is much longer, to eliminate unnecessary config
      * failures.

@@ -23,10 +23,10 @@ public class EmpiricalInverseRange implements DoubleFunction<FiringParameters> {
         m_map = new InterpolatingTreeMap<>(
                 InverseInterpolator.forDouble(), new FiringParametersInterpolator());
         // these values should be determined experimentally.
-        m_map.put(0.0, new FiringParameters(0.00, 0.00));
-        m_map.put(1.0, new FiringParameters(0.05, 0.16));
-        m_map.put(2.0, new FiringParameters(0.16, 0.37));
-        m_map.put(3.0, new FiringParameters(0.47, 0.75));
+        m_map.put(0.0, new FiringParameters(0, 5, 0.00, 0.00));
+        m_map.put(1.0, new FiringParameters(1, 5, 0.05, 0.16));
+        m_map.put(2.0, new FiringParameters(2, 5, 0.16, 0.37));
+        m_map.put(3.0, new FiringParameters(3, 5, 0.47, 0.75));
     }
 
     public FiringParameters apply(double range) {

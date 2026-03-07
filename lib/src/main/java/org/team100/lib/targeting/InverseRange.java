@@ -30,7 +30,7 @@ public class InverseRange implements DoubleFunction<FiringParameters> {
             double maxElevation,
             double targetHeight,
             double minTargetElevation,
-            double v,
+            double muzzleVelocity,
             double omega) {
         m_minElevation = minElevation;
         m_maxElevation = maxElevation;
@@ -40,13 +40,14 @@ public class InverseRange implements DoubleFunction<FiringParameters> {
         if (DEBUG)
             System.out.println("range, elevation, tof");
         for (double elevation = m_minElevation; elevation <= m_maxElevation; elevation += ELEVATION_STEP) {
-            Interception solution = rangeSolver.getSolution(v, omega, elevation);
+            Interception solution = rangeSolver.getSolution(muzzleVelocity, omega, elevation);
             if (solution == null) {
                 if (DEBUG)
-                    System.out.printf("null for v %f omega %f elevation %f\n", v, omega, elevation);
+                    System.out.printf("null for v %f omega %f elevation %f\n", muzzleVelocity, omega, elevation);
                 continue;
             }
-            FiringParameters params = new FiringParameters(elevation, solution.tof());
+            FiringParameters params = new FiringParameters(
+                    solution.range(), muzzleVelocity, elevation, solution.tof());
             if (DEBUG)
                 System.out.printf("%6.3f, %6.3f, %6.3f\n",
                         solution.range(), params.elevation(), params.tof());

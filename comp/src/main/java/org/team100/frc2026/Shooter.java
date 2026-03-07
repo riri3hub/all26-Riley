@@ -29,7 +29,7 @@ public class Shooter extends SubsystemBase {
     private static final CanId CAN_ID_3 = new CanId(14);
     private static final double TOLERANCE_M_S = 1;
     private static final double GEAR_RATIO = 1;
-    private static final double WHEEL_DIAMETER_M = 0.1;
+    private static final double WHEEL_DIAMETER_M = 0.075;
 
     private final Supplier<OptionalDouble> m_speed;
 
