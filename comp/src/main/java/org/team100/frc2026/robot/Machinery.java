@@ -5,10 +5,10 @@ import java.util.function.UnaryOperator;
 
 import org.team100.frc2026.Climber;
 import org.team100.frc2026.ClimberExtension;
-import org.team100.frc2026.Intake;
-import org.team100.frc2026.IntakeExtend;
 import org.team100.frc2026.Conveyor;
 import org.team100.frc2026.Feeder;
+import org.team100.frc2026.Intake;
+import org.team100.frc2026.IntakeExtend;
 import org.team100.frc2026.Shooter;
 import org.team100.frc2026.ShooterHood;
 import org.team100.frc2026.Targeter;
@@ -34,11 +34,13 @@ import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
 import org.team100.lib.subsystems.swerve.module.SwerveModuleCollection;
 import org.team100.lib.uncertainty.IsotropicNoiseSE2;
+import org.team100.lib.uncertainty.NoisyPose2d;
 import org.team100.lib.uncertainty.VariableR1;
 import org.team100.lib.visualization.RobotPoseVisualization;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
@@ -70,6 +72,7 @@ public class Machinery {
 
     public final TrajectoryVisualization m_trajectoryViz;
     public final SwerveKinodynamics m_swerveKinodynamics;
+    public final NudgingVisionUpdater m_visionUpdater;
     public final AprilTagRobotLocalizer m_localizer;
     public final SwerveLimiter m_limiter;
     public final SwerveDriveSubsystem m_drive;
@@ -128,7 +131,7 @@ public class Machinery {
                 odometryNoise);
         // odometryUpdater.m_debug = true;
         odometryUpdater.reset(Pose2d.kZero, IsotropicNoiseSE2.high());
-        NudgingVisionUpdater visionUpdater = new NudgingVisionUpdater(
+        m_visionUpdater = new NudgingVisionUpdater(
                 driveLog, history, odometryUpdater);
 
         ////////////////////////////////////////////////////////////
@@ -141,7 +144,7 @@ public class Machinery {
                 fieldLogger,
                 layout,
                 history,
-                visionUpdater);
+                m_visionUpdater);
 
         ////////////////////////////////////////////////////////////
         //
@@ -217,6 +220,21 @@ public class Machinery {
             Pose2d p = m_drive.getPose();
             System.out.printf("*** DISORIENT: %s\n", p);
             resetPose(p);
+        }, m_drive);
+    }
+
+    /**
+     * Nudge the rotation towards zero, like a camera would do.
+     * The "nudge" in this case is quite firm.
+     */
+    public Command zeroRotation() {
+        return Commands.runOnce(() -> {
+            Pose2d p = m_drive.getPose();
+            NoisyPose2d np = new NoisyPose2d(
+                    new Pose2d(p.getX(), p.getY(), Rotation2d.kZero),
+                    IsotropicNoiseSE2.fromStdDev(10, 0.001));
+            System.out.printf("*** ZERO ROTATION: %s\n", np);
+            m_visionUpdater.put(Takt.get(), np);
         }, m_drive);
     }
 

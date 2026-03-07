@@ -1,7 +1,6 @@
 package org.team100.frc2026.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.parallel;
-import static edu.wpi.first.wpilibj2.command.Commands.sequence;
 import static org.team100.frc2026.util.TriggerUtil.onTrue;
 import static org.team100.frc2026.util.TriggerUtil.whileTrue;
 
@@ -85,7 +84,11 @@ public class Binder {
         ///
         /// DISORIENT
         ///
+
+        // Forget the current pose, listen to camera input.
         onTrue(driver::back, m_machinery.disorient());
+        // Nudge the rotation towards zero.
+        onTrue(driver::start, m_machinery.zeroRotation());
 
         ////////////////////////////////////////////////////
         ///
@@ -183,7 +186,7 @@ public class Binder {
         // here we rely only on PID so make it stronger
         FeedbackR1 aggressiveFeedback = new FullStateFeedback(
                 m_log, 3, 0.1, true, 0.025, 0.25);
-                
+
         // button 5
         whileTrue(() -> driver.leftBumper(),
                 new DriveMovingTargetLock(
