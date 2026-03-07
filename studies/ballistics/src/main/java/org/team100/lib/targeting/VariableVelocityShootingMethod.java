@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.team100.lib.geometry.GlobalVelocityR2;
-import org.team100.lib.optimization.NewtonsMethod;
+import org.team100.lib.optimization.GradientDescent;
 import org.team100.lib.util.StrUtil;
 
 import edu.wpi.first.math.Nat;
@@ -33,8 +33,13 @@ import edu.wpi.first.math.numbers.N3;
  * problem: that way the shooter will be ready faster, and take less battery
  * power.
  * 
- * I think the first constraint is more interesting.
+ * We can combine those two criteria into a "loss function" that penalizes
+ * extra velocity and insufficient elevation.
+ * 
+ * Since we're minimizing a scalar loss rather than finding the zero, the
+ * natural solver is gradient descent.
  */
+@SuppressWarnings("unused")
 public class VariableVelocityShootingMethod {
     private static final boolean DEBUG = false;
 
@@ -42,9 +47,9 @@ public class VariableVelocityShootingMethod {
     }
 
     /** Minimum (azimuth, velocity, elevation) */
-    private static final Vector<N3> X_MIN = VecBuilder.fill(-Math.PI, 3, 0.1);
+    private final Vector<N3> m_xMin;
     /** Maximum (azimuth, velocity, elevation) */
-    private static final Vector<N3> X_MAX = VecBuilder.fill(Math.PI, 20, 1.4);
+    private final Vector<N3> m_xMax;
     /**
      * In between iterations, the solver chooses a random starting point within the
      * bounds above.
@@ -59,8 +64,11 @@ public class VariableVelocityShootingMethod {
     private final IVVRange m_range;
     private final double m_tolerance;
 
-    public VariableVelocityShootingMethod(IVVRange range, double tolerance) {
+    public VariableVelocityShootingMethod(
+            IVVRange range, double minElevation, double maxElvation, double tolerance) {
         m_range = range;
+        m_xMin = VecBuilder.fill(-Math.PI, 3, minElevation);
+        m_xMax = VecBuilder.fill(Math.PI, 20, maxElvation);
         m_tolerance = tolerance;
     }
 
@@ -83,17 +91,24 @@ public class VariableVelocityShootingMethod {
         GlobalVelocityR2 vT = targetVelocity.minus(robotVelocity);
         Vector<N3> initialX = VecBuilder.fill(
                 T0.getAngle().getRadians(), 5, initialElevation);
-        NewtonsMethod<N3, N3> solver = new NewtonsMethod<>(
+        GradientDescent<N3> solver2 = new GradientDescent<>(
                 Nat.N3(),
-                Nat.N3(),
-                fn(T0, vT, targetElevation),
-                X_MIN,
-                X_MAX,
+                fn2(T0, vT, targetElevation),
                 m_tolerance,
-                ITERATIONS,
-                DX_LIMIT);
+                ITERATIONS);
+
+        // NewtonsMethod<N3, N3> solver = new NewtonsMethod<>(
+        // Nat.N3(),
+        // Nat.N3(),
+        // fn(T0, vT, targetElevation),
+        // m_xMin,
+        // m_xMax,
+        // m_tolerance,
+        // ITERATIONS,
+        // DX_LIMIT);
         try {
-            Vector<N3> x = solver.solve2(initialX, 3, true);
+            // Vector<N3> x = solver.solve2(initialX, 3, true);
+            Vector<N3> x = solver2.solve(initialX);
             return Optional.of(
                     new Solution(
                             new Rotation2d(x.get(0)),
@@ -106,45 +121,74 @@ public class VariableVelocityShootingMethod {
         }
     }
 
+    Function<Vector<N3>, Double> fn2(Translation2d T0,
+            GlobalVelocityR2 vT,
+            double targetElevation) {
+        return x -> this.f2(x, T0, vT, targetElevation);
+    }
+
     /**
      * @return a function of (azimuth, velocity, elevation)
      *         that returns error (x, y, targetElevation)
      */
-    Function<Vector<N3>, Vector<N3>> fn(
-            Translation2d T0,
-            GlobalVelocityR2 vT,
-            double targetElevation) {
-        return x -> this.f(x, T0, vT, targetElevation);
-    }
+    // Function<Vector<N3>, Vector<N3>> fn(
+    // Translation2d T0,
+    // GlobalVelocityR2 vT,
+    // double targetElevation) {
+    // return x -> this.f(x, T0, vT, targetElevation);
+    // }
 
     /**
-     * @param x               (azimuth, velocity, elevation)
-     * @param T0              target relative position
-     * @param vT              target relative velocity
-     * @param targetElevation arrival path elevation
+     * @param x                  (azimuth, velocity, elevation)
+     * @param T0                 target relative position
+     * @param vT                 target relative velocity
+     * @param minTargetElevation minimum arrival path elevation
      * @return error (x, y, angle)
      */
-    Vector<N3> f(
-            Vector<N3> x,
+    // Vector<N3> f(
+    // Vector<N3> x,
+    // Translation2d T0,
+    // GlobalVelocityR2 vT,
+    // double minTargetElevation) {
+    // if (DEBUG)
+    // System.out.printf("x %s\n", StrUtil.vecStr(x));
+    // Rotation2d azimuth = new Rotation2d(x.get(0));
+    // double v = x.get(1);
+    // double elevation = x.get(2);
+    // Interception rangeSolution = m_range.get(v, elevation);
+    // if (DEBUG)
+    // System.out.printf("soln %s\n", rangeSolution);
+    // Translation2d b = new Translation2d(rangeSolution.range(), azimuth);
+    // Translation2d T = vT.integrate(T0, rangeSolution.tof());
+    // Translation2d err = b.minus(T);
+    // double gamma = rangeSolution.targetElevation();
+    // double elevationErr = gamma - minTargetElevation;
+    // if (DEBUG)
+    // System.out.printf("gamma %f err %f\n", gamma, elevationErr);
+    // return VecBuilder.fill(err.getX(), err.getY(), elevationErr);
+    // }
+
+    double f2(Vector<N3> x,
             Translation2d T0,
             GlobalVelocityR2 vT,
-            double targetElevation) {
+            double minTargetElevation) {
         if (DEBUG)
             System.out.printf("x %s\n", StrUtil.vecStr(x));
         Rotation2d azimuth = new Rotation2d(x.get(0));
         double v = x.get(1);
         double elevation = x.get(2);
-        FiringSolution rangeSolution = m_range.get(v, elevation);
+        Interception rangeSolution = m_range.get(v, elevation);
         if (DEBUG)
             System.out.printf("soln %s\n", rangeSolution);
         Translation2d b = new Translation2d(rangeSolution.range(), azimuth);
         Translation2d T = vT.integrate(T0, rangeSolution.tof());
         Translation2d err = b.minus(T);
         double gamma = rangeSolution.targetElevation();
-        double elevationErr = gamma - targetElevation;
+        double elevationErr = gamma - minTargetElevation;
         if (DEBUG)
             System.out.printf("gamma %f err %f\n", gamma, elevationErr);
-        return VecBuilder.fill(err.getX(), err.getY(), elevationErr);
+        double loss = err.getNorm() + Math.abs(elevationErr);
+        return loss;
     }
 
 }

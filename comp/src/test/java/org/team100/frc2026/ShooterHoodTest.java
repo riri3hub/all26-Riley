@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.OptionalDouble;
+
 import org.junit.jupiter.api.Test;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
-import org.team100.lib.state.ModelSE2;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class ShooterHoodTest implements Timeless2026 {
@@ -20,11 +20,7 @@ public class ShooterHoodTest implements Timeless2026 {
 
     @Test
     void test0() {
-        // robot is at the origin
-        // target is at the origin
-        ShooterHood hood = new ShooterHood(log,
-                () -> new ModelSE2(),
-                () -> new Translation2d());
+        ShooterHood hood = new ShooterHood(log, () -> OptionalDouble.empty());
         // Mech starts at zero.
         assertEquals(0, hood.getUnwrappedPositionRad(), DELTA);
         // Goal starts at measurement.
@@ -42,11 +38,7 @@ public class ShooterHoodTest implements Timeless2026 {
 
     @Test
     void test1() {
-        // robot is at the origin
-        // target is at the origin
-        ShooterHood hood = new ShooterHood(log,
-                () -> new ModelSE2(),
-                () -> new Translation2d(3, 0));
+        ShooterHood hood = new ShooterHood(log, () -> OptionalDouble.of(0.593));
         // Mech starts at zero.
         assertEquals(0, hood.getUnwrappedPositionRad(), DELTA);
         // Goal starts at measurement.

@@ -1,5 +1,6 @@
 package org.team100.frc2026;
 
+import java.util.OptionalDouble;
 import java.util.function.Supplier;
 
 import org.team100.lib.config.Friction;
@@ -18,10 +19,8 @@ import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.servo.AngularPositionServo;
 import org.team100.lib.servo.OutboardAngularPositionServo;
 import org.team100.lib.state.ModelR1;
-import org.team100.lib.state.ModelSE2;
 import org.team100.lib.util.CanId;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -30,20 +29,16 @@ public class ShooterHood extends SubsystemBase {
     private static final CanId CAN_ID = new CanId(0);
     private static final double GEAR_RATIO = 10;
 
+    private final Supplier<OptionalDouble> m_angle;
     private final AngularPositionServo m_servo;
-    private final Supplier<Translation2d> m_target;
-    private final ShooterTable m_table;
 
-    private Supplier<ModelSE2> m_state;
-
-    public ShooterHood(
-            LoggerFactory parent,
-            Supplier<ModelSE2> state,
-            Supplier<Translation2d> target) {
+    /**
+     * @param parent log
+     * @param angle  angle for auto mode
+     */
+    public ShooterHood(LoggerFactory parent, Supplier<OptionalDouble> angle) {
         LoggerFactory log = parent.type(this);
-        m_state = state;
-        m_target = target;
-        m_table = new ShooterTable();
+        m_angle = angle;
         double initialPosition = 0;
         TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 1, 2, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
@@ -113,17 +108,14 @@ public class ShooterHood extends SubsystemBase {
         m_servo.actuateWithProfile(value, 0);
     }
 
+    /** Do not use a profile. */
+    private void actuateDirect(double value) {
+        m_servo.actuateDirect(value, 0);
+    }
+
     private void autoWork() {
-        ModelSE2 state = m_state.get();
-        Translation2d target = m_target.get();
-        double rangeM = state.translation().getDistance(target);
-        Double angle = m_table.getAngleRad(rangeM);
-        if (angle == null) {
-            // out of bounds
-            stopServo();
-        } else {
-            actuateWithProfile(angle);
-        }
+        m_angle.get().ifPresentOrElse(
+                this::actuateWithProfile, this::stopServo);
     }
 
 }

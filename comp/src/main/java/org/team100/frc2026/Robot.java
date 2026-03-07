@@ -62,7 +62,6 @@ public class Robot extends TimedRobot100 {
 
         m_machinery = new Machinery();
         m_binder = new Binder(m_machinery);
-        m_binder.bind();
 
         m_allAutons = new AllAutons(m_machinery);
         m_alerts = new Alerts();
@@ -123,6 +122,7 @@ public class Robot extends TimedRobot100 {
         super.close();
         m_machinery.close();
         m_allAutons.close();
+        m_binder.close();
     }
 
     ///////////////////////////////////////////////////////////////////////

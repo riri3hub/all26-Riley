@@ -8,11 +8,11 @@ import edu.wpi.first.math.interpolation.Interpolator;
  * 
  * This is certainly unrealistic, don't use it for large differences.
  */
-public class FiringSolutionInterpolator implements Interpolator<FiringSolution> {
+public class InterceptionInterpolator implements Interpolator<Interception> {
 
     @Override
-    public FiringSolution interpolate(FiringSolution a, FiringSolution b, double t) {
-        return new FiringSolution(
+    public Interception interpolate(Interception a, Interception b, double t) {
+        return new Interception(
                 MathUtil.interpolate(a.range(), b.range(), t),
                 MathUtil.interpolate(a.tof(), b.tof(), t),
                 MathUtil.interpolate(a.targetElevation(), b.targetElevation(), t));

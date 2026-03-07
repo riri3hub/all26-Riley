@@ -54,7 +54,7 @@ public class Math100 {
     }
 
     public static boolean inRange(double v, double min, double max) {
-        return v > min && v < max;
+        return v >= min && v <= max;
     }
 
     public static double limit(double v, double min, double max) {

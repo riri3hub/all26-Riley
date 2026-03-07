@@ -76,4 +76,8 @@ public class MockAngularPositionServo implements AngularPositionServo {
     public void actuateWithProfile(double unwrappedGoalX, double torqueNm) {
     }
 
+    @Override
+    public void actuateDirect(double unwrappedSetpoint, double torqueNm) {
+    }
+
 }

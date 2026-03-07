@@ -67,9 +67,12 @@ public interface AngularPositionServo extends Player {
     void setPositionDirect(double wrappedGoalRad, double velocityRad_S, double torqueNm);
 
     /**
-     * For unwrapped goal
+     * For unwrapped goal.
      */
     void actuateWithProfile(double unwrappedGoalX, double torqueNm);
+
+    /** Unwrapped setpoint, no profile. */
+    void actuateDirect(double unwrappedSetpoint, double torqueNm);
 
     /**
      * This is the "wrapped" value, i.e. it is periodic within +/- pi.

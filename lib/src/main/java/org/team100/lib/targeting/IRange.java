@@ -5,5 +5,5 @@ public interface IRange {
     /**
      * @param elevation in radians
      */
-    FiringSolution get(double elevation);
+    Interception get(double elevation);
 }

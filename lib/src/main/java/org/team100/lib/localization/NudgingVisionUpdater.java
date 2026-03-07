@@ -63,12 +63,9 @@ public class NudgingVisionUpdater implements VisionUpdater {
      * 
      * @param timestamp        When the measurement was made.
      * @param noisyMeasurement Robot pose from vision.
-     * @param visionNoise      Measurement noise in SE(2).
      */
     @Override
-    public void put(
-            double timestamp,
-            NoisyPose2d noisyMeasurement) {
+    public void put(double timestamp, NoisyPose2d noisyMeasurement) {
         // System.out.printf("vision updater visionNoise %s\n", visionNoise);
 
         // Skip too-old measurement

@@ -23,6 +23,11 @@ public record ControlR1(double x, double v, double a) implements Interpolatable<
         this(x, v, 0);
     }
 
+    /** Zero velocity and acceleration */
+    public ControlR1(double x) {
+        this(x, 0, 0);
+    }
+
     /** Zero everything */
     public ControlR1() {
         this(0, 0, 0);

@@ -6,6 +6,7 @@ import java.util.function.DoubleFunction;
 import org.team100.lib.geometry.GlobalVelocityR2;
 import org.team100.lib.state.ModelSE2;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -40,36 +41,77 @@ public class TimeOfFlightRecursion implements Solver {
         m_tolerance = tolerance;
     }
 
+    /** This is a separate class to make it easier to test. */
+    static class Looper {
+        static record LoopSolution(
+                FiringParameters params, Translation2d targetPositionAtTOF) {
+        }
+
+        private final DoubleFunction<FiringParameters> m_inverseRange;
+        /** Target position relative to robot. */
+        final Translation2d T0;
+        /** Target velocity relative to robot. */
+        final GlobalVelocityR2 vT;
+
+        public Looper(
+                DoubleFunction<FiringParameters> inverseRange,
+                Translation2d T0,
+                GlobalVelocityR2 vT) {
+            m_inverseRange = inverseRange;
+            this.T0 = T0;
+            this.vT = vT;
+        }
+
+        LoopSolution step(Double targetTOF) {
+
+            // where is the target at the specified TOF?
+            Translation2d targetPositionAtTOF = vT.integrate(T0, targetTOF);
+            double rangeAtTOF = targetPositionAtTOF.getNorm();
+
+            // What gun elevation gets to that range, and what is the
+            // ball TOF to get there?
+            FiringParameters params = m_inverseRange.apply(rangeAtTOF);
+            LoopSolution var2 = new LoopSolution(
+                    params, targetPositionAtTOF);
+            if (DEBUG)
+                System.out.printf("range %f elevation %f tof %f\n",
+                        var2.targetPositionAtTOF.getNorm(),
+                        var2.params.elevation(), var2.params.tof());
+            return var2;
+        }
+    }
+
     @Override
     public Optional<Solution> solve(
             ModelSE2 state,
             Translation2d targetPosition,
             GlobalVelocityR2 targetVelocity) {
-        Translation2d robotPosition = state.translation();
-        GlobalVelocityR2 robotVelocity = state.velocityR2();
-        // Target relative to robot
-        Translation2d T0 = targetPosition.minus(robotPosition);
-        // Target velocity relative to robot
-        GlobalVelocityR2 vT = targetVelocity.minus(robotVelocity);
+        final Translation2d robotPosition = state.translation();
+        final GlobalVelocityR2 robotVelocity = state.velocityR2();
 
-        double range = T0.getNorm();
-        double tof = m_inverseRange.apply(range).tof();
-        double iter = 100;
-        while (iter-- > 0) {
-            Translation2d impact = vT.integrate(T0, tof);
-            range = impact.getNorm();
-            FiringParameters p2 = m_inverseRange.apply(range);
-            if (DEBUG)
-                System.out.printf("range %f elevation %f tof %f\n", range, p2.elevation(), p2.tof());
-            if (Math.abs(tof - p2.tof()) < m_tolerance) {
+        // Target relative to robot
+        final Translation2d T0 = targetPosition.minus(robotPosition);
+        // Target velocity relative to robot
+        final GlobalVelocityR2 vT = targetVelocity.minus(robotVelocity);
+
+        Looper looper = new Looper(m_inverseRange, T0, vT);
+
+        // Initial guess is the initial location.
+        double targetTOF = m_inverseRange.apply(T0.getNorm()).tof();
+        for (int i = 0; i < 100; ++i) {
+            Looper.LoopSolution soln = looper.step(targetTOF);
+            double ballTOF = soln.params.tof();
+            if (MathUtil.isNear(targetTOF, ballTOF, m_tolerance)) {
                 // Found a good solution!
-                double targetMotion = TargetUtil.targetMotion(state, impact);
+                double targetMotion = TargetUtil.targetMotion(
+                        state, soln.targetPositionAtTOF);
                 return Optional.of(new Solution(
-                        impact.getAngle(),
+                        soln.targetPositionAtTOF.getAngle(),
                         targetMotion,
-                        new Rotation2d(p2.elevation())));
+                        new Rotation2d(soln.params.elevation())));
             }
-            tof = p2.tof();
+            // try again with a new target TOF guess
+            targetTOF = ballTOF;
         }
         return Optional.empty();
     }

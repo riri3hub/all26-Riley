@@ -22,12 +22,13 @@ public class VariableVelocityRangeCache implements IVVRange {
     private static final double MAX_V = 20;
     /** Precomputation step. */
     private static final double V_STEP = 0.5;
-    /** Precomputation lower bound. */
-    private static final double MIN_ELEVATION = 0;
-    /** Precomputation upper bound. */
-    private static final double MAX_ELEVATION = Math.PI / 2;
     /** Precomputation step. */
     private static final double ELEVATION_STEP = 0.05;
+
+    /** Precomputation lower bound. */
+    private final double m_minElevation;
+    /** Precomputation upper bound. */
+    private final double m_maxElevation;
 
     /**
      * Cache.
@@ -43,14 +44,17 @@ public class VariableVelocityRangeCache implements IVVRange {
      * key2 = elevation (rad)
      * value = solution
      */
-    private final NestedInterpolatingTreeMap<Double, FiringSolution> m_map;
+    private final NestedInterpolatingTreeMap<Double, Interception> m_map;
 
-    public VariableVelocityRangeCache(RangeSolver rangeSolver, double omega) {
+    public VariableVelocityRangeCache(
+            RangeSolver rangeSolver, double minElevation, double maxElvation, double omega) {
+        m_minElevation = minElevation;
+        m_maxElevation = maxElvation;
         m_map = new NestedInterpolatingTreeMap<>(
-                InverseInterpolator.forDouble(), new FiringSolutionInterpolator());
+                InverseInterpolator.forDouble(), new InterceptionInterpolator());
         for (double v = MIN_V; v < MAX_V; v += V_STEP) {
-            for (double elevation = MIN_ELEVATION; elevation < MAX_ELEVATION; elevation += ELEVATION_STEP) {
-                FiringSolution solution = rangeSolver.getSolution(v, omega, elevation);
+            for (double elevation = m_minElevation; elevation < m_maxElevation; elevation += ELEVATION_STEP) {
+                Interception solution = rangeSolver.getSolution(v, omega, elevation);
                 if (solution == null) {
                     // no solution
                     continue;
@@ -64,7 +68,7 @@ public class VariableVelocityRangeCache implements IVVRange {
      * @param v         velocity in m/s
      * @param elevation in radians
      */
-    public FiringSolution get(double v, double elevation) {
+    public Interception get(double v, double elevation) {
         return m_map.get(v, elevation);
     }
 }

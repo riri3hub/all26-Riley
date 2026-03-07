@@ -46,7 +46,7 @@ public class Intake extends SubsystemBase {
                 double statorLimit = 50;
                 SimpleDynamics ff = new SimpleDynamics(log, 0.004, 0.002);
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.1);
+                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
                 m1 = new KrakenX44Motor(
                         log1, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
                         supplyLimit, statorLimit, ff, friction, pid);

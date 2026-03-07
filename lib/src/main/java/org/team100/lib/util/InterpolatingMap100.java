@@ -25,6 +25,7 @@ public class InterpolatingMap100<K, V> {
         m_map.put(key, value);
     }
 
+    /** Returns null for off-the-end keys. */
     public V get(K key) {
         V val = m_map.get(key);
         if (val != null) {

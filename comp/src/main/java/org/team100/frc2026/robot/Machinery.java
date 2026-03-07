@@ -5,13 +5,13 @@ import java.util.function.UnaryOperator;
 
 import org.team100.frc2026.Climber;
 import org.team100.frc2026.ClimberExtension;
+import org.team100.frc2026.Conveyor;
+import org.team100.frc2026.Feeder;
 import org.team100.frc2026.Intake;
 import org.team100.frc2026.IntakeExtend;
-import org.team100.frc2026.Serializer;
-import org.team100.frc2026.SerializerUpper;
 import org.team100.frc2026.Shooter;
 import org.team100.frc2026.ShooterHood;
-import org.team100.frc2026.field.FieldConstants2026;
+import org.team100.frc2026.Targeter;
 import org.team100.lib.coherence.Takt;
 import org.team100.lib.controller.se2.ControllerFactorySE2;
 import org.team100.lib.controller.se2.ControllerSE2;
@@ -34,11 +34,13 @@ import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
 import org.team100.lib.subsystems.swerve.module.SwerveModuleCollection;
 import org.team100.lib.uncertainty.IsotropicNoiseSE2;
+import org.team100.lib.uncertainty.NoisyPose2d;
 import org.team100.lib.uncertainty.VariableR1;
 import org.team100.lib.visualization.RobotPoseVisualization;
 import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
@@ -70,6 +72,7 @@ public class Machinery {
 
     public final TrajectoryVisualization m_trajectoryViz;
     public final SwerveKinodynamics m_swerveKinodynamics;
+    public final NudgingVisionUpdater m_visionUpdater;
     public final AprilTagRobotLocalizer m_localizer;
     public final SwerveLimiter m_limiter;
     public final SwerveDriveSubsystem m_drive;
@@ -77,12 +80,12 @@ public class Machinery {
     public final Shooter m_shooter;
     public final Intake m_intake;
     public final IntakeExtend m_intakeExtend;
-    public final Serializer m_serializer;
+    public final Conveyor m_conveyor;
     public final ShooterHood m_shooterHood;
     public final ClimberExtension m_ClimberExtension;
     public final Climber m_Climber;
     public final ControllerSE2 m_holonomicController;
-    public final SerializerUpper m_serializerUpper;
+    public final Feeder m_feeder;
 
     public Machinery() {
 
@@ -128,7 +131,7 @@ public class Machinery {
                 odometryNoise);
         // odometryUpdater.m_debug = true;
         odometryUpdater.reset(Pose2d.kZero, IsotropicNoiseSE2.high());
-        NudgingVisionUpdater visionUpdater = new NudgingVisionUpdater(
+        m_visionUpdater = new NudgingVisionUpdater(
                 driveLog, history, odometryUpdater);
 
         ////////////////////////////////////////////////////////////
@@ -141,7 +144,7 @@ public class Machinery {
                 fieldLogger,
                 layout,
                 history,
-                visionUpdater);
+                m_visionUpdater);
 
         ////////////////////////////////////////////////////////////
         //
@@ -165,14 +168,16 @@ public class Machinery {
         //
         // SUBSYSTEMS
         //
+
+        Targeter targeter = new Targeter(() -> m_drive.getState().translation());
+
         m_intake = new Intake(logger);
         m_intakeExtend = new IntakeExtend(logger);
 
-        m_serializer = new Serializer(logger);
-        m_shooter = new Shooter(logger);
-        m_serializerUpper = new SerializerUpper(logger, m_shooter);
-        m_shooterHood = new ShooterHood(
-                logger, m_drive::getState, FieldConstants2026.HUB::toTranslation2d);
+        m_conveyor = new Conveyor(logger);
+        m_shooter = new Shooter(logger, targeter::speed);
+        m_feeder = new Feeder(logger, m_shooter);
+        m_shooterHood = new ShooterHood(logger, targeter::angle);
 
         m_ClimberExtension = new ClimberExtension(logger);
         m_Climber = new Climber(logger);
@@ -218,14 +223,31 @@ public class Machinery {
         }, m_drive);
     }
 
+    /**
+     * Nudge the rotation towards zero, like a camera would do.
+     * The "nudge" in this case is quite firm.
+     */
+    public Command zeroRotation() {
+        return Commands.runOnce(() -> {
+            Pose2d p = m_drive.getPose();
+            NoisyPose2d np = new NoisyPose2d(
+                    new Pose2d(p.getX(), p.getY(), Rotation2d.kZero),
+                    IsotropicNoiseSE2.fromStdDev(10, 0.001));
+            System.out.printf("*** ZERO ROTATION: %s\n", np);
+            m_visionUpdater.put(Takt.get(), np);
+        }, m_drive);
+    }
+
     public void periodic() {
         m_groundTruth.periodic();
         // publish pose estimate
         m_robotViz.run();
     }
 
+    /**
+     * Keeps the tests from conflicting via the use of simulated HAL ports.
+     */
     public void close() {
-        // this keeps the tests from conflicting via the use of simulated HAL ports.
         m_modules.close();
     }
 

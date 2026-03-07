@@ -5,6 +5,9 @@ import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 import static org.team100.frc2026.util.TriggerUtil.onTrue;
 import static org.team100.frc2026.util.TriggerUtil.whileTrue;
 
+import java.util.Optional;
+import java.util.function.Supplier;
+
 import org.team100.frc2026.field.FieldConstants2026;
 import org.team100.lib.controller.r1.FeedbackR1;
 import org.team100.lib.controller.r1.PIDFeedback;
@@ -87,37 +90,25 @@ public class InterlinkBinder {
         ///
         FeedbackR1 thetaFeedback = new PIDFeedback(
                 m_log, 3.2, 0, 0, true, 0.05, 1);
-        // aim at the hub while in the alliance zone
-        whileTrue(() -> driver.a1()
-                && FieldConstants2026.ALLIANCE_ZONE.contains(m_machinery.m_drive.getPose().getTranslation()),
+
+        Supplier<Optional<Translation2d>> target = () -> {
+            return FieldConstants2026.TARGET(
+                    m_machinery.m_drive.getPose().getTranslation());
+        };
+
+        // aim at the hub or our zone
+        whileTrue(() -> driver.a1(),
                 new DriveTargetLockDirect(
                         fieldLogger,
                         m_log,
                         m_machinery.m_swerveKinodynamics,
-                        () -> FieldConstants2026.HUB.toTranslation2d(),
+                        target,
                         thetaFeedback,
                         driver::velocity,
                         m_machinery.m_localizer::setHeedRadiusM,
                         m_machinery.m_drive,
                         m_machinery.m_limiter)
-                        .withName("Aim to shoot"));
-        // aim at our zone while in the neutral zone
-        whileTrue(() -> driver.a1()
-                && FieldConstants2026.NEUTRAL_ZONE.contains(m_machinery.m_drive.getPose().getTranslation()),
-                new DriveTargetLockDirect(
-                        fieldLogger,
-                        m_log,
-                        m_machinery.m_swerveKinodynamics,
-                        () -> {
-                            Translation2d t = m_machinery.m_drive.getPose().getTranslation();
-                            return new Translation2d(0, t.getY());
-                        },
-                        thetaFeedback,
-                        driver::velocity,
-                        m_machinery.m_localizer::setHeedRadiusM,
-                        m_machinery.m_drive,
-                        m_machinery.m_limiter)
-                        .withName("Aim to lob"));
+                        .withName("Direct target lock"));
 
         ////////////////////////////////////////////////////
         ///
@@ -125,7 +116,7 @@ public class InterlinkBinder {
         ///
         Command runshooter = m_machinery.m_shooter.shooterFullspeed();
         Command runhood = m_machinery.m_shooterHood.position();
-        Command runserial = m_machinery.m_serializer.serialize();
+        Command runserial = m_machinery.m_conveyor.conveyor();
         whileTrue(driver::i,
                 parallel(
                         runshooter,

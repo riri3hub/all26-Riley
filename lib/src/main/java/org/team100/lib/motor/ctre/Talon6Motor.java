@@ -298,7 +298,7 @@ public abstract class Talon6Motor implements BareMotor {
     /** Not latency-compensated. Updated in Robot.robotPeriodic(). */
     @Override
     public double getVelocityRad_S() {
-        return m_velocity.getAsDouble() * 2 * Math.PI;
+        return m_velocity.getAsDouble();
     }
 
     @Override

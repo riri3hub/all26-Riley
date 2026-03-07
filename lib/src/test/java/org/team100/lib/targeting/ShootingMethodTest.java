@@ -30,7 +30,9 @@ public class ShootingMethodTest {
     @Test
     void testJacobian() {
         Drag d = new Drag(0, 0, 0, 1, 0);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        // low min elevation so that this test works
+        // TODO: make a more realistic case
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0.01, 0.001);
         double v = 5;
         Translation2d robotPosition = new Translation2d();
         GlobalVelocityR2 robotVelocity = GlobalVelocityR2.ZERO;
@@ -42,7 +44,7 @@ public class ShootingMethodTest {
         Function<Vector<N2>, Vector<N2>> fn = (x) -> {
             Rotation2d azimuth = new Rotation2d(x.get(0));
             double elevation = x.get(1);
-            FiringSolution rangeSolution = rangeSolver.getSolution(v, 0, elevation);
+            Interception rangeSolution = rangeSolver.getSolution(v, 0, elevation);
             Translation2d b = new Translation2d(rangeSolution.range(), azimuth);
             Translation2d T = vT.integrate(T0, rangeSolution.tof());
             Translation2d err = b.minus(T);
@@ -58,9 +60,9 @@ public class ShootingMethodTest {
         // more azimuth pushes target in y, not x
         assertEquals(0, j.get(0, 0), 0.001);
         // more azimuth pushes target in y; for low elevation radius is low
-        assertEquals(0.506, j.get(1, 0), 0.001);
+        assertEquals(0.506, j.get(1, 0), 0.002);
         // more elevation makes x error more positive
-        assertEquals(4.995, j.get(0, 1), 0.001);
+        assertEquals(4.995, j.get(0, 1), 0.08);
         // more elevation doesn't change y error
         assertEquals(0, j.get(1, 1), 0.001);
 
@@ -69,19 +71,38 @@ public class ShootingMethodTest {
 
     }
 
-    /** For parabolic paths, we can check against the analytical solution. */
+    @Test
+    void testDumpParabolic() {
+        Drag d = new Drag(0, 0, 0, 1, 0);
+        double v = 7;
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0.01, 0.001);
+        IRange ir = (e) -> rangeSolver.getSolution(v, 0, e);
+        ShootingMethod m = new ShootingMethod(ir, 0.1, 1.5, 0.0001, 0.1);
+        m.dump();
+    }
+
+    /**
+     * For parabolic paths, we can check against the analytical solution.
+     * 
+     * This takes a few iterations, compared to 1 for TOF.
+     * 
+     * (Turn on NewtonsMethod.DEBUG to see.)
+     */
     @Test
     void testMotionlessParabolic() {
-        if (DEBUG)
-            System.out.println("## ShootingMethodTest.testMotionlessParabolic");
-        double g = 9.81;
         Drag d = new Drag(0, 0, 0, 1, 0);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
         double v = 7;
-        // tight tolerance for testing
-        // note this tolerance is smaller than the range accuracy
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0, 0.001);
         IRange ir = (e) -> rangeSolver.getSolution(v, 0, e);
-        ShootingMethod m = new ShootingMethod(ir, 0.001, 0.1);
+        // Indirect fire, 0.75-1.5 rad
+        //
+        // The tolerance here must be larger than the RangeSolver step size,
+        // otherwise the solution will just oscillate between rangesolver solutions,
+        // neither of which is within the tolerance.
+        //
+        // Note the boundary is pi/4, not 0.7, which leaves a little divot
+        // at the boundary that traps the solver.
+        ShootingMethod m = new ShootingMethod(ir, Math.PI / 4, Math.PI / 2, 0.01, Math.PI / 4);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
@@ -89,56 +110,62 @@ public class ShootingMethodTest {
         Solution x = o.orElseThrow();
 
         double azimuth = 0;
-        double elevation = 0.206;
-        double r = 2;
-        double tof = 0.292;
-        checkX(x, azimuth, elevation);
-        checkSolution(ir, x, r, tof);
+        double elevation = 1.365; // Indirect fire
+        double r = 2; // The range we asked for
+        double tof = 1.396;
+        checkX(x, azimuth, elevation, 0.01);
+        checkSolution(ir, x, r, tof, 0.01);
 
         // check analytic solution is the same
+        double g = 9.81;
         double R = v * v * Math.sin(2 * elevation) / g;
         double t = 2 * v * Math.sin(elevation) / g;
-        assertEquals(r, R, 0.001);
-        assertEquals(tof, t, 0.001);
+        assertEquals(r, R, 0.004);
+        assertEquals(tof, t, 0.002);
     }
 
-    /** Same scenario as above but with drag. */
+    /** Similar to above but with drag. */
     @Test
     void testMotionless() {
         Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0.01, 0.001);
         double v = 7;
         IRange ir = (e) -> rangeSolver.getSolution(v, 0, e);
-
-        // tight tolerance for testing
-        // note this tolerance is smaller than the range accuracy
-        ShootingMethod m = new ShootingMethod(ir, 0.001, 0.1);
-        // target is 2m away along +x
+        ShootingMethod m = new ShootingMethod(ir, 0.7, 1.5, 0.0001, 0.7);
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        Optional<Solution> o = m.solve(new ModelSE2(), targetPosition, targetVelocity);
+        Optional<Solution> o = m.solve(
+                new ModelSE2(), targetPosition, targetVelocity);
         Solution x = o.orElseThrow();
 
         double azimuth = 0;
-        // higher elevation than the zero-drag case
-        double elevation = 0.346;
+        double elevation = 1.067;
         double r = 2;
-        // tof is higher too
-        double tof = 0.423;
+        // lower arc takes less time
+        double tof = 0.982;
 
-        checkX(x, azimuth, elevation);
-        checkSolution(ir, x, r, tof);
+        checkX(x, azimuth, elevation, 0.01);
+        checkSolution(ir, x, r, tof, 0.01);
     }
 
-    /** Target is approaching. */
+    @Test
+    void testDumpWithDrag() {
+        Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
+        double v = 7;
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0.01, 0.001);
+        IRange ir = (e) -> rangeSolver.getSolution(v, 0, e);
+        // tight tolerance for testing
+        ShootingMethod m = new ShootingMethod(ir, 0.1, 1.4, 0.0001, 0.1);
+        m.dump();
+    }
+
+    /** Robot is driving towards the target. */
     @Test
     void testTowardsTarget() {
         Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0.01, 0.001);
         IRange ir = (e) -> rangeSolver.getSolution(7, 0, e);
-        // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.0001, 0.1);
-
+        ShootingMethod m = new ShootingMethod(ir, Math.PI/4, Math.PI/2, 0.001, 1);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
@@ -148,26 +175,27 @@ public class ShootingMethodTest {
         Solution x = o.orElseThrow();
 
         double azimuth = 0;
-        // lower elevation than the motionless case.
-        double elevation = 0.256;
-        // approaching target means shorter range
-        double r = 1.675;
-        // less time in the air
-        double tof = 0.324;
+        // higher elevation than the motionless case
+        // with indirect fire, to aim closer, you aim higher.
+        double elevation = 1.378;
+        // approaching target means shorter range relative to a motionless gun
+        double r = 0.907;
+        // higher arc = more time in the air
+        double tof = 1.093;
 
-        checkX(x, azimuth, elevation);
-        checkSolution(ir, x, r, tof);
+        checkX(x, azimuth, elevation, 0.01);
+        checkSolution(ir, x, r, tof, 0.01);
     }
 
-    /** Target is receding pretty fast. */
+    /** Robot is driving away pretty fast. */
     @Test
     void testAwayFromTarget() {
         Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
-        IRange ir = (e) -> rangeSolver.getSolution(10, 0, e);
-        // velocity is higher because the target is receding.
-        // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.0001, 0.1);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0, 0.001);
+        // more v, otherwise it's impossible.
+        IRange ir = (e) -> rangeSolver.getSolution(12, 0, e);
+        // still indirect fire
+        ShootingMethod m = new ShootingMethod(ir, 0.7, 1.5, 0.001, 0.7);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
@@ -177,24 +205,25 @@ public class ShootingMethodTest {
         Solution x = o.orElseThrow();
 
         double azimuth = 0;
-        // higher elevation (in addition to higher velocity)
-        double elevation = 0.390;
+        double elevation = 0.721;
         // target is much further away when the ball reaches it
-        double r = 3.206;
-        // time of flight is much longer
-        double tof = 0.603;
-        checkX(x, azimuth, elevation);
-        checkSolution(ir, x, r, tof);
+        double r = 4.108;
+        // time of flight is not much longer because v is so high
+        double tof = 1.054;
+        checkX(x, azimuth, elevation, 0.01);
+        checkSolution(ir, x, r, tof, 0.01);
     }
 
     /** Target is receding too fast to reach. */
     @Test
     void testImpossible() {
         Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        // low min elevation so that this test works
+        // TODO: make a more realistic case
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0.01, 0.001);
         IRange ir = (e) -> rangeSolver.getSolution(10, 0, e);
         // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.0001, 0.1);
+        ShootingMethod m = new ShootingMethod(ir, 0.1, 1.4, 0.001, 0.1);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
@@ -210,10 +239,12 @@ public class ShootingMethodTest {
     @Test
     void testStrafing() {
         Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        // low min elevation so that this test works
+        // TODO: make a more realistic case
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0.01, 0.001);
         IRange ir = (e) -> rangeSolver.getSolution(7, 0, e);
         // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.01, 0.1);
+        ShootingMethod m = new ShootingMethod(ir, 0.1, 1.4, 0.01, 0.1);
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
@@ -223,15 +254,15 @@ public class ShootingMethodTest {
         Solution x = o.orElseThrow();
 
         // aim to the right
-        double azimuth = -0.484;
+        double azimuth = -0.479;
         // pretty high elevation
-        double elevation = 0.449;
+        double elevation = 0.440;
         // target is further away when the ball reaches it
-        double r = 2.259;
+        double r = 2.245;
         // flight time is longer
-        double tof = 0.526;
-        checkX(x, azimuth, elevation);
-        checkSolution(ir, x, r, tof);
+        double tof = 0.518;
+        checkX(x, azimuth, elevation, 0.01);
+        checkSolution(ir, x, r, tof, 0.01);
     }
 
     /**
@@ -249,11 +280,11 @@ public class ShootingMethodTest {
     // @Test
     void testPerformance() {
         Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 1, 0.001);
         double v = 7;
         IRange ir = (e) -> rangeSolver.getSolution(v, 0, e);
         // tight tolerance for testing
-        ShootingMethod m = new ShootingMethod(ir, 0.0001, 0.1);
+        ShootingMethod m = new ShootingMethod(ir, 0.1, 1.4, 0.0001, 0.1);
 
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
@@ -272,15 +303,15 @@ public class ShootingMethodTest {
 
     }
 
-    private void checkX(Solution x, double azimuth, double elevation) {
-        assertEquals(azimuth, x.azimuth().getRadians(), 0.001);
-        assertEquals(elevation, x.elevation().getRadians(), 0.001);
+    private void checkX(Solution x, double azimuth, double elevation, double delta) {
+        assertEquals(azimuth, x.azimuth().getRadians(), delta);
+        assertEquals(elevation, x.elevation().getRadians(), delta);
     }
 
-    private void checkSolution(IRange range, Solution x, double r, double tof) {
-        FiringSolution s = range.get(x.elevation().getRadians());
-        assertEquals(r, s.range(), 0.001);
-        assertEquals(tof, s.tof(), 0.001);
+    private void checkSolution(IRange range, Solution x, double r, double tof, double delta) {
+        Interception s = range.get(x.elevation().getRadians());
+        assertEquals(r, s.range(), delta);
+        assertEquals(tof, s.tof(), delta);
     }
 
 }

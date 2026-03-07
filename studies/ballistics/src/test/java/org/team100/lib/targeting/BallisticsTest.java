@@ -9,7 +9,7 @@ public class BallisticsTest {
 
     @Test
     void testParabolic() {
-        FiringSolution s = Ballistics.parabolic(10, Math.PI / 4);
+        Interception s = Ballistics.parabolic(10, Math.PI / 4);
         // https://www.vcalc.com/wiki/ballistic-range
         assertEquals(10.194, s.range(), DELTA);
         // https://www.vcalc.com/wiki/ballistic-travel-time

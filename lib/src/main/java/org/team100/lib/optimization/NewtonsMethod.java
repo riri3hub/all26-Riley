@@ -145,7 +145,8 @@ public class NewtonsMethod<X extends Num, Y extends Num> {
                 System.out.printf("random restart failed, error %f\n", error.maxAbs());
             if (throwOnFailure)
                 throw new IllegalArgumentException(
-                        String.format("failed to converge for inputs %s",
+                        String.format("failed to converge with error %f for inputs %s",
+                                error.maxAbs(),
                                 StrUtil.vecStr(initialX)));
             return x;
         } finally {
@@ -179,20 +180,30 @@ public class NewtonsMethod<X extends Num, Y extends Num> {
      * @return false if unsolvable
      */
     private boolean solveOnce(Vector<Y> error, Vector<X> x) {
-        Matrix<Y, X> J = NumericalJacobian100.numericalJacobian2(m_xdim, m_ydim, m_f, x);
+        // Matrix<Y, X> J = NumericalJacobian100.numericalJacobian2(m_xdim, m_ydim, m_f,
+        // x);
+        // ths single-sided jacobian is wrong when the error is at the minimum -- the
+        // slope is obviously nonzero on both sides, and opposite, so if you only look
+        // at one side, you'll think it is nonzero, and orbit the solution.  :-(
+        Matrix<Y, X> J = NumericalJacobian100.numericalJacobian(m_xdim, m_ydim, m_f, x);
         if (DEBUG) {
             System.out.printf("x %s\n", StrUtil.vecStr(x));
             System.out.printf("J %s\n", StrUtil.matStr(J));
         }
         try {
             // solve J dx = error
-            // The normal solver seems to work:
-            Vector<X> dx = new Vector<>(J.solve(error));
+            // see NewtonsMethodTest.testScalar.
+            Vector<X> dx;
+            if (m_ydim.getNum() >= m_xdim.getNum()) {
+                // For "narrow" systems, the normal solver seems to work:
+                dx = new Vector<>(J.solve(error));
+            } else {
             // QR decomposition also works:
             // Vector<X> dx = getDxWithQRDecomp(error, J);
             // The pseudoinverse should always work (but slower)
-            // Matrix<X, Y> jInv = new Matrix<>(J.getStorage().pseudoInverse());
-            // Vector<X> dx = new Vector<>(jInv.times(error));
+                Matrix<X, Y> jInv = new Matrix<>(J.getStorage().pseudoInverse());
+                dx = new Vector<>(jInv.times(error));
+            }
 
             if (DEBUG)
                 System.out.printf("dx: %s\n", StrUtil.vecStr(dx));

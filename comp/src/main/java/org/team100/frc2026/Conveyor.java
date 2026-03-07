@@ -20,40 +20,40 @@ import org.team100.lib.util.CanId;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class SerializerUpper extends SubsystemBase {
-    public static final CanId canID1 = new CanId(8);
-    public static final CanId canID2 = new CanId(9);
-    private static final double WHEEL_DIAMETER_M = 0.1;
-    private static final double TOLERANCE_M_S = 1.0;
-    private static final double GEAR_RATIO = 1.0;
+public class Conveyor extends SubsystemBase {
+    private static final CanId canID1 = new CanId(19);
+    private static final CanId canID2 = new CanId(20);
+    private static final double TOLERANCE_M_S = 1;
+    private static final double GEAR_RATIO = 3;
+    private static final double WHEEL_DIAMETER_M = 0.035;
 
     private final OutboardLinearVelocityServo m_servo1;
     private final OutboardLinearVelocityServo m_servo2;
 
-    private final Shooter m_Shooter;
-
-    public SerializerUpper(LoggerFactory parent, Shooter shooter) {
+    public Conveyor(LoggerFactory parent) {
         LoggerFactory log = parent.type(this);
-        LoggerFactory log1 = log.name("SerializerUpper1");
-        LoggerFactory log2 = log.name("SerializerUpper2");
-        m_Shooter = shooter;
+        LoggerFactory log1 = log.name("Conveyor1");
+        LoggerFactory log2 = log.name("Conveyor2");
+
         VelocityProfileR1 profile = new AccelLimitedVelocityProfileR1(10);
         VelocityReferenceR1 ref = new VelocityProfileReferenceR1(
                 log, () -> profile, 1);
+
         final BareMotor m1;
         final BareMotor m2;
+
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
                 double supplyLimit = 120;
                 double statorLimit = 120;
                 SimpleDynamics dynamics = new SimpleDynamics(log, 0.004, 0.002);
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, WHEEL_DIAMETER_M);
+                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
                 m1 = new KrakenX44Motor(
-                        log1, canID1, NeutralMode100.COAST, MotorPhase.FORWARD,
+                        log1, canID1, NeutralMode100.COAST, MotorPhase.REVERSE,
                         supplyLimit, statorLimit, dynamics, friction, pid);
                 m2 = new KrakenX44Motor(
-                        log2, canID2, NeutralMode100.COAST, MotorPhase.FORWARD,
+                        log2, canID2, NeutralMode100.COAST, MotorPhase.REVERSE,
                         supplyLimit, statorLimit, dynamics, friction, pid);
             }
             default -> {
@@ -73,22 +73,27 @@ public class SerializerUpper extends SubsystemBase {
         m_servo2.periodic();
     }
 
-    public Command serializerUpperFullspeed() {
-        return startRun(this::reset, this::feedWhenReady)
-                .withName("to Shooter full speed");
+    public Command conveyor() {
+        return startRun(this::reset, () -> setVelocityProfiled(0.5))
+                .withName("Serialize");
     }
 
-    public Command testSerializerUpper() {
+    public Command testConveyor() {
         return run(this::dutyCycleAll)
-                .withName("test to Shooter full speed");
+                .withName("Test Serialize");
+    }
+
+    public Command testConveyorBack() {
+        return run(this::dutyCycleBackAll)
+                .withName("Test Back Serialize");
     }
 
     public Command stop() {
         return run(this::stopMotor)
-                .withName("stop Shooter feed");
+                .withName("stop serializing");
     }
 
-    ///////////////////////////////////////////////////////
+    //////////////////////////////////////////
 
     private void reset() {
         m_servo1.reset();
@@ -100,20 +105,18 @@ public class SerializerUpper extends SubsystemBase {
         m_servo2.stop();
     }
 
-    private void feedWhenReady() {
-        if (m_Shooter.atSpeed()) {
-            double Velocity = 5.0;
-            m_servo1.setVelocityProfiled(Velocity);
-            m_servo2.setVelocityProfiled(Velocity);
-        } else {
-            double Zero = 0;
-            m_servo1.setVelocityProfiled(Zero);
-            m_servo2.setVelocityProfiled(Zero);
-        }
+    private void setVelocityProfiled(double goalM_S) {
+        m_servo1.setVelocityProfiled(goalM_S);
+        m_servo2.setVelocityProfiled(goalM_S);
     }
 
     private void dutyCycleAll() {
         m_servo1.setDutyCycle(1);
         m_servo2.setDutyCycle(1);
+    }
+
+    private void dutyCycleBackAll() {
+        m_servo1.setDutyCycle(-1);
+        m_servo2.setDutyCycle(-1);
     }
 }

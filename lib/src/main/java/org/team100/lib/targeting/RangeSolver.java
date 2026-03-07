@@ -1,6 +1,5 @@
 package org.team100.lib.targeting;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
@@ -8,13 +7,14 @@ import edu.wpi.first.math.numbers.N6;
 import edu.wpi.first.math.system.NumericalIntegration;
 
 /**
+ * Solves the initial-value problem.
+ * 
  * Given initial conditions of elevation and fixed muzzle velocity, integrates
  * the drag model until position is less than zero.
  * 
  * Returns a firing solution (range and time of flight).
  */
 public class RangeSolver {
-
     private static final boolean DEBUG = false;
 
     /**
@@ -22,36 +22,49 @@ public class RangeSolver {
      * 
      * See RangeSolverTest for choice of DT
      */
-    static final double INTEGRATION_DT = 0.001;
+    private final double INTEGRATION_DT;
 
-    private final Drag m_d;
+    private final Drag m_drag;
     private final double m_targetHeight;
+    private final double m_minTargetElevation;
 
     /**
-     * @param targetHeight Height of the target above the firing height (not the
+     * @param drag               Drag model
+     * @param targetHeight       Height of the target above the firing height (not
+     *                           the
      *                     floor)
+     * @param minTargetElevation Minimum path elevation at arrival, from horizontal.
+     *                           The HUB has a funnel that looks like about 1 radian
+     *                           above horizontal.
      */
-    public RangeSolver(Drag d, double targetHeight) {
-        m_d = d;
+    public RangeSolver(
+            Drag drag, double targetHeight, double minTargetElevation, double timeStep) {
+        m_drag = drag;
         m_targetHeight = targetHeight;
+        m_minTargetElevation = minTargetElevation;
+        INTEGRATION_DT = timeStep;
     }
 
     /**
+     * Solves the initial-value problem.
+     * 
      * Both range and time-of-flight are always slight underestimates.
      * 
-     * @param d         drag model
      * @param v         muzzle speed in m/s
      * @param omega     spin in rad/s, positive is backspin
      * @param elevation in rad
      */
-    public FiringSolution getSolution(
+    public Interception getSolution(
             double v, double omega, double elevation) {
         return solveWithDt(v, omega, elevation, INTEGRATION_DT);
     }
 
     /** Package-private for testing */
-    FiringSolution solveWithDt(
+    Interception solveWithDt(
             double v, double omega, double elevation, double dt) {
+        if (DEBUG)
+            System.out.printf("range  solver solve for %f %f %f %f\n",
+                    v, omega, elevation, dt);
         if (dt < 1e-6)
             throw new IllegalArgumentException("must use nonzero dt");
         double vx = v * Math.cos(elevation);
@@ -62,7 +75,7 @@ public class RangeSolver {
         double t = 0;
         for (t = 0; t < 10; t += dt) {
             // this is the x for t+dt.
-            x = NumericalIntegration.rk4(m_d, prevX, dt);
+            x = NumericalIntegration.rk4(m_drag, prevX, dt);
             double range = x.get(0, 0);
             double height = x.get(1, 0);
             double prevRange = prevX.get(0, 0);
@@ -76,13 +89,10 @@ public class RangeSolver {
             if (dy < 0 && height < m_targetHeight) {
                 if (DEBUG)
                     System.out.println("impact");
-                // interpolate using the floor position
-                // more-clever interpolation or integration makes no difference.
+                // This used to interpolate to find the exact tof at the target
+                // height but it was confusing so I took it out.
 
-                double lerp = -1.0 * prevHeight / dy;
                 double drange = range - prevRange; // a positive number
-                double rangeLerp = MathUtil.interpolate(prevRange, range, lerp);
-                double tofLerp = t + dt * lerp;
                 // to compute the target elevation, look at the last two points.
                 if (DEBUG)
                     System.out.printf("prevRange %f range %f prevHeight %f height %f\n",
@@ -90,7 +100,12 @@ public class RangeSolver {
                 double targetElevation = Math.atan2(-1.0 * dy, drange);
                 if (DEBUG)
                     System.out.printf("e %f\n", targetElevation);
-                return new FiringSolution(rangeLerp, tofLerp, targetElevation);
+                if (targetElevation < m_minTargetElevation) {
+                    if (DEBUG)
+                        System.out.printf("target elevation too low");
+                    return null;
+                }
+                return new Interception(range, t, targetElevation);
             }
             prevX = x;
         }

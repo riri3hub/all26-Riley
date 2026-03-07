@@ -55,6 +55,10 @@ import org.team100.lib.tuning.Mutable;
      * WARNING! REV velocity control does not work well for light mechanisms (e.g.
      * flywheels), so don't do it.
      * 
+     * To guess a good starting point: say you're running at 300 rad/s,
+     * you'll want 10% of full-range (1 volt) for a 10% error (30 rad/s),
+     * so 0.03 might work; start lower.
+     * 
      * @param p Volt-sec/rad
      */
     public static PIDConstants makeVelocityPID(

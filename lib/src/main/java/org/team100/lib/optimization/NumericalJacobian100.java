@@ -54,6 +54,9 @@ public class NumericalJacobian100 {
     }
 
     /**
+     * 
+     * TODO: REMOVE THIS VERSION, it is wrong near the goal, causes orbiting.
+     * 
      * Estimates the Jacobian using a single-sided difference to the right of the
      * reference x.
      * 

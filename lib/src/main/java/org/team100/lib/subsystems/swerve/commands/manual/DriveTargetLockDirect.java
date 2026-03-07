@@ -1,6 +1,7 @@
 
 package org.team100.lib.subsystems.swerve.commands.manual;
 
+import java.util.Optional;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
@@ -56,7 +57,7 @@ public class DriveTargetLockDirect extends Command {
     private final SwerveLimiter m_limiter;
 
     private final SwerveKinodynamics m_swerveKinodynamics;
-    private final Supplier<Translation2d> m_target;
+    private final Supplier<Optional<Translation2d>> m_target;
     private final FeedbackR1 m_thetaController;
 
     private final DoubleLogger m_log_apparent_motion;
@@ -70,7 +71,7 @@ public class DriveTargetLockDirect extends Command {
             LoggerFactory fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
-            Supplier<Translation2d> target,
+            Supplier<Optional<Translation2d>> target,
             FeedbackR1 thetaController,
             Supplier<Velocity> twistSupplier,
             DoubleConsumer heedRadiusM,
@@ -104,8 +105,15 @@ public class DriveTargetLockDirect extends Command {
     public void execute() {
         ModelSE2 state = m_drive.getState();
 
+        Optional<Translation2d> oTarget = m_target.get();
+        if (oTarget.isEmpty()) {
+            // no target, just use driver input
+            actuate(null);
+            return;
+        }
         // the goal omega should match the target's apparent motion
-        Translation2d target = m_target.get();
+        Translation2d target = oTarget.get();
+
         m_log_target.log(() -> new double[] {
                 target.getX(),
                 target.getY(),
@@ -134,6 +142,10 @@ public class DriveTargetLockDirect extends Command {
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
         m_log_omega.log(() -> omega);
 
+        actuate(omega);
+    }
+
+    private void actuate(Double omega) {
         // Clip and scale user input.
         VelocitySE2 v = VelocitySE2.scale(
                 m_twistSupplier.get().clip(1.0),
@@ -149,7 +161,9 @@ public class DriveTargetLockDirect extends Command {
         }
 
         // Override omega.
-        v = new VelocitySE2(v.x(), v.y(), omega);
+        if (omega != null) {
+            v = new VelocitySE2(v.x(), v.y(), omega);
+        }
 
         // Actuate the drivetrain.
         m_drive.setVelocity(v);

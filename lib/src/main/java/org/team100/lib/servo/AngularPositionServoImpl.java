@@ -196,6 +196,14 @@ public abstract class AngularPositionServoImpl implements AngularPositionServo {
         actuate(unwrappedSetpoint, torqueNm);
     }
 
+    @Override
+    public void actuateDirect(double unwrappedSetpoint, double torqueNm) {
+        m_unwrappedGoal = null;
+        m_nextUnwrappedSetpoint = null;
+        ControlR1 c = new ControlR1(unwrappedSetpoint);
+        actuate(new SetpointsR1(c, c), torqueNm);
+    }
+
     /** The reference only understands unwrapped angles. */
     private void initReference(ModelR1 unwrappedGoal) {
         if (DEBUG) {

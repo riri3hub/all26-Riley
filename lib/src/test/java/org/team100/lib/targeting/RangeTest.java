@@ -1,7 +1,32 @@
 package org.team100.lib.targeting;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
 public class RangeTest {
     private static final boolean DEBUG = false;
+
+    /** Inverse of InverseRangeTest.test0 */
+    @Test
+    void test0() {
+        Drag drag = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
+        double targetHeight = 0;
+        int minTargetElevation = 1;
+
+        double muzzleSpeed = 10;
+        double omega = 1;
+        double elevation = 1;
+
+        RangeSolver rangeSolver = new RangeSolver(
+                drag, targetHeight, minTargetElevation, 0.001);
+        Interception soln = rangeSolver.getSolution(
+                muzzleSpeed, omega, elevation);
+
+        assertEquals(3, soln.range(), 0.01);
+        assertEquals(1.18, soln.tof(), 0.01);
+        assertEquals(1.30, soln.targetElevation(), 0.01);
+    }
 
     /**
      * Is it worth caching?
@@ -19,7 +44,7 @@ public class RangeTest {
     // @Test
     void testPerformance() {
         Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 1, 0.001);
 
         double uncachedETperCall;
         {

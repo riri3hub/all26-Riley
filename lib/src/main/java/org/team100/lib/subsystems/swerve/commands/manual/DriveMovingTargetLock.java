@@ -141,8 +141,9 @@ public class DriveMovingTargetLock extends Command {
         }
 
         // Override omega.
-        if (omega != null)
+        if (omega != null) {
             v = new VelocitySE2(v.x(), v.y(), omega);
+        }
 
         // Actuate the drivetrain.
         m_drive.setVelocity(v);

@@ -9,7 +9,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /**
- * Solution for infinite muzzle velocity.
+ * Solution for infinite muzzle velocity, for testing.
+ * 
+ * Azimuth is always the bearing.
+ * Azimuth velocity is the apparent target motion.
+ * Elevation is always zero.
  */
 public class LaserSolver implements Solver {
 

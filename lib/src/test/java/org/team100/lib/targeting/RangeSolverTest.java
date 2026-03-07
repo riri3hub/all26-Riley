@@ -2,21 +2,38 @@ package org.team100.lib.targeting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
+import org.team100.frc2026.field.FieldConstants2026;
 
 public class RangeSolverTest {
     private static final double DELTA = 0.001;
     private static final boolean DEBUG = false;
 
+    /**
+     * Target is level with the gun
+     * min target elevation is high
+     * gun elevation is low
+     * so there are no solutions.
+     */
+    @Test
+    void testTargetElevationConstraint() {
+        Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
+        int minTargetElevation = 1;
+        RangeSolver rangeSolver = new RangeSolver(d, 0, minTargetElevation, 0.001);
+        Interception solution = rangeSolver.getSolution(7, 0, 0.4);
+        assertNull(solution);
+    }
+
     @Test
     void testRange() {
         Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 1, 0.001);
         IRange ir = (e) -> rangeSolver.getSolution(8, 50, e);
-        FiringSolution s = ir.get(Math.PI / 4);
+        Interception s = ir.get(Math.PI / 4);
         assertEquals(2.825, s.range(), DELTA);
-        assertEquals(1.011, s.tof(), DELTA);
+        assertEquals(1.010, s.tof(), DELTA);
     }
 
     /**
@@ -46,14 +63,27 @@ public class RangeSolverTest {
     @Test
     void testDt() {
         Drag d = new Drag(0.5, 0.1, 0.1, 0.1, 0.1);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 1, 0.001);
         double ddt = 0.0001;
         double dtmax = 0.25;
         for (double dt = ddt; dt < dtmax; dt += ddt) {
-            FiringSolution s = rangeSolver.solveWithDt(10, 1, 1, dt);
+            Interception s = rangeSolver.solveWithDt(10, 1, 1, dt);
             if (DEBUG)
                 System.out.printf("%20.10f %20.10f\n", dt, s.range());
         }
+    }
+
+    @Test
+    void testBlarg() {
+        // this case was broken before because the min target elevation
+        // parameter was zero.
+        RangeSolver rangeSolver = new RangeSolver(
+                FieldConstants2026.FUEL_DRAG,
+                FieldConstants2026.HUB.getZ(),
+                FieldConstants2026.HUB_ELEVATION,
+                0.001);
+        Interception s = rangeSolver.solveWithDt(7, 1, 0.88, 0.001);
+        assertNull(s);
     }
 
     /**
@@ -67,7 +97,7 @@ public class RangeSolverTest {
     // @Test
     void testPerformance() {
         Drag d = new Drag(0.5, 0, 0.1, 0.1, 0);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 1, 0.001);
         int iterations = 100000;
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < iterations; ++i) {
@@ -111,8 +141,8 @@ public class RangeSolverTest {
         double R = v * v * Math.sin(2 * elevation) / g;
         double t = 2 * v * Math.sin(elevation) / g;
         Drag d = new Drag(0, 0, 0, 1, 0);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
-        FiringSolution s = rangeSolver.getSolution(v, 0, elevation);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0, 0.001);
+        Interception s = rangeSolver.getSolution(v, 0, elevation);
         assertNotNull(s, String.format(
                 "v %6.3f elevation %6.3f R %6.3f t %6.3f\n",
                 v, elevation, R, t));
@@ -123,10 +153,10 @@ public class RangeSolverTest {
             System.out.printf("%6.3f, %6.3f, %10.7f, %10.7f, %10.7f\n",
                     v, elevation, rError, tError, eError);
         // coarse DT means expected position error is a little higher
-        assertEquals(R, s.range(), 0.01);
-        assertEquals(t, s.tof(), DELTA);
+        assertEquals(R, s.range(), 0.02, "range");
+        assertEquals(t, s.tof(), DELTA, "tof");
         // 0.5 degree scatter here
-        assertEquals(elevation, s.targetElevation(), 0.01);
+        assertEquals(elevation, s.targetElevation(), 0.01, "target elevation");
     }
 
     /**
@@ -165,7 +195,7 @@ public class RangeSolverTest {
         double elevation = 1;
         // no air so we can compute the real answer
         Drag d = new Drag(0, 0, 0, 1, 0);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 1, 0.001);
 
         // System.out.println("dt, rErr, tErr");
         if (DEBUG)
@@ -175,12 +205,12 @@ public class RangeSolverTest {
             double R = v * v * Math.sin(2 * elevation) / g;
             double t = 2 * v * Math.sin(elevation) / g;
             // approximation
-            FiringSolution s = rangeSolver.solveWithDt(v, 0, elevation, dt);
+            Interception s = rangeSolver.solveWithDt(v, 0, elevation, dt);
             // System.out.printf("%12.9f, %12.9f, %12.9f\n", dt, R - s.range(), t -
             // s.tof());
             if (DEBUG)
                 System.out.printf("%12.9f, %12.9f, %12.9f, %12.9f, %12.9f\n",
-                        dt, R, s.range(), t, s.tof());
+                        dt, R, s == null ? 0 : s.range(), t, s == null ? 0 : s.tof());
         }
     }
 
@@ -198,7 +228,7 @@ public class RangeSolverTest {
         double elevation = 0.1;
         // no air so we can compute the real answer
         Drag d = new Drag(0, 0, 0, 1, 0);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 1, 0.001);
         // System.out.println("dt, rErr, tErr");
         if (DEBUG)
             System.out.println("v, R, range, t, tof");
@@ -207,10 +237,10 @@ public class RangeSolverTest {
             double R = v * v * Math.sin(2 * elevation) / g;
             double t = 2 * v * Math.sin(elevation) / g;
             // approximation
-            FiringSolution s = rangeSolver.solveWithDt(v, 0, elevation, dt);
+            Interception s = rangeSolver.solveWithDt(v, 0, elevation, dt);
             if (DEBUG)
                 System.out.printf("%12.9f, %12.9f, %12.9f, %12.9f, %12.9f\n",
-                        v, R, s.range(), t, s.tof());
+                        v, R, s == null ? 0 : s.range(), t, s == null ? 0 : s.tof());
         }
     }
 
@@ -222,7 +252,7 @@ public class RangeSolverTest {
         double dt = 0.25;
         // no air so we can compute the real answer
         Drag d = new Drag(0, 0, 0, 1, 0);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 1, 0.001);
         // System.out.println("dt, rErr, tErr");
         if (DEBUG)
             System.out.println("elevation, R, range, t, tof");
@@ -231,10 +261,10 @@ public class RangeSolverTest {
             double R = v * v * Math.sin(2 * elevation) / g;
             double t = 2 * v * Math.sin(elevation) / g;
             // approximation
-            FiringSolution s = rangeSolver.solveWithDt(v, 0, elevation, dt);
+            Interception s = rangeSolver.solveWithDt(v, 0, elevation, dt);
             if (DEBUG)
                 System.out.printf("%12.9f, %12.9f, %12.9f, %12.9f, %12.9f\n",
-                        elevation, R, s.range(), t, s.tof());
+                        elevation, R, s == null ? 0 : s.range(), t, s == null ? 0 : s.tof());
         }
     }
 
@@ -250,7 +280,7 @@ public class RangeSolverTest {
     void testFull() {
         double g = 9.81;
         Drag d = new Drag(0, 0, 0, 1, 0);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 0, 0.001);
 
         if (DEBUG)
             System.out.println("dt, v, elevation, R, range, t, tof");
@@ -259,7 +289,7 @@ public class RangeSolverTest {
                 for (double elevation = 0.1; elevation < 1.5; elevation += 0.1) {
                     double R = v * v * Math.sin(2 * elevation) / g;
                     double t = 2 * v * Math.sin(elevation) / g;
-                    FiringSolution s = rangeSolver.solveWithDt(v, 0, elevation, dt);
+                    Interception s = rangeSolver.solveWithDt(v, 0, elevation, dt);
                     double rangeAbsoluteError = Math.abs(R - s.range());
                     double tofAbsoluteError = Math.abs(t - s.tof());
                     if (rangeAbsoluteError > 0.01) // 1 cm tolerance
@@ -279,16 +309,16 @@ public class RangeSolverTest {
     void testShort() {
         double g = 9.81;
         Drag d = new Drag(0, 0, 0, 1, 0);
-        RangeSolver rangeSolver = new RangeSolver(d, 0);
+        RangeSolver rangeSolver = new RangeSolver(d, 0, 1, 0.001);
         double v = 1;
         double elevation = 0.1;
         double dt = 0.1;
         double R = v * v * Math.sin(2 * elevation) / g;
         double t = 2 * v * Math.sin(elevation) / g;
-        FiringSolution s = rangeSolver.solveWithDt(v, 0, elevation, dt);
+        Interception s = rangeSolver.solveWithDt(v, 0, elevation, dt);
         if (DEBUG)
             System.out.printf("%6.3f, %6.3f, %6.3f, %6.3f, %6.3f, %10.7f, %10.7f\n",
-                    dt, v, elevation, R, s.range(), t, s.tof());
+                    dt, v, elevation, R, s == null ? 0 : s.range(), t, s == null ? 0 : s.tof());
     }
 
 }

@@ -84,9 +84,10 @@ public class Turret extends SubsystemBase {
         m_intercept = new Intercept(log);
         Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
         double TARGET_HEIGHT = 0;
-        RangeSolver rangeSolver = new RangeSolver(d, TARGET_HEIGHT);
+        double TARGET_ELEVATION = 1;
+        RangeSolver rangeSolver = new RangeSolver(d, TARGET_HEIGHT, TARGET_ELEVATION, 0.001);
         RangeCache range = new RangeCache(rangeSolver, speed, 0);
-        m_shootingMethod = new ShootingMethod(range, 0.01, 0.1);
+        m_shootingMethod = new ShootingMethod(range, 0.1, 1.4, 0.01, 0.1);
         m_laser = new LaserSolver();
         m_aiming = false;
     }

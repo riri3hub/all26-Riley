@@ -22,7 +22,10 @@ public class GyroFactory {
             default:
                 // for simulation
                 // this is a very high drift rate, to make it more obvious.
-                double driftRateRad_S = 0.5;
+                // double driftRateRad_S = 0.5;
+                // having proven the gyro drift works fine, the level now is
+                // a bit more realistic, though still high.
+                double driftRateRad_S = 0.05;
                 return new SimulatedGyro(parent, kinodynamics, collection, driftRateRad_S);
         }
     }

@@ -1,5 +1,8 @@
 package org.team100.frc2026;
 
+import java.util.OptionalDouble;
+import java.util.function.Supplier;
+
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -26,17 +29,24 @@ public class Shooter extends SubsystemBase {
     private static final CanId CAN_ID_3 = new CanId(14);
     private static final double TOLERANCE_M_S = 1;
     private static final double GEAR_RATIO = 1;
-    private static final double WHEEL_DIAMETER_M = 0.1;
+    private static final double WHEEL_DIAMETER_M = 0.075;
+
+    private final Supplier<OptionalDouble> m_speed;
 
     private final OutboardLinearVelocityServo m_servo1;
     private final OutboardLinearVelocityServo m_servo2;
     private final OutboardLinearVelocityServo m_servo3;
 
-    public Shooter(LoggerFactory parent) {
+    /**
+     * @param parent log
+     * @param speed  speed (m/s) for auto mode
+     */
+    public Shooter(LoggerFactory parent, Supplier<OptionalDouble> speed) {
         LoggerFactory log = parent.type(this);
         LoggerFactory log1 = log.name("Shooter1");
         LoggerFactory log2 = log.name("Shooter2");
         LoggerFactory log3 = log.name("Shooter3");
+        m_speed = speed;
 
         VelocityProfileR1 profile = new CurrentLimitedExponentialVelocityProfileR1(
                 10, 10, 20, 30);
@@ -48,10 +58,10 @@ public class Shooter extends SubsystemBase {
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
                 double supplyLimit = 120;
-                double statorLimit = 120;
+                double statorLimit = 60;
                 SimpleDynamics ff = new SimpleDynamics(log, 0.004, 0.002);
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.1);
+                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
 
                 m1 = new KrakenX60Motor(
                         log1, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
@@ -105,6 +115,10 @@ public class Shooter extends SubsystemBase {
         return run(this::dutyCycle3).withName("Motor 3 Spin");
     }
 
+    public Command auto() {
+        return startRun(this::reset, this::autoWork);
+    }
+
     public Command stop() {
         return run(this::stopMotor).withName("stop Shooter");
     }
@@ -126,6 +140,12 @@ public class Shooter extends SubsystemBase {
         m_servo1.stop();
         m_servo2.stop();
         m_servo3.stop();
+    }
+
+    private void setVelocityDirect(double setpointM_S) {
+        m_servo1.setVelocityDirect(setpointM_S);
+        m_servo2.setVelocityDirect(setpointM_S);
+        m_servo3.setVelocityDirect(setpointM_S);
     }
 
     private void setVelocityProfiled(double goalM_S) {
@@ -150,6 +170,11 @@ public class Shooter extends SubsystemBase {
 
     private void dutyCycle3() {
         m_servo3.setDutyCycle(1);
+    }
+
+    private void autoWork() {
+        m_speed.get().ifPresentOrElse(
+                this::setVelocityProfiled, this::stopMotor);
     }
 
 }
