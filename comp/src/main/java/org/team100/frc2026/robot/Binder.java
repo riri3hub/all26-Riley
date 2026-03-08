@@ -29,6 +29,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 /**
  * Binds buttons to commands. Also creates default commands.
@@ -215,6 +216,12 @@ public class Binder {
         Command runFeeder = m_machinery.m_feeder.testFeed();
         Command runShooter3 = m_machinery.m_shooter.testMotor3Command();
         Command runFeederBack = m_machinery.m_feeder.testFeedBack();
+        Command runIntakeWobbleExtendIn = m_machinery.m_intakeExtend.goToWobbleSlightlyInExtendedPosition();
+        Command runIntakeWobbleRetractIn = m_machinery.m_intakeExtend.goToWobbleSlightlyOutRetractedPosition();
+        Command runIntakeWobbleExtendOut = m_machinery.m_intakeExtend.goToWobbleSlightlyInExtendedPosition();
+        Command runIntakeWobbleRetractOut = m_machinery.m_intakeExtend.goToWobbleInRetractedPosition();
+
+
         // whileTrue(driver::rightTrigger,
         // parallel(
         // runHood,
@@ -240,6 +247,13 @@ public class Binder {
         ///
         /// TEST
         ///
+        ///
+        if(m_machinery.m_intakeExtend.atExtendedPosition()){
+             whileTrue(driver::y, Commands.repeatingSequence(runIntakeWobbleExtendOut.withTimeout(0.5)
+                .andThen(runIntakeWobbleRetractOut).withTimeout(0.5)));
+        }
+       whileTrue(driver::y, Commands.repeatingSequence(runIntakeWobbleExtendIn.withTimeout(0.5)
+                .andThen(runIntakeWobbleRetractIn).withTimeout(0.5)));
 
         Tester tester = new Tester(m_machinery);
         whileTrue(() -> (RobotState.isTest() && driver.a() && driver.b()),

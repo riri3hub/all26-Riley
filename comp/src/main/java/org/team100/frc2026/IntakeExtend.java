@@ -75,6 +75,30 @@ public class IntakeExtend extends SubsystemBase {
         return run(this::stopServo).withName("Intake Extend Stop");
     }
 
+    public Command goToWobbleSlightlyInExtendedPosition() {
+        return startRun(this::reset, () -> actuateWithProfile(1))
+                .until(m_servo::atGoal)
+                .withName("Intake Extend GoToWobbleExtendedPosition");
+    }
+
+    public Command goToWobbleSlightlyOutRetractedPosition() {
+        return startRun(this::reset, () -> actuateWithProfile(0.5))
+                .until(m_servo::atGoal)
+                .withName("Intake Extend GoToWobbleRetractedPosition");
+    }
+    public Command goToWobbleOutExtendedPosition() {
+        return startRun(this::reset, () -> actuateWithProfile(3))
+                .until(m_servo::atGoal)
+                .withName("Intake Extend GoToWobbleExtendedPosition");
+    }
+
+    public Command goToWobbleInRetractedPosition() {
+        return startRun(this::reset, () -> actuateWithProfile(2))
+                .until(m_servo::atGoal)
+                .withName("Intake Extend GoToWobbleRetractedPosition");
+    }
+    
+
     /////////////////////////////////////////
 
     private void stopServo() {
@@ -87,5 +111,8 @@ public class IntakeExtend extends SubsystemBase {
 
     private void actuateWithProfile(double value) {
         m_servo.actuateWithProfile(value, 0);
+    }
+    public boolean atExtendedPosition(){
+        return m_servo.getUnwrappedPositionRad() > 2.5;
     }
 }
