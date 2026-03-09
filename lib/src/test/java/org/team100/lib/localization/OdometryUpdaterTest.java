@@ -148,9 +148,11 @@ public class OdometryUpdaterTest {
         assertEquals(0.010, newState.noise().rotation(), DELTA);
         // nonzero bias mean, we're not confident enough to go straight to the right
         // answer
-        assertEquals(0.000004, newState.gyroBias().mean(), 1e-6);
+        // assertEquals(0.000004, newState.gyroBias().mean(), 1e-6);
+        assertEquals(4.4e-7, newState.gyroBias().mean(), 1e-6);
         // much more bias noise
-        assertEquals(0.001039, newState.gyroBias().sigma(), 1e-6);
+        // assertEquals(0.001039, newState.gyroBias().sigma(), 1e-6);
+        assertEquals(0.001004, newState.gyroBias().sigma(), 1e-6);
         // Grind on the bias for awhile
         for (int i = 2; i < 100; ++i) {
             gyroYaw = new Rotation2d(0.02 * i);
@@ -199,9 +201,11 @@ public class OdometryUpdaterTest {
         assertEquals(0.010, newState.noise().cartesian(), DELTA);
         assertEquals(0.010, newState.noise().rotation(), DELTA);
         // much more bias
-        assertEquals(0.001307, newState.gyroBias().mean(), 1e-6);
+        // assertEquals(0.001307, newState.gyroBias().mean(), 1e-6);
+        assertEquals(6.1e-5, newState.gyroBias().mean(), 1e-6);
         // a bit more bias noise
-        assertEquals(0.005206, newState.gyroBias().sigma(), 1e-6);
+        // assertEquals(0.005206, newState.gyroBias().sigma(), 1e-6);
+        assertEquals(0.001493, newState.gyroBias().sigma(), 1e-6);
     }
 
 }

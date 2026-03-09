@@ -304,27 +304,6 @@ public class OdometryUpdater {
         return swerveState;
     }
 
-    /**
-     * Mix the gyro dtheta with the twist dtheta, depending on the twist norm.
-     * If we're not moving very fast, then the odometry is pretty reliable: the gyro
-     * signal is mostly drift. But if we're moving fast, then the wheels are
-     * probably slipping against the carpet, so we should pay more attention to the
-     * gyro signal. In particular, if we're not moving at all (or nearly so), we
-     * should ignore the gyro entirely.
-     */
-    static Twist2d mix(Twist2d twist, double gyroDTheta, double dt) {
-        double velocity = Metrics.l2Norm(twist) / dt;
-        // Try a Gaussian. Set this to a very small number to recover the previous
-        // behavior, where the gyro always overrides.
-        double width = 1.0;
-        double odoFraction = Math.exp(-width * velocity * velocity);
-        double gyroFraction = 1 - odoFraction;
-        return new Twist2d(
-                twist.dx,
-                twist.dy,
-                odoFraction * twist.dtheta + gyroFraction * gyroDTheta);
-    }
-
     /** Replay odometry after the sample time. */
     void replay(double sampleTime) {
         if (m_debug)

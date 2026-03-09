@@ -52,7 +52,9 @@ public class NudgingVisionUpdater implements VisionUpdater {
         m_log_prevNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "previous noise");
         m_log_updateNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "update noise");
         m_log_newNoise = log.isotropicNoiseSE2Logger(Level.TRACE, "new noise");
+        // TODO: maybe the minimum variance here it too low?
         m_cartesianFusor = new CovarianceInflation(0.02, 0.003);
+        // TODO: maybe the minimum variance here it too low?
         m_rotationFusor = new CovarianceInflation(0.02, 0.003);
         m_latestTimeS = 0;
     }

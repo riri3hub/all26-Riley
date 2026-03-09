@@ -18,7 +18,6 @@ import org.team100.lib.uncertainty.VariableR1;
  * of a few millimeters. This seems to keep it from becoming too confident and
  * locking in on the wrong value.
  * 
- * 
  * I tuned these terms by eye, in this sheet:
  * https://docs.google.com/spreadsheets/d/1DmHL1UDd6vngmr-5_9fNHg2xLC4TEVWTN2nHZBOnje0/edit?gid=1604242948#gid=1604242948
  */

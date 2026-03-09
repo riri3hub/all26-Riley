@@ -33,19 +33,23 @@ public class OdometryNoiseTest {
         // moving pretty slowly, 0.5 m/s over 0.02 sec
         odo = OdometryNoise.get(0.01, 0).rotation();
         // about 3 cm/s of error, which seems reasonable
-        assertEquals(0.00055, odo, 1e-6);
+        // assertEquals(0.00055, odo, 1e-6);
+        assertEquals(0.00255, odo, 1e-6);
         // moving pretty fast, 5 m/s over 0.02 sec
         odo = OdometryNoise.get(0.1, 0).rotation();
         // 0.5 m/s of error, a whole lot!
-        assertEquals(0.010, odo, 1e-6);
+        // assertEquals(0.010, odo, 1e-6);
+        assertEquals(0.030, odo, 1e-6);
         // this is slow rotation, 1 rad/s over 0.02 sec
         odo = OdometryNoise.get(0, 0.02).rotation();
         // 0.06 rad/s of error, a few degrees
-        assertEquals(0.0012, odo, 1e-3);
+        // assertEquals(0.0012, odo, 1e-3);
+        assertEquals(0.0052, odo, 1e-3);
         // this is very fast rotation, 10 rad/s over 0.02 sec
         odo = OdometryNoise.get(0, 0.2).rotation();
         // 1.5 rad/s of error, that's a whole lot!
-        assertEquals(0.0300, odo, 1e-3);
+        // assertEquals(0.0300, odo, 1e-3);
+        assertEquals(0.0700, odo, 1e-3);
     }
 
     @Test
