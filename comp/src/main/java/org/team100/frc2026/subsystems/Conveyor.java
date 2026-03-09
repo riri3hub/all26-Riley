@@ -1,4 +1,4 @@
-package org.team100.frc2026;
+package org.team100.frc2026.subsystems;
 
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
@@ -10,7 +10,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.KrakenX44Motor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
-import org.team100.lib.profile.r1.CurrentLimitedExponentialVelocityProfileR1;
+import org.team100.lib.profile.r1.AccelLimitedVelocityProfileR1;
 import org.team100.lib.profile.r1.VelocityProfileR1;
 import org.team100.lib.reference.r1.VelocityProfileReferenceR1;
 import org.team100.lib.reference.r1.VelocityReferenceR1;
@@ -20,39 +20,41 @@ import org.team100.lib.util.CanId;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Intake extends SubsystemBase {
-    private static final CanId CAN_ID_1 = new CanId(15);
-    private static final CanId CAN_ID_2 = new CanId(17);
+public class Conveyor extends SubsystemBase {
+    private static final CanId canID1 = new CanId(19);
+    private static final CanId canID2 = new CanId(20);
     private static final double TOLERANCE_M_S = 1;
-    private static final double GEAR_RATIO = 1;
-    private static final double WHEEL_DIAMETER_M = 0.1;
+    private static final double GEAR_RATIO = 3;
+    private static final double WHEEL_DIAMETER_M = 0.035;
 
     private final OutboardLinearVelocityServo m_servo1;
     private final OutboardLinearVelocityServo m_servo2;
 
-    public Intake(LoggerFactory parent) {
+    public Conveyor(LoggerFactory parent) {
         LoggerFactory log = parent.type(this);
-        LoggerFactory log1 = log.name("motor1");
-        LoggerFactory log2 = log.name("motor2");
-        VelocityProfileR1 profile = new CurrentLimitedExponentialVelocityProfileR1(
-                10, 10, 20, 30);
+        LoggerFactory log1 = log.name("Conveyor1");
+        LoggerFactory log2 = log.name("Conveyor2");
+
+        VelocityProfileR1 profile = new AccelLimitedVelocityProfileR1(10);
         VelocityReferenceR1 ref = new VelocityProfileReferenceR1(
                 log, () -> profile, 1);
+
         final BareMotor m1;
         final BareMotor m2;
+
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
-                double supplyLimit = 50;
-                double statorLimit = 50;
-                SimpleDynamics ff = new SimpleDynamics(log, 0.004, 0.002);
+                double supplyLimit = 120;
+                double statorLimit = 120;
+                SimpleDynamics dynamics = new SimpleDynamics(log, 0.004, 0.002);
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
                 m1 = new KrakenX44Motor(
-                        log1, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        supplyLimit, statorLimit, ff, friction, pid);
+                        log1, canID1, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        supplyLimit, statorLimit, dynamics, friction, pid);
                 m2 = new KrakenX44Motor(
-                        log2, CAN_ID_2, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        supplyLimit, statorLimit, ff, friction, pid);
+                        log2, canID2, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        supplyLimit, statorLimit, dynamics, friction, pid);
             }
             default -> {
                 m1 = new SimulatedBareMotor(log1, 600);
@@ -65,22 +67,33 @@ public class Intake extends SubsystemBase {
                 log2, m2, ref, GEAR_RATIO, WHEEL_DIAMETER_M, TOLERANCE_M_S);
     }
 
-    public Command intake() {
-        return startRun(this::reset, () -> setVelocityProfiled(5))
-                .withName("Intake Full Speed");
-    }
-
-    public Command stop() {
-        return run(this::stopMotor).withName("Stop Intake");
-    }
-
     @Override
     public void periodic() {
         m_servo1.periodic();
         m_servo2.periodic();
     }
 
-    ////////////////////////////////
+    public Command conveyor() {
+        return startRun(this::reset, () -> setVelocityProfiled(0.5))
+                .withName("Convey");
+    }
+
+    public Command testConveyor() {
+        return run(this::dutyCycleAll)
+                .withName("Test Conveyor");
+    }
+
+    public Command testConveyorBack() {
+        return run(this::dutyCycleBackAll)
+                .withName("Test Back Conveyor");
+    }
+
+    public Command stop() {
+        return run(this::stopMotor)
+                .withName("Stop Conveyor");
+    }
+
+    //////////////////////////////////////////
 
     private void reset() {
         m_servo1.reset();
@@ -92,8 +105,18 @@ public class Intake extends SubsystemBase {
         m_servo2.stop();
     }
 
-    private void setVelocityProfiled(double velocityM_S) {
-        m_servo1.setVelocityProfiled(velocityM_S);
-        m_servo2.setVelocityProfiled(velocityM_S);
+    private void setVelocityProfiled(double goalM_S) {
+        m_servo1.setVelocityProfiled(goalM_S);
+        m_servo2.setVelocityProfiled(goalM_S);
+    }
+
+    private void dutyCycleAll() {
+        m_servo1.setDutyCycle(1);
+        m_servo2.setDutyCycle(1);
+    }
+
+    private void dutyCycleBackAll() {
+        m_servo1.setDutyCycle(-1);
+        m_servo2.setDutyCycle(-1);
     }
 }

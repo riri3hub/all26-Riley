@@ -1,4 +1,4 @@
-package org.team100.frc2026;
+package org.team100.frc2026.subsystems;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.OptionalDouble;
 
 import org.junit.jupiter.api.Test;
+import org.team100.frc2026.Timeless2026;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;

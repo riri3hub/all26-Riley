@@ -118,6 +118,13 @@ public class Robot extends TimedRobot100 {
     }
 
     @Override
+    public void testInit() {
+        System.out.println("*************************************");
+        System.out.println("TEST MODE!");
+        System.out.println("To run tests, hold down 'a' and 'b'");
+    }
+
+    @Override
     public void close() {
         super.close();
         m_machinery.close();
@@ -140,13 +147,6 @@ public class Robot extends TimedRobot100 {
 
     @Override
     public void disabledInit() {
-    }
-
-    @Override
-    public void testInit() {
-        System.out.println("*************************************");
-        System.out.println("TEST MODE!");
-        System.out.println("To run tests, hold down 'a' and 'b'");
     }
 
     @Override

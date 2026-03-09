@@ -1,4 +1,4 @@
-package org.team100.frc2026;
+package org.team100.frc2026.subsystems;
 
 import java.util.OptionalDouble;
 import java.util.function.Supplier;

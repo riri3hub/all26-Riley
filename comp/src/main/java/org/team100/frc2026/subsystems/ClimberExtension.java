@@ -1,4 +1,4 @@
-package org.team100.frc2026;
+package org.team100.frc2026.subsystems;
 
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
