@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import org.team100.frc2026.field.FieldConstants2026;
 import org.team100.lib.controller.r1.FeedbackR1;
 import org.team100.lib.controller.r1.PIDFeedback;
+import org.team100.lib.controller.r1.SimpleAim;
 import org.team100.lib.hid.InterLinkDX;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
@@ -97,13 +98,17 @@ public class InterlinkBinder {
         };
 
         // aim at the hub or our zone
+        SimpleAim aim = new SimpleAim(
+                fieldLogger,
+                m_log,
+                m_machinery.m_swerveKinodynamics::getMaxAngleSpeedRad_S,
+                thetaFeedback);
         whileTrue(() -> driver.a1(),
                 new DriveTargetLockDirect(
-                        fieldLogger,
                         m_log,
                         m_machinery.m_swerveKinodynamics,
                         target,
-                        thetaFeedback,
+                        aim,
                         driver::velocity,
                         m_machinery.m_localizer::setHeedRadiusM,
                         m_machinery.m_drive,

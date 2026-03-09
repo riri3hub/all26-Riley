@@ -15,6 +15,15 @@ class TargetUtilTest {
     private static final double DELTA = 0.001;
 
     @Test
+    void testUnwrappedAbsoluteBearing() {
+        // no translation => zero bearing
+        // this depends on the bad behavior of Rotation2d, where norm of zero yields angle of zero
+        assertEquals(0, TargetUtil.unwrappedAbsoluteBearing(new Pose2d(), new Translation2d()), DELTA);
+        assertEquals(0, TargetUtil.unwrappedAbsoluteBearing(
+                new Pose2d(0, 0, new Rotation2d(1)), new Translation2d()), DELTA);
+    }
+
+    @Test
     void testBearing() {
         assertEquals(0,
                 TargetUtil.absoluteBearing(

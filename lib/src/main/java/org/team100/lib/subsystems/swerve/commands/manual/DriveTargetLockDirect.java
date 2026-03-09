@@ -6,7 +6,7 @@ import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
 import org.team100.lib.config.DriverSkill;
-import org.team100.lib.controller.r1.FeedbackR1;
+import org.team100.lib.controller.r1.SimpleAim;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GeometryUtil;
@@ -14,17 +14,11 @@ import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.hid.Velocity;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
-import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.ModelR1Logger;
-import org.team100.lib.state.ModelR1;
-import org.team100.lib.state.ModelSE2;
+import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.subsystems.swerve.SwerveDriveSubsystem;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
-import org.team100.lib.targeting.TargetUtil;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -54,42 +48,30 @@ public class DriveTargetLockDirect extends Command {
     private final DoubleConsumer m_heedRadiusM;
     private final SwerveDriveSubsystem m_drive;
     private final SwerveLimiter m_limiter;
-
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final Supplier<Optional<Translation2d>> m_target;
-    private final FeedbackR1 m_thetaController;
 
-    private final DoubleLogger m_log_apparent_motion;
-    private final DoubleArrayLogger m_log_target;
-    private final ModelR1Logger m_log_goal;
-    private final DoubleLogger m_log_thetaFB;
-    private final DoubleLogger m_log_thetaFF;
-    private final DoubleLogger m_log_omega;
+    private final SimpleAim m_aim;
+    private final BooleanLogger m_log_aiming;
 
     public DriveTargetLockDirect(
-            LoggerFactory fieldLogger,
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
             Supplier<Optional<Translation2d>> target,
-            FeedbackR1 thetaController,
+            SimpleAim aim,
             Supplier<Velocity> twistSupplier,
             DoubleConsumer heedRadiusM,
             SwerveDriveSubsystem drive,
             SwerveLimiter limiter) {
         LoggerFactory log = parent.type(this);
-        m_log_goal = log.ModelR1Logger(Level.TRACE, "goal");
-        m_log_thetaFB = log.doubleLogger(Level.TRACE, "thetaFB");
-        m_log_thetaFF = log.doubleLogger(Level.TRACE, "thetaFF");
-        m_log_omega = log.doubleLogger(Level.TRACE, "omega");
-        m_log_target = fieldLogger.doubleArrayLogger(Level.TRACE, "target");
-        m_log_apparent_motion = log.doubleLogger(Level.TRACE, "apparent motion");
+        m_log_aiming = log.booleanLogger(Level.TRACE, "aiming");
         m_twistSupplier = twistSupplier;
         m_heedRadiusM = heedRadiusM;
         m_drive = drive;
         m_limiter = limiter;
         m_swerveKinodynamics = swerveKinodynamics;
         m_target = target;
-        m_thetaController = thetaController;
+        m_aim = aim;
         addRequirements(m_drive);
     }
 
@@ -97,51 +79,21 @@ public class DriveTargetLockDirect extends Command {
     public void initialize() {
         m_heedRadiusM.accept(HEED_RADIUS_M);
         m_limiter.updateSetpoint(m_drive.getVelocity());
-        m_thetaController.reset();
+        m_aim.reset();
     }
 
     @Override
     public void execute() {
-        ModelSE2 state = m_drive.getState();
+        actuate(getOmega());
+    }
 
+    private Double getOmega() {
         Optional<Translation2d> oTarget = m_target.get();
         if (oTarget.isEmpty()) {
-            // no target, just use driver input
-            actuate(null);
-            return;
+            // No target, so use the driver input.
+            return null;
         }
-        // the goal omega should match the target's apparent motion
-        Translation2d target = oTarget.get();
-
-        m_log_target.log(() -> new double[] {
-                target.getX(),
-                target.getY(),
-                0 });
-        double targetMotion = TargetUtil.targetMotion(state, target);
-        m_log_apparent_motion.log(() -> targetMotion);
-
-        double unwrappedBearing = TargetUtil.unwrappedAbsoluteBearing(state.pose(), target);
-        // eliminate target motion to reduce noise
-        // TODO: put back target motion
-        // ModelR1 goal = new ModelR1(unwrappedBearing, 0);
-        final ModelR1 goal = new ModelR1(unwrappedBearing, targetMotion);
-        m_log_goal.log(() -> goal);
-
-        // Feedforward is the goal velocity
-        double thetaFF = goal.v();
-        m_log_thetaFF.log(() -> thetaFF);
-
-        // Feedback uses the goal, there's no profile.
-        double thetaFB = m_thetaController.calculate(state.theta(), goal);
-        m_log_thetaFB.log(() -> thetaFB);
-
-        double omega = MathUtil.clamp(
-                thetaFF + thetaFB,
-                -m_swerveKinodynamics.getMaxAngleSpeedRad_S(),
-                m_swerveKinodynamics.getMaxAngleSpeedRad_S());
-        m_log_omega.log(() -> omega);
-
-        actuate(omega);
+        return m_aim.getOmega(m_drive.getState(), oTarget.get());
     }
 
     private void actuate(Double omega) {
@@ -160,6 +112,7 @@ public class DriveTargetLockDirect extends Command {
         }
 
         // Override omega.
+        m_log_aiming.log(() -> omega != null);
         if (omega != null) {
             v = new VelocitySE2(v.x(), v.y(), omega);
         }

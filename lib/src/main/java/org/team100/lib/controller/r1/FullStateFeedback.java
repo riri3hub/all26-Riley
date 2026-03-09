@@ -17,6 +17,7 @@ import edu.wpi.first.math.MathUtil;
  * Does not include feedforward, this just does feedback.
  */
 public class FullStateFeedback implements FeedbackR1 {
+    private static final boolean DEBUG = false;
 
     private final ModelR1Logger m_log_measurement;
     private final ModelR1Logger m_log_reference;
@@ -72,8 +73,14 @@ public class FullStateFeedback implements FeedbackR1 {
     private double calculateFB(ModelR1 measurement, ModelR1 setpoint) {
         double xError = m_modulus.applyAsDouble(setpoint.x() - measurement.x());
         double xDotError = setpoint.v() - measurement.v();
+        if (DEBUG)
+            System.out.printf("xerr %f xdoterr %f\n", xError, xDotError);
         m_atSetpoint = Math.abs(xError) < m_tol1 && Math.abs(xDotError) < m_tol2;
-        return m_K1.getAsDouble() * xError + m_K2.getAsDouble() * xDotError;
+        double k1 = m_K1.getAsDouble();
+        double k2 = m_K2.getAsDouble();
+        if (DEBUG)
+            System.out.printf("k1 %f k2 %f\n", k1, k2);
+        return k1 * xError + k2 * xDotError;
     }
 
     /** True if the most recent call to calculate() was at the setpoint. */

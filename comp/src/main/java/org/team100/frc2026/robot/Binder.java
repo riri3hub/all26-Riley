@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import org.team100.frc2026.field.FieldConstants2026;
 import org.team100.lib.controller.r1.FeedbackR1;
 import org.team100.lib.controller.r1.FullStateFeedback;
+import org.team100.lib.controller.r1.LeadingAim;
 import org.team100.lib.controller.r1.PIDFeedback;
 import org.team100.lib.hid.DriverXboxControl;
 import org.team100.lib.logging.LoggerFactory;
@@ -190,15 +191,19 @@ public class Binder {
                 m_log, 3, 0.1, true, 0.025, 0.25);
 
         // button 6
+        LeadingAim aim = new LeadingAim(
+                m_log,
+                m_machinery.m_swerveKinodynamics::getMaxAngleSpeedRad_S,
+                aggressiveFeedback);
         whileTrue(() -> driver.rightBumper(),
                 new DriveMovingTargetLock(
                         m_log,
                         m_machinery.m_swerveKinodynamics,
+                        aim,
                         driver::velocity,
                         m_machinery.m_localizer::setHeedRadiusM,
                         m_machinery.m_limiter,
                         tofSolution,
-                        aggressiveFeedback,
                         m_machinery.m_drive)
                         .withName("Moving target lock"));
 
@@ -242,15 +247,16 @@ public class Binder {
 
         // whileTrue(driver::rightTrigger, parallel(runSerial, runSerialUpper,
         // runShooter));
-        
+
         ////////////////////////////////////////////////////
         ///
         /// TEST
         ///
-    
+
         // if (m_machinery.m_intakeExtend.atExtendedPosition()) {
-        //     whileTrue(driver::y, Commands.repeatingSequence(runIntakeWobbleExtendOut.withTimeout(0.5)
-        //             .andThen(runIntakeWobbleRetractOut).withTimeout(0.5)));
+        // whileTrue(driver::y,
+        // Commands.repeatingSequence(runIntakeWobbleExtendOut.withTimeout(0.5)
+        // .andThen(runIntakeWobbleRetractOut).withTimeout(0.5)));
         // };
         whileTrue(driver::y, Commands.repeatingSequence(runIntakeWobbleExtendIn.withTimeout(0.5)
                 .andThen(runIntakeWobbleRetractIn).withTimeout(0.5)));
