@@ -7,6 +7,8 @@ import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.print.DocFlavor.INPUT_STREAM;
+
 import org.team100.frc2026.robot.Machinery;
 import org.team100.lib.config.AnnotatedCommand;
 import org.team100.lib.controller.se2.ControllerSE2;
@@ -122,19 +124,16 @@ public class CenterAuton implements AnnotatedCommand {
                 waitSeconds(1),
 
                 parallel(
-                    IntakeBalls
-                   // machinery.m_intake.intake()
+                    IntakeBalls,
+                    machinery.m_intake.intake()
                 ).until(IntakeBalls::isDone),
-                // Without telling it to, the intake would only stop spinning
-                // at the end of the auton. Without the timeout, the robot
-                // would not continue the rest of the auton
-               // machinery.m_intake.stop().withTimeout(1),
+                machinery.m_intake.stop().withTimeout(1),
                 waitSeconds(1),
 
                 ScoreSetUp.until(ScoreSetUp::isDone),
-              //  machinery.m_shooter.shoot().withTimeout(1),
-                waitSeconds(2)
-              //  machinery.m_shooter.stop().withTimeout(1));
+                machinery.m_shooter.shooterFullspeed().withTimeout(1),
+                waitSeconds(2),
+                machinery.m_shooter.stop().withTimeout(1)
         );    
         }
 

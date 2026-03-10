@@ -128,7 +128,7 @@ public class Auton2 implements AnnotatedCommand {
                 // Without telling it to, the intake would only stop spinning
                 // at the end of the auton. Without the timeout, the robot
                 // would not continue the rest of the auton
-               // machinery.m_intake.stop().withTimeout(1),
+                machinery.m_intake.stop().withTimeout(1),
                 waitSeconds(1),
 
                 ScoreSetUp.until(ScoreSetUp::isDone),

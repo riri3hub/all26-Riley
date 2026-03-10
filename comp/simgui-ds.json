@@ -1,9 +1,4 @@
 {
-  "FMS": {
-    "window": {
-      "visible": false
-    }
-  },
   "Joysticks": {
     "window": {
       "visible": false
@@ -40,7 +35,7 @@
         }
       ],
       "axisCount": 6,
-      "buttonCount": 8,
+      "buttonCount": 7,
       "buttonKeys": [
         49,
         50,
@@ -48,8 +43,7 @@
         52,
         53,
         54,
-        55,
-        56
+        55
       ],
       "povConfig": [
         {

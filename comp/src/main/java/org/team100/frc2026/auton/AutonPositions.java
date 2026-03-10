@@ -18,7 +18,7 @@ public class AutonPositions {
     public static final Pose2d SHOOT_RIGHT = new Pose2d(2.3, 2.7, new Rotation2d(35 * (Math.PI / 180)));
 
     public static final Pose2d LEFT_BUMP_MID = new Pose2d(4.66, 5.5, new Rotation2d(0 * (Math.PI / 180)));
-     public static final Pose2d LEFT_BUMP_PAST = new Pose2d(8, 5.5, new Rotation2d(225 * (Math.PI / 180)));
+     public static final Pose2d LEFT_BUMP_PAST = new Pose2d(8, 5.5, new Rotation2d(0 * (Math.PI / 180)));
     public static final Pose2d RIGHT_BUMP_MID = new Pose2d(4.66, 2.5, new Rotation2d(0 * (Math.PI / 180)));
 
     public static final Pose2d CENTER = new Pose2d(3.5, 4.0, Rotation2d.kZero);
