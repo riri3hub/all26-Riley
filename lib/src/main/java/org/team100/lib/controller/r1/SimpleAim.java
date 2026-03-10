@@ -26,6 +26,7 @@ public class SimpleAim {
     private final DoubleSupplier m_maxOmega;
     private final FeedbackR1 m_thetaController;
 
+    private final ModelR1Logger m_log_thetaGoal;
     private final DoubleLogger m_log_apparent_motion;
     private final DoubleArrayLogger m_log_target;
     private final ModelR1Logger m_log_goal;
@@ -45,6 +46,7 @@ public class SimpleAim {
         m_log_omega = log.doubleLogger(Level.TRACE, "omega");
         m_log_target = fieldLogger.doubleArrayLogger(Level.TRACE, "target");
         m_log_apparent_motion = log.doubleLogger(Level.TRACE, "apparent motion");
+        m_log_thetaGoal = log.ModelR1Logger(Level.TRACE, "theta goal");
         m_maxOmega = maxOmega;
         m_thetaController = thetaController;
     }
@@ -68,12 +70,15 @@ public class SimpleAim {
 
         ModelR1 thetaGoal = new ModelR1(unwrappedBearing, azimuthVelocity);
 
+        return getOmega(state, thetaGoal);
+    }
 
+    public Double getOmega(ModelSE2 state, ModelR1 thetaGoal) {
+        m_log_thetaGoal.log(() -> thetaGoal);
         ModelR1 theta = state.theta();
         double thetaFB = getThetaFB(theta, thetaGoal);
         double thetaFF = getThetaFF(thetaGoal);
-
-        Double omega = MathUtil.clamp(
+        double omega = MathUtil.clamp(
                 thetaFF + thetaFB,
                 -m_maxOmega.getAsDouble(),
                 m_maxOmega.getAsDouble());
@@ -98,12 +103,4 @@ public class SimpleAim {
         m_log_thetaFF.log(() -> thetaFF);
         return thetaFF;
     }
-
-    /**
-     * @param state  robot state
-     * @param target azimuth
-     */
-    // public double getOmega(ModelSE2 state, ModelR1 target) {
-    // }
-
 }

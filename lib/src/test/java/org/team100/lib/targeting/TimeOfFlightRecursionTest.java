@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.geometry.StateR2;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.targeting.TimeOfFlightRecursion.Looper;
@@ -46,7 +47,8 @@ public class TimeOfFlightRecursionTest {
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
         Optional<Solution> o = tofr.solve(
-                new ModelSE2(), targetPosition, targetVelocity);
+                new ModelSE2(),
+                new StateR2(targetPosition, targetVelocity));
         Solution x = o.orElseThrow();
         assertEquals(0, x.azimuth().getRadians(), DELTA);
         assertEquals(0.206, x.parameters().elevation(), DELTA);
@@ -171,7 +173,7 @@ public class TimeOfFlightRecursionTest {
                 new ModelSE2(
                         new Pose2d(),
                         new VelocitySE2(robotVelocity.x(), robotVelocity.y(), 0)),
-                targetPosition, targetVelocity);
+                new StateR2(targetPosition, targetVelocity));
         Solution x = o.orElseThrow();
         assertEquals(0, x.azimuth().getRadians(), DELTA);
         assertEquals(0.390, x.parameters().elevation(), 0.006);
@@ -194,7 +196,7 @@ public class TimeOfFlightRecursionTest {
                 new ModelSE2(
                         new Pose2d(),
                         new VelocitySE2(robotVelocity.x(), robotVelocity.y(), 0)),
-                targetPosition, targetVelocity);
+                new StateR2(targetPosition, targetVelocity));
         Solution solution = o.orElseThrow();
         assertEquals(0, solution.azimuth().getRadians(), DELTA);
         assertEquals(0.95, solution.parameters().elevation(), 0.006);
@@ -262,7 +264,7 @@ public class TimeOfFlightRecursionTest {
         Optional<Solution> o = tofr.solve(
                 new ModelSE2(new Pose2d(),
                         new VelocitySE2(robotVelocity.x(), robotVelocity.y(), 0)),
-                targetPosition, targetVelocity);
+                new StateR2(targetPosition, targetVelocity));
         Solution x = o.orElseThrow();
         assertEquals(-0.484, x.azimuth().getRadians(), 0.002);
         assertEquals(0.449, x.parameters().elevation(), 0.003);

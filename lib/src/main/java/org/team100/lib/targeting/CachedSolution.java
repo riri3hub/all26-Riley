@@ -7,6 +7,7 @@ import org.team100.lib.coherence.Cache;
 import org.team100.lib.coherence.ObjectCache;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.geometry.StateR2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
@@ -55,15 +56,15 @@ public class CachedSolution implements Supplier<Optional<Solution>> {
             return Optional.empty();
 
         Translation2d targetPosition = oTargetPosition.get();
-        
+
         m_log_target.log(() -> new double[] {
                 targetPosition.getX(),
                 targetPosition.getY(),
                 0 });
-        GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
 
         return m_solver.solve(
-                state, targetPosition, targetVelocity);
+                state,
+                new StateR2(targetPosition, GlobalVelocityR2.ZERO));
     }
 
 }

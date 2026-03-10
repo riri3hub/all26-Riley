@@ -8,6 +8,7 @@ import org.team100.lib.controller.r1.PIDFeedback;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.geometry.StateR2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
@@ -174,11 +175,14 @@ public class Turret extends SubsystemBase {
      * motion of either one.
      */
     private Optional<Solution> getAbsoluteBearingInstantaneous() {
-        return m_laser.solve(m_state.get(), m_target.get(), GlobalVelocityR2.ZERO);
+        StateR2 target = new StateR2(m_target.get(), GlobalVelocityR2.ZERO);
+        return m_laser.solve(m_state.get(), target);
     }
 
     private Optional<Solution> getShootingMethod() {
-        return m_shootingMethod.solve(m_state.get(), m_target.get(), GlobalVelocityR2.ZERO);
+        return m_shootingMethod.solve(
+                m_state.get(),
+                new StateR2(m_target.get(), GlobalVelocityR2.ZERO));
     }
 
     /**

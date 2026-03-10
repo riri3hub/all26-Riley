@@ -93,7 +93,8 @@ public class DriveTargetLockDirect extends Command {
             // No target, so use the driver input.
             return null;
         }
-        return m_aim.getOmega(m_drive.getState(), oTarget.get());
+        Translation2d target = oTarget.get();
+        return m_aim.getOmega(m_drive.getState(), target);
     }
 
     private void actuate(Double omega) {

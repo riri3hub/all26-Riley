@@ -38,7 +38,7 @@ public class LeadingAim {
         m_log_thetaFB = log.doubleLogger(Level.TRACE, "thetaFB");
         m_log_thetaFF = log.doubleLogger(Level.TRACE, "thetaFF");
         m_log_omega = log.doubleLogger(Level.TRACE, "omega");
-        m_log_thetaGoal = log.ModelR1Logger(Level.TRACE, "target");
+        m_log_thetaGoal = log.ModelR1Logger(Level.TRACE, "theta goal");
         m_maxOmega = maxOmega;
         m_thetaController = thetaController;
     }

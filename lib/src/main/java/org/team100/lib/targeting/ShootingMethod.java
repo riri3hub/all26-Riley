@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.geometry.StateR2;
 import org.team100.lib.optimization.NewtonsMethod;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.util.Math100;
@@ -94,17 +95,15 @@ public class ShootingMethod implements Solver {
      * elevation and "indirect" high elevation), you should choose an initial
      * elevation close to the solution you want.
      */
-    public Optional<Solution> solve(
-            ModelSE2 state,
-            Translation2d targetPosition,
-            GlobalVelocityR2 targetVelocity) {
+    @Override
+    public Optional<Solution> solve(ModelSE2 state, StateR2 target) {
         final Translation2d robotPosition = state.translation();
         final GlobalVelocityR2 robotVelocity = state.velocityR2();
 
         // Target relative to robot
-        final Translation2d T0 = targetPosition.minus(robotPosition);
+        final Translation2d T0 = target.position().minus(robotPosition);
         // Target velocity relative to robot
-        final GlobalVelocityR2 vT = targetVelocity.minus(robotVelocity);
+        final GlobalVelocityR2 vT = target.velocity().minus(robotVelocity);
 
         // Initial azimuth guess is the current target bearing.
         Vector<N2> initialX = VecBuilder.fill(

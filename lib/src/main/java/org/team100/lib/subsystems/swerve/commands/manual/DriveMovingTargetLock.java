@@ -90,7 +90,9 @@ public class DriveMovingTargetLock extends Command {
             return null;
         }
         Solution solution = oSolution.get();
-        ModelR1 target = new ModelR1(solution.azimuth().getRadians(), solution.azimuthVelocity());
+        ModelR1 target = new ModelR1(
+                solution.azimuth().getRadians(),
+                solution.azimuthVelocity());
         return m_aim.getOmega(m_drive.getState(), target);
     }
 

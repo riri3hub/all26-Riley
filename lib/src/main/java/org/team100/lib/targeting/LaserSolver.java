@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.DoubleFunction;
 
 import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.geometry.StateR2;
 import org.team100.lib.state.ModelSE2;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,14 +26,12 @@ public class LaserSolver implements Solver {
     }
 
     @Override
-    public Optional<Solution> solve(
-            ModelSE2 state,
-            Translation2d targetPosition,
-            GlobalVelocityR2 targetVelocity) {
-        final Translation2d robotPosition = state.translation();
+    public Optional<Solution> solve(ModelSE2 state, StateR2 target) {
+        Translation2d robotPosition = state.translation();
+        Translation2d targetPosition = target.position();
 
         // Target relative to robot
-        final Translation2d T0 = targetPosition.minus(robotPosition);
+        Translation2d T0 = targetPosition.minus(robotPosition);
         double rangeM = T0.getNorm();
 
         Optional<FiringParameters> oParams = m_rangeToParams.apply(rangeM);

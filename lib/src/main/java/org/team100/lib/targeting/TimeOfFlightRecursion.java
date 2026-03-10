@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.DoubleFunction;
 
 import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.geometry.StateR2;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.targeting.TimeOfFlightRecursion.Looper.LoopSolution;
 
@@ -88,18 +89,15 @@ public class TimeOfFlightRecursion implements Solver {
     }
 
     @Override
-    public Optional<Solution> solve(
-            ModelSE2 state,
-            Translation2d targetPosition,
-            GlobalVelocityR2 targetVelocity) {
+    public Optional<Solution> solve(ModelSE2 state, StateR2 target) {
         final Translation2d robotPosition = state.translation();
         final GlobalVelocityR2 robotVelocity = state.velocityR2();
 
         // Target relative to robot
-        final Translation2d T0 = targetPosition.minus(robotPosition);
+        Translation2d T0 = target.position().minus(robotPosition);
         double rangeM = T0.getNorm();
         // Target velocity relative to robot
-        final GlobalVelocityR2 vT = targetVelocity.minus(robotVelocity);
+        GlobalVelocityR2 vT = target.velocity().minus(robotVelocity);
 
         Looper looper = new Looper(m_rangeToParams, T0, vT);
 

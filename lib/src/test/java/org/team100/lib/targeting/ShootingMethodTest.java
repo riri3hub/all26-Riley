@@ -9,6 +9,7 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.geometry.StateR2;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.optimization.NumericalJacobian100;
 import org.team100.lib.state.ModelSE2;
@@ -106,7 +107,9 @@ public class ShootingMethodTest {
         // target is 2m away along +x
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        Optional<Solution> o = m.solve(new ModelSE2(), targetPosition, targetVelocity);
+        Optional<Solution> o = m.solve(
+                new ModelSE2(),
+                new StateR2(targetPosition, targetVelocity));
         Solution x = o.orElseThrow();
 
         double azimuth = 0;
@@ -135,7 +138,8 @@ public class ShootingMethodTest {
         Translation2d targetPosition = new Translation2d(2, 0);
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
         Optional<Solution> o = m.solve(
-                new ModelSE2(), targetPosition, targetVelocity);
+                new ModelSE2(),
+                new StateR2(targetPosition, targetVelocity));
         Solution x = o.orElseThrow();
 
         double azimuth = 0;
@@ -171,7 +175,7 @@ public class ShootingMethodTest {
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
         Optional<Solution> o = m.solve(
                 new ModelSE2(new Pose2d(), new VelocitySE2(1, 0, 0)),
-                targetPosition, targetVelocity);
+                new StateR2(targetPosition, targetVelocity));
         Solution x = o.orElseThrow();
 
         double azimuth = 0;
@@ -201,7 +205,7 @@ public class ShootingMethodTest {
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
         Optional<Solution> o = m.solve(
                 new ModelSE2(new Pose2d(), new VelocitySE2(-2, 0, 0)),
-                targetPosition, targetVelocity);
+                new StateR2(targetPosition, targetVelocity));
         Solution x = o.orElseThrow();
 
         double azimuth = 0;
@@ -229,7 +233,7 @@ public class ShootingMethodTest {
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
         Optional<Solution> o = m.solve(
                 new ModelSE2(new Pose2d(), new VelocitySE2(-10, 0, 0)),
-                targetPosition, targetVelocity);
+                new StateR2(targetPosition, targetVelocity));
         assertTrue(o.isEmpty());
     }
 
@@ -250,7 +254,7 @@ public class ShootingMethodTest {
         GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
         Optional<Solution> o = m.solve(
                 new ModelSE2(new Pose2d(), new VelocitySE2(0, 2, 0)),
-                targetPosition, targetVelocity);
+                new StateR2(targetPosition, targetVelocity));
         Solution x = o.orElseThrow();
 
         // aim to the right
@@ -293,7 +297,8 @@ public class ShootingMethodTest {
         long startTime = System.currentTimeMillis();
         for (int i = 0; i < iterations; ++i) {
             // this solve takes 7 iterations
-            m.solve(new ModelSE2(), targetPosition, targetVelocity);
+            m.solve(new ModelSE2(),
+                    new StateR2(targetPosition, targetVelocity));
         }
         long finishTime = System.currentTimeMillis();
         if (DEBUG) {

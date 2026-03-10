@@ -4,11 +4,10 @@ import java.util.Optional;
 import java.util.function.DoubleFunction;
 
 import org.team100.frc2026.field.FieldConstants2026;
-import org.team100.lib.geometry.GlobalVelocityR2;
+import org.team100.lib.geometry.StateR2;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.util.NamedChooser;
 
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -49,8 +48,8 @@ public class ProxySolver implements Solver {
     }
 
     @Override
-    public Optional<Solution> solve(ModelSE2 state, Translation2d targetPosition, GlobalVelocityR2 targetVelocity) {
-        return m_chooser.getSelected().solve(state, targetPosition, targetVelocity);
+    public Optional<Solution> solve(ModelSE2 state, StateR2 target) {
+        return m_chooser.getSelected().solve(state, target);
     }
 
     ////////////////////////////////////////////////
