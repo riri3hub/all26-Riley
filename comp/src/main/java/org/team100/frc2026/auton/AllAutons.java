@@ -46,22 +46,38 @@ public class AllAutons {
                 machinery.m_swerveKinodynamics,
                 controller,
                 machinery));
-        m_autonChooser.add(new Auton1R(
-                log,
-                machinery.m_swerveKinodynamics,
-                controller,
-                machinery));
+
         m_autonChooser.add(new Auton2(
                 log,
                 machinery.m_swerveKinodynamics,
                 controller,
                 machinery));
-         m_autonChooser.add(new Auton1L(
+         m_autonChooser.add(new LeftBumpFullSweepAuton(
                 log,
                 machinery.m_swerveKinodynamics,
                 controller,
                 machinery));
-        m_autonChooser.add(new CenterAuton(
+        m_autonChooser.add(new LeftBumpHalfSweepAuton(
+                log,
+                machinery.m_swerveKinodynamics,
+                controller,
+                machinery));
+        m_autonChooser.add(new CenterFullSweepAuton(
+                log,
+                machinery.m_swerveKinodynamics,
+                controller,
+                machinery)); 
+        m_autonChooser.add(new CenterHalfSweepAuton(
+                log,
+                machinery.m_swerveKinodynamics,
+                controller,
+                machinery)); 
+        m_autonChooser.add(new RightBumpFullSweepAuton(
+                log,
+                machinery.m_swerveKinodynamics,
+                controller,
+                machinery));
+        m_autonChooser.add(new RightBumpHalfSweepAuton(
                 log,
                 machinery.m_swerveKinodynamics,
                 controller,

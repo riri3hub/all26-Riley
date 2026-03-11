@@ -24,10 +24,11 @@ import org.team100.lib.trajectory.constraint.VelocityLimitRegionConstraint;
 import org.team100.lib.trajectory.path.PathSE2Factory;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /** An example of a simple sequence */
-public class CenterAuton implements AnnotatedCommand {
+public class RightBumpFullSweepAuton implements AnnotatedCommand {
     private final LoggerFactory log;
     private final ControllerSE2 controller;
     private final Machinery machinery;
@@ -36,7 +37,7 @@ public class CenterAuton implements AnnotatedCommand {
     private final PathSE2Factory pathFactory;
     private final TrajectorySE2Planner planner;
 
-    public CenterAuton(
+    public RightBumpFullSweepAuton(
             LoggerFactory parent,
             SwerveKinodynamics kinodynamics,
             ControllerSE2 controller,
@@ -45,20 +46,15 @@ public class CenterAuton implements AnnotatedCommand {
         this.controller = controller;
         this.machinery = machinery;
         constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
-        // In meters/second
+       // In meters/second
         double maxBumpVelocity = 1;
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
-
+         
         // create a new VelocityRegionContstraint `slow_bump_zone`
-        // the "name" values here separate the "Mutables" inside.
-        VelocityLimitRegionConstraint slow_bump_zone = new VelocityLimitRegionConstraint(log.name("bumpzone"),
-                BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone2 = new VelocityLimitRegionConstraint(log.name("bumpzone2"),
-                BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone3 = new VelocityLimitRegionConstraint(log.name("bumpzone3"),
-                BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone4 = new VelocityLimitRegionConstraint(log.name("bumpzone4"),
-                BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone = new VelocityLimitRegionConstraint(log, BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone2 = new VelocityLimitRegionConstraint(log, BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone3 = new VelocityLimitRegionConstraint(log, BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone4 = new VelocityLimitRegionConstraint(log, BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
         new_constraints.add(slow_bump_zone);
         new_constraints.add(slow_bump_zone2);
         new_constraints.add(slow_bump_zone3);
@@ -71,37 +67,35 @@ public class CenterAuton implements AnnotatedCommand {
 
     @Override
     public String name() {
-        return "Center Auton";
+        return "Full Sweep Right Bump Auton";
     }
 
     TrajectorySE2 t1(Pose2d startingPose) {
         List<WaypointSE2> waypoints = List.of(
                 new WaypointSE2(startingPose,
-                        new DirectionSE2(0, 1, 0), 1),
-                new WaypointSE2(AutonPositions.ABOVE_BALL_FIELD,
-                        new DirectionSE2(1, 1, 0), 1));
+                        new DirectionSE2(1, 0, 0), 1),
+                new WaypointSE2(new Pose2d(7.75, 1, Rotation2d.kCCW_90deg),
+                        new DirectionSE2(1, 0, 0), 1));
         return planner.restToRest(waypoints);
     }
-    
+
     TrajectorySE2 t2(Pose2d startingPose) {
         List<WaypointSE2> waypoints = List.of(
                 new WaypointSE2(startingPose,
-                        new DirectionSE2(0, -1, 0), 1),
-                new WaypointSE2(AutonPositions.BELOW_BALL_FIELD,
-                        new DirectionSE2(0, -1, 0), 1));
+                        new DirectionSE2(0, 1, 0), 1),
+                new WaypointSE2(new Pose2d(7.75, 7, Rotation2d.kCCW_90deg),
+                        new DirectionSE2(0, 1, 0), 1));
         return planner.restToRest(waypoints);
     }
 
     TrajectorySE2 t3(Pose2d startingPose) {
         List<WaypointSE2> waypoints = List.of(
                 new WaypointSE2(startingPose,
-                        new DirectionSE2(-1, 1, 0), 1),
-                new WaypointSE2(AutonPositions.LEFT_BUMP_MID,
+                        new DirectionSE2(0, -1, 0), 1),
+                new WaypointSE2(StartingPositions.RIGHT_BUMP,
                         new DirectionSE2(-1, 0, 0), 1),
-                new WaypointSE2(StartingPositions.LEFT_BUMP,
-                        new DirectionSE2(-1, 0, 0), 1),
-                new WaypointSE2(AutonPositions.SHOOT_LEFT,
-                        new DirectionSE2(-1, -1, 0), 1));
+                new WaypointSE2(AutonPositions.SHOOT_RIGHT,
+                        new DirectionSE2(-1, 0, 0), 1));
         return planner.restToRest(waypoints);
     }
 
@@ -117,17 +111,21 @@ public class CenterAuton implements AnnotatedCommand {
                 log, machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t3);
 
-        // Intake, score, climb.
+        // Intake, score       
         return sequence(
                 parallel(
-                        IntakeSetUp.until(IntakeSetUp::isDone),
-                        // Assumed that the intake shouldn't deploy while going over the bump
-                        waitSeconds(1).andThen(machinery.m_intakeExtend.goToExtendedPosition())),
+                IntakeSetUp.until(IntakeSetUp::isDone),
+                // Assumed that the intake shouldn't deploy over the bump
+                waitSeconds(1).andThen(machinery.m_intakeExtend.goToExtendedPosition())), 
                 waitSeconds(1),
 
                 parallel(
-                        IntakeBalls,
-                        machinery.m_intake.intake()).until(IntakeBalls::isDone),
+                    IntakeBalls,
+                    machinery.m_intake.intake()
+                ).until(IntakeBalls::isDone),
+                // Without telling it to, the intake would only stop spinning
+                // at the end of the auton. Without the timeout, the robot
+                // would not continue the rest of the auton
                 machinery.m_intake.stop().withTimeout(1),
                 waitSeconds(1),
 
@@ -135,11 +133,11 @@ public class CenterAuton implements AnnotatedCommand {
                 machinery.m_shooter.shooterFullspeed().withTimeout(1),
                 waitSeconds(2),
                 machinery.m_shooter.stop().withTimeout(1));
-    }
+            }
 
     @Override
     public Pose2d start() {
-        return AutonPositions.CENTER;
+        return StartingPositions.RIGHT_BUMP;
     }
 
 }
