@@ -98,14 +98,14 @@ public class Auton1R implements AnnotatedCommand {
         return planner.restToRest(waypoints);
     }
 
-    TrajectorySE2 t4(Pose2d startingPose) {
-        List<WaypointSE2> waypoints = List.of(
-                new WaypointSE2(startingPose,
-                        new DirectionSE2(-1, -1, 0), 1),
-                new WaypointSE2(AutonPositions.CLIMB_RIGHT,
-                        new DirectionSE2(-1, -1, 0), 1));
-        return planner.restToRest(waypoints);
-    }
+    // TrajectorySE2 t4(Pose2d startingPose) {
+    //     List<WaypointSE2> waypoints = List.of(
+    //             new WaypointSE2(startingPose,
+    //                     new DirectionSE2(-1, -1, 0), 1),
+    //             new WaypointSE2(AutonPositions.CLIMB_RIGHT,
+    //                     new DirectionSE2(-1, -1, 0), 1));
+    //     return planner.restToRest(waypoints);
+    // }
     
     @Override
     public Command command() {
@@ -118,9 +118,9 @@ public class Auton1R implements AnnotatedCommand {
         DriveWithTrajectoryFunction ScoreSetUp = new DriveWithTrajectoryFunction(
                 log, machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t3);
-        DriveWithTrajectoryFunction ClimbSetUp = new DriveWithTrajectoryFunction(
-                log, machinery.m_drive, controller,
-                machinery.m_trajectoryViz, this::t4);
+        // DriveWithTrajectoryFunction ClimbSetUp = new DriveWithTrajectoryFunction(
+        //         log, machinery.m_drive, controller,
+        //         machinery.m_trajectoryViz, this::t4);
 
         // Intake, score, climb.         
         return sequence(
@@ -143,10 +143,10 @@ public class Auton1R implements AnnotatedCommand {
                 ScoreSetUp.until(ScoreSetUp::isDone),
                 machinery.m_shooter.shooterFullspeed().withTimeout(1),
                 waitSeconds(2),
-                machinery.m_shooter.stop().withTimeout(1),
+                machinery.m_shooter.stop().withTimeout(1));}
 
-                ClimbSetUp.until(ClimbSetUp::isDone));
-        }
+        //         ClimbSetUp.until(ClimbSetUp::isDone));
+        // }
 
     @Override
     public Pose2d start() {

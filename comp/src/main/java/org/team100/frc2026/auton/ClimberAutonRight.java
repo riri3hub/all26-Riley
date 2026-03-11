@@ -66,10 +66,11 @@ public class ClimberAutonRight implements AnnotatedCommand {
                 log, machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t1);
         return sequence(
-                n1.until(n1::isDone),
-                waitSeconds(1),
-                machinery.m_ClimberExtension.setPosition(),
-                waitSeconds(1).andThen(machinery.m_Climber.setClimb1()));
+                n1.until(n1::isDone)
+                //waitSeconds(1),
+               // machinery.m_ClimberExtension.setPosition(),
+               // waitSeconds(1).andThen(machinery.m_Climber.setClimb1()
+               );
     }
 
     @Override
