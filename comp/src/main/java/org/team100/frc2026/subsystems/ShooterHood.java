@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ShooterHood extends SubsystemBase {
     // TODO GET THIS CAN ID
-    private static final CanId CAN_ID = new CanId(0);
+    private static final CanId CAN_ID = new CanId(13);
     private static final double GEAR_RATIO = 10;
 
     // MECHANISM POSITIONS

@@ -25,9 +25,9 @@ public class Intake extends SubsystemBase {
     private static final CanId CAN_ID_2 = new CanId(17);
     private static final double TOLERANCE_M_S = 1;
     private static final double GEAR_RATIO = 1;
-    private static final double WHEEL_DIAMETER_M = 0.1;
+    private static final double WHEEL_DIAMETER_M = 0.025;
 
-    private static final double NORMAL_SPEED = 5;
+    private static final double NORMAL_SPEED = 50;
 
     private final OutboardLinearVelocityServo m_servo1;
     private final OutboardLinearVelocityServo m_servo2;

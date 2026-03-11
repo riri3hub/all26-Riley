@@ -66,8 +66,8 @@ public class SwerveModuleCollection implements Player {
 
         switch (Identity.instance) {
             // TODO: turned off while testing
-            // case COMP_BOT:
-            case SWERVE_TWO:
+            case COMP_BOT:
+            // case SWERVE_TWO:
                 System.out.println("************** WCP MODULES w/Duty-Cycle Encoders **************");
                 return new SwerveModuleCollection(
                         WCPSwerveModule100.getKrakenDrive(frontLeftLogger, supplyLimit, statorLimit,

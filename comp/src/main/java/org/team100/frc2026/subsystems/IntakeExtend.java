@@ -33,7 +33,7 @@ public class IntakeExtend extends SubsystemBase {
 
     public IntakeExtend(LoggerFactory parent) {
         LoggerFactory log = parent.type(this);
-        TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 8, 8, 0.05);
+        TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 16, 32, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
         final BareMotor motor;
         switch (Identity.instance) {
@@ -41,7 +41,7 @@ public class IntakeExtend extends SubsystemBase {
                 double supplyLimit = 4;
                 double statorLimit = 80;
                 SimpleDynamics ff = new SimpleDynamics(log, 0.0, 0.0);
-                Friction friction = new Friction(log, 1.26, 1.26, 0.006, 0.5);
+                Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
                 PIDConstants pid = PIDConstants.makePositionPID(log, 1);
                 motor = new KrakenX44Motor(
                         log, CAN_ID,
