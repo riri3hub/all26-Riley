@@ -43,12 +43,12 @@ class Identity(Enum):
     #
     # Comp bot 2024 
     #
-    SHOOTER = "10000000a7a892c0"
+    DEV2 = "10000000a7a892c0"
     RIGHTAMP = "10000000caeaae82"
     LEFTAMP = "100000004e0a1fb9"
     GAME_PIECE = "1000000013c9c96c"
     DIST_TEST = "cf206cd348d20bdd"
-    DEV2 = "4230a96261f3ab90"
+    SHOOTER = "4230a96261f3ab90"
 
     # Comp bot 2025
     FUNNEL = "1e5acbaa5a7f9d10"  # 30
