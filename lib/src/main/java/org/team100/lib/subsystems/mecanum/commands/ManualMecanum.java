@@ -74,7 +74,7 @@ public class ManualMecanum extends Command {
         VelocitySE2 scaled = VelocitySE2.scale(
                 clippedOrSquashed, m_maxVX.getAsDouble(), m_maxOmega.getAsDouble());
         // Apply field-relative limits.
-        if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
+        if (Experiments.instance.enabled(Experiment.UseSwerveLimiter)) {
             scaled = m_limiter.apply(scaled);
         }
         m_drive.setVelocity(scaled);

@@ -7,8 +7,6 @@ import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.print.DocFlavor.INPUT_STREAM;
-
 import org.team100.frc2026.robot.Machinery;
 import org.team100.lib.config.AnnotatedCommand;
 import org.team100.lib.controller.se2.ControllerSE2;
@@ -47,16 +45,20 @@ public class CenterAuton implements AnnotatedCommand {
         this.controller = controller;
         this.machinery = machinery;
         constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
-       // In meters/second
+        // In meters/second
         double maxBumpVelocity = 1;
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
-         
+
         // create a new VelocityRegionContstraint `slow_bump_zone`
         // the "name" values here separate the "Mutables" inside.
-        VelocityLimitRegionConstraint slow_bump_zone = new VelocityLimitRegionConstraint(log.name("bumpzone"), BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone2 = new VelocityLimitRegionConstraint(log.name("bumpzone2"), BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone3 = new VelocityLimitRegionConstraint(log.name("bumpzone3"), BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
-        VelocityLimitRegionConstraint slow_bump_zone4 = new VelocityLimitRegionConstraint(log.name("bumpzone4"), BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone = new VelocityLimitRegionConstraint(log.name("bumpzone"),
+                BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone2 = new VelocityLimitRegionConstraint(log.name("bumpzone2"),
+                BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone3 = new VelocityLimitRegionConstraint(log.name("bumpzone3"),
+                BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
+        VelocityLimitRegionConstraint slow_bump_zone4 = new VelocityLimitRegionConstraint(log.name("bumpzone4"),
+                BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
         new_constraints.add(slow_bump_zone);
         new_constraints.add(slow_bump_zone2);
         new_constraints.add(slow_bump_zone3);
@@ -94,7 +96,7 @@ public class CenterAuton implements AnnotatedCommand {
         List<WaypointSE2> waypoints = List.of(
                 new WaypointSE2(startingPose,
                         new DirectionSE2(-1, 1, 0), 1),
-                new WaypointSE2(AutonPositions.LEFT_BUMP_MID, 
+                new WaypointSE2(AutonPositions.LEFT_BUMP_MID,
                         new DirectionSE2(-1, 0, 0), 1),
                 new WaypointSE2(StartingPositions.LEFT_BUMP,
                         new DirectionSE2(-1, 0, 0), 1),
@@ -102,7 +104,7 @@ public class CenterAuton implements AnnotatedCommand {
                         new DirectionSE2(-1, -1, 0), 1));
         return planner.restToRest(waypoints);
     }
-    
+
     @Override
     public Command command() {
         DriveWithTrajectoryFunction IntakeSetUp = new DriveWithTrajectoryFunction(
@@ -115,27 +117,25 @@ public class CenterAuton implements AnnotatedCommand {
                 log, machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t3);
 
-        // Intake, score, climb.         
+        // Intake, score, climb.
         return sequence(
                 parallel(
-                IntakeSetUp.until(IntakeSetUp::isDone),
-                // Assumed that the intake shouldn't deploy while going over the bump
-                waitSeconds(1).andThen(machinery.m_intakeExtend.goToExtendedPosition())), 
+                        IntakeSetUp.until(IntakeSetUp::isDone),
+                        // Assumed that the intake shouldn't deploy while going over the bump
+                        waitSeconds(1).andThen(machinery.m_intakeExtend.goToExtendedPosition())),
                 waitSeconds(1),
 
                 parallel(
-                    IntakeBalls,
-                    machinery.m_intake.intake()
-                ).until(IntakeBalls::isDone),
+                        IntakeBalls,
+                        machinery.m_intake.intake()).until(IntakeBalls::isDone),
                 machinery.m_intake.stop().withTimeout(1),
                 waitSeconds(1),
 
                 ScoreSetUp.until(ScoreSetUp::isDone),
                 machinery.m_shooter.shooterFullspeed().withTimeout(1),
                 waitSeconds(2),
-                machinery.m_shooter.stop().withTimeout(1)
-        );    
-        }
+                machinery.m_shooter.stop().withTimeout(1));
+    }
 
     @Override
     public Pose2d start() {

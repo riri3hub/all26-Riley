@@ -29,11 +29,12 @@ public class Shooter extends SubsystemBase {
     private static final CanId CAN_ID_2 = new CanId(5);
     private static final CanId CAN_ID_3 = new CanId(14);
     private static final double TOLERANCE_M_S = 1;
+    // TODO: TUNE
+    // gear ratios are not all the same
     private static final double GEAR_RATIO = 1;
     private static final double WHEEL_DIAMETER_M = 0.075;
 
     /** Speed used in selftest. */
-    private static final double TEST_SPEED = 5;
     private static final double FULL_SPEED = 10;
 
     private final Supplier<OptionalDouble> m_speed;
@@ -42,6 +43,7 @@ public class Shooter extends SubsystemBase {
     private final OutboardLinearVelocityServo m_servo2;
     private final OutboardLinearVelocityServo m_servo3;
     private final Mutable m_tuningSetting;
+    private final Mutable TEST_SPEED;
 
     /**
      * @param parent log
@@ -54,6 +56,7 @@ public class Shooter extends SubsystemBase {
         LoggerFactory log3 = log.name("Shooter3");
         m_speed = speed;
         m_tuningSetting = new Mutable(log, "for tuning", 0);
+        TEST_SPEED = new Mutable(log, "Shooter test speed", 15);
 
         VelocityProfileR1 profile = new CurrentLimitedExponentialVelocityProfileR1(
                 10, 10, 20, 30);
@@ -65,10 +68,16 @@ public class Shooter extends SubsystemBase {
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
                 double supplyLimit = 120;
-                double statorLimit = 60;
-                SimpleDynamics ff = new SimpleDynamics(log, 0.004, 0.002);
+                // TODO: TUNE
+                double statorLimit = 80;
+                // SimpleDynamics ff = new SimpleDynamics(log, 0.004, 0.002);
+                SimpleDynamics ff = new SimpleDynamics(log, 0.000, 0.000);
+
+                // TODO: TUNE
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
+                // TODO: TUNE
+                // PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
+                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.0);
 
                 m1 = new KrakenX60Motor(
                         log1, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
@@ -122,7 +131,7 @@ public class Shooter extends SubsystemBase {
     public Command testRun() {
         return startRun(
                 this::reset,
-                () -> setVelocityProfiled(TEST_SPEED))
+                () -> setVelocityProfiled(TEST_SPEED.getAsDouble()))
                 .withName("Shooter Test");
     }
 

@@ -72,7 +72,7 @@ public abstract class CameraReader<T> {
             }
             String[] fields = name.split("/");
             if (fields.length != 3) {
-                System.out.printf("WARNING: weird event name: %s\n", name);
+                //System.out.printf("WARNING: weird event name: %s\n", name);
                 continue;
             }
             // key is "rootName/cameraId/valueName"
@@ -82,7 +82,7 @@ public abstract class CameraReader<T> {
             if (fields[2].equals("temp"))
                 continue;
             if (!fields[2].equals(m_ntValueName)) {
-                System.out.println("WARNING: weird key: " + name);
+            // System.out.println("WARNING: weird key: " + name);
                 continue;
             }
             if (DEBUG) {

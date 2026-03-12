@@ -56,8 +56,6 @@ public class ShooterHoodTest implements Timeless2026 {
         }
         // partway there
         assertEquals(0.250, hood.getUnwrappedPositionRad(), DELTA);
-        // TODO: this is taking too long, increase the profile speed
-        // or use direct mode.
         for (int i = 0; i < 50; ++i) {
             stepTime();
             position.execute();

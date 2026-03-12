@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj.RobotState;
  */
 public class Binder {
     private static final LoggerFactory rootLogger = Logging.instance().rootLogger;
+    @SuppressWarnings("unused")
     private static final LoggerFactory fieldLogger = Logging.instance().fieldLogger;
 
     private final Machinery m_machinery;
@@ -200,7 +201,7 @@ public class Binder {
                         m_machinery.m_conveyor.testConveyorBack(),
                         m_machinery.m_feeder.testFeedBack()));
         whileTrue(driver::x,
-                m_machinery.m_shooter.testShooterFullspeed());
+                m_machinery.m_shooter.testRun());
 
         // whileTrue(driver::rightTrigger, parallel(runSerial, runSerialUpper,
         // runShooter));

@@ -25,21 +25,19 @@ import org.team100.lib.util.CanId;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * Shooter hood must be at the minimum position at startup.
+ */
 public class ShooterHood extends SubsystemBase {
-    // TODO GET THIS CAN ID
     private static final CanId CAN_ID = new CanId(13);
+    // TODO: TUNE
     private static final double GEAR_RATIO = 10;
-
-    // MECHANISM POSITIONS
-
-    private static final double INITIAL_POSITION_RAD = 0;
     private static final double MIN_POSITION_RAD = 0;
-    // TODO: this is definitely wrong
+    // TODO: TUNE
     private static final double MAX_POSITION_RAD = 1;
 
     private final Supplier<OptionalDouble> m_angle;
     private final AngularPositionServo m_servo;
-
     private final Mutable m_tuningSetting;
 
     /**
@@ -50,6 +48,8 @@ public class ShooterHood extends SubsystemBase {
         LoggerFactory log = parent.type(this);
         m_angle = angle;
         m_tuningSetting = new Mutable(log, "for tuning", 0);
+
+        // TODO: TUNE
         TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 1, 2, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
 
@@ -58,9 +58,13 @@ public class ShooterHood extends SubsystemBase {
             case TEST_BOARD_B0, COMP_BOT -> {
                 double supplyLimit = 50;
                 double statorLimit = 20;
-                SimpleDynamics ff = new SimpleDynamics(log, 0.004, 0.002);
+                // SimpleDynamics ff = new SimpleDynamics(log, 0.004, 0.002);
+                SimpleDynamics ff = new SimpleDynamics(log, 0.00, 0.00);
+
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
-                PIDConstants pid = PIDConstants.makePositionPID(log, 1);
+                // TODO: TUNE
+                // PIDConstants pid = PIDConstants.makePositionPID(log, 1);
+                PIDConstants pid = PIDConstants.makePositionPID(log, 0);
 
                 motor = new KrakenX44Motor(
                         log, CAN_ID, NeutralMode100.COAST, MotorPhase.REVERSE,
@@ -73,7 +77,8 @@ public class ShooterHood extends SubsystemBase {
         }
 
         m_servo = OutboardAngularPositionServo.make(
-                log, motor, ref, GEAR_RATIO, INITIAL_POSITION_RAD, MIN_POSITION_RAD, MAX_POSITION_RAD);
+                log, motor, ref, GEAR_RATIO,
+                MIN_POSITION_RAD, MIN_POSITION_RAD, MAX_POSITION_RAD);
     }
 
     @Override

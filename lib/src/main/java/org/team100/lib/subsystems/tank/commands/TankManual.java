@@ -61,7 +61,7 @@ public class TankManual extends Command {
         Rotation2d currentRotation = m_drive.getPose().getRotation();
         VelocitySE2 v = SwerveKinodynamics.fromInstantaneousChassisSpeeds(
                 new ChassisSpeeds(translationM_S, 0, rotationRad_S), currentRotation);
-        if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
+        if (Experiments.instance.enabled(Experiment.UseSwerveLimiter)) {
             v = m_limiter.apply(v);
         }
         ChassisSpeeds s = SwerveKinodynamics.toInstantaneousChassisSpeeds(v, currentRotation);

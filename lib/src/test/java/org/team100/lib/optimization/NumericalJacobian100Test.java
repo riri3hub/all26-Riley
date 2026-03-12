@@ -106,7 +106,7 @@ public class NumericalJacobian100Test {
         assertEquals(1, X0.get(0), 1e-9);
         assertEquals(1, X0.get(1), 1e-9);
         // jacobian at q0
-        Matrix<N2, N2> j0 = NumericalJacobian100.numericalJacobian2(
+        Matrix<N2, N2> j0 = NumericalJacobian100.numericalJacobian(
                 Nat.N2(), Nat.N2(), err, q0);
         // radius of rotation for q0 to end, at pi/2, is sqrt(2)
         // dx/dq for unit circle is -sqrt(2)/2

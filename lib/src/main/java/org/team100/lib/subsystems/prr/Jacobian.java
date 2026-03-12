@@ -35,7 +35,7 @@ public class Jacobian {
      * Given a joint configuration and velocities, what is the cartesian velocity?
      */
     public VelocitySE2 forward(EAWConfig c, JointVelocities v) {
-        Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian2(
+        Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian(
                 Nat.N3(), Nat.N3(), m_f, config(c));
         return VelocitySE2.fromVector(j.times(v.toVector()));
     }
@@ -48,7 +48,7 @@ public class Jacobian {
         Pose2d p = swerveModel.pose();
         VelocitySE2 v = swerveModel.velocity();
         EAWConfig c = m_k.inverse(p);
-        Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian2(
+        Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian(
                 Nat.N3(), Nat.N3(), m_f, config(c));
         if (Math.abs(j.det()) < 1e-3) {
             // Don't try to invert if it's not possible.

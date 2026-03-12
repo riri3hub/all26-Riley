@@ -5,8 +5,6 @@ import java.util.function.DoubleFunction;
 import java.util.function.Supplier;
 
 import org.team100.lib.controller.r1.PIDFeedback;
-import org.team100.lib.experiments.Experiment;
-import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.GlobalVelocityR2;
 import org.team100.lib.geometry.StateR2;
 import org.team100.lib.logging.Level;
@@ -23,13 +21,8 @@ import org.team100.lib.sensor.position.incremental.IncrementalBareEncoder;
 import org.team100.lib.servo.AngularPositionServo;
 import org.team100.lib.servo.OnboardAngularPositionServo;
 import org.team100.lib.state.ModelSE2;
-import org.team100.lib.targeting.Drag;
 import org.team100.lib.targeting.FiringParameters;
-import org.team100.lib.targeting.Intercept;
 import org.team100.lib.targeting.LaserSolver;
-import org.team100.lib.targeting.RangeCache;
-import org.team100.lib.targeting.RangeSolver;
-import org.team100.lib.targeting.ShootingMethod;
 import org.team100.lib.targeting.Solution;
 import org.team100.lib.targeting.Solver;
 
@@ -43,25 +36,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Attempts to maintain aim. Demonstrates "spotting".
  * 
  * It provides Field2d visualization of the turret using the name "turret".
+ * 
+ * There's a version of this in the shooting_method study that has a few more methods.
  */
 public class Turret extends SubsystemBase {
     private static final double GEAR_RATIO = 100;
     private static final double MIN_POSITION = -3;
     private static final double MAX_POSITION = 3;
-    /**
-     * accounts for firing delay and actuation delay
-     * TODO: why is this so long?
-     */
-    private static final double DELAY = 0.2;
+
     private final DoubleArrayLogger m_log_field_turret;
     private final Supplier<ModelSE2> m_state;
     private final Supplier<Translation2d> m_target;
     private final AngularPositionServo m_pivot;
     private final AngularPositionServo m_elevation;
-    /** Projectile speed m/s */
-    private final double m_speed;
-    private final Intercept m_intercept;
-    private final ShootingMethod m_shootingMethod;
     private final Solver m_laser;
     private boolean m_aiming;
 
@@ -84,14 +71,6 @@ public class Turret extends SubsystemBase {
         m_target = target;
         m_pivot = pivot(log);
         m_elevation = elevation(log);
-        m_speed = speed;
-        m_intercept = new Intercept(log);
-        Drag d = new Drag(0.5, 0.025, 0.1, 0.1, 0.1);
-        double TARGET_HEIGHT = 0;
-        double TARGET_ELEVATION = 1;
-        RangeSolver rangeSolver = new RangeSolver(d, TARGET_HEIGHT, TARGET_ELEVATION, 0.001);
-        RangeCache range = new RangeCache(rangeSolver, speed, 0);
-        m_shootingMethod = new ShootingMethod(range, 0.1, 1.4, 0.01, 0.1);
         m_laser = new LaserSolver(rangeToParams);
         m_aiming = false;
     }
@@ -158,14 +137,6 @@ public class Turret extends SubsystemBase {
     }
 
     private Optional<Solution> getSolution() {
-        if (Experiments.instance.enabled(Experiment.TurretShootingMethod)) {
-            // Use 3d intercept logic.
-            return getShootingMethod();
-        }
-        if (Experiments.instance.enabled(Experiment.TurretIntercept)) {
-            // Use 2d intercept logic.
-            return getAbsoluteBearingForIntercept();
-        }
         // For shining a flashlight at the target.
         return getAbsoluteBearingInstantaneous();
     }
@@ -177,46 +148,6 @@ public class Turret extends SubsystemBase {
     private Optional<Solution> getAbsoluteBearingInstantaneous() {
         StateR2 target = new StateR2(m_target.get(), GlobalVelocityR2.ZERO);
         return m_laser.solve(m_state.get(), target);
-    }
-
-    private Optional<Solution> getShootingMethod() {
-        return m_shootingMethod.solve(
-                m_state.get(),
-                new StateR2(m_target.get(), GlobalVelocityR2.ZERO));
-    }
-
-    /**
-     * Compute absolute bearing to the intercept point, given moving target and
-     * moving robot.
-     */
-    private Optional<Solution> getAbsoluteBearingForIntercept() {
-        ModelSE2 state = m_state.get();
-
-        Translation2d robotPosition = state.translation();
-        GlobalVelocityR2 robotVelocity = state.velocityR2();
-        /**
-         * account for firing delay
-         */
-        robotPosition = robotVelocity.integrate(robotPosition, DELAY);
-        // GlobalVelocityR2 robotVelocity = GlobalVelocityR2.ZERO;
-        Translation2d targetPosition = m_target.get();
-        // for now, the target is assumed to be motionless
-        GlobalVelocityR2 targetVelocity = GlobalVelocityR2.ZERO;
-        Optional<Rotation2d> azimuth = m_intercept.intercept(
-                robotPosition,
-                robotVelocity,
-                targetPosition,
-                targetVelocity,
-                m_speed);
-        if (azimuth.isEmpty())
-            return Optional.empty();
-        // TODO: add azimuth velocity
-        // TODO: add drum velocity
-        return Optional.of(
-                new Solution(
-                        azimuth.get(),
-                        0,
-                        new FiringParameters(0, 0, 0, 0)));
     }
 
     private void stopAiming() {

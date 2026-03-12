@@ -2,8 +2,6 @@ package org.team100.frc2026.targeting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.OptionalDouble;
-
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.geometry.Translation2d;

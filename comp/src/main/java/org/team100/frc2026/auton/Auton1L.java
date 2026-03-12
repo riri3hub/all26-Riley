@@ -123,9 +123,9 @@ public class Auton1L implements AnnotatedCommand {
         DriveWithTrajectoryFunction ScoreSetUp = new DriveWithTrajectoryFunction(
                 log.name("scoreSetup"), machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t3);
-        DriveWithTrajectoryFunction ClimbSetUp = new DriveWithTrajectoryFunction(
-                log.name("ClimbSetup"), machinery.m_drive, controller,
-                machinery.m_trajectoryViz, this::t4);
+      //  DriveWithTrajectoryFunction ClimbSetUp = new DriveWithTrajectoryFunction(
+               // log.name("ClimbSetup"), machinery.m_drive, controller,
+               // machinery.m_trajectoryViz, this::t4);
 
         // Intake, score, climb.
         return sequence(
@@ -150,9 +150,10 @@ public class Auton1L implements AnnotatedCommand {
                 ScoreSetUp.until(ScoreSetUp::isDone),
                 machinery.m_shooter.shooterFullspeed().withTimeout(1),
                 waitSeconds(2),
-                machinery.m_shooter.stop().withTimeout(1),
+                machinery.m_shooter.stop().withTimeout(1)
 
-                ClimbSetUp.until(ClimbSetUp::isDone));
+               // ClimbSetUp.until(ClimbSetUp::isDone)
+               );
     }
 
     @Override

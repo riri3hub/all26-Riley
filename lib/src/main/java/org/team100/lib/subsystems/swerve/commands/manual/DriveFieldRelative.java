@@ -76,7 +76,7 @@ public class DriveFieldRelative extends Command {
         VelocitySE2 scaled = GeometryUtil.scale(scaled1, DriverSkill.level().scale());
         // Apply field-relative limits.
 
-        if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
+        if (Experiments.instance.enabled(Experiment.UseSwerveLimiter)) {
             scaled = m_limiter.apply(scaled);
         }
         m_drive.setVelocity(scaled);

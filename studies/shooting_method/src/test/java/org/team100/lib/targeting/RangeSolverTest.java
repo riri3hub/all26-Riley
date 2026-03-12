@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 import org.junit.jupiter.api.Test;
 import org.team100.frc2026.field.FieldConstants2026;
+import org.team100.frc2026.field.FieldConstants2026ForStudy;
 
 public class RangeSolverTest {
     private static final double DELTA = 0.001;
@@ -78,7 +79,7 @@ public class RangeSolverTest {
         // this case was broken before because the min target elevation
         // parameter was zero.
         RangeSolver rangeSolver = new RangeSolver(
-                FieldConstants2026.FUEL_DRAG,
+                FieldConstants2026ForStudy.FUEL_DRAG,
                 FieldConstants2026.HUB.getZ(),
                 FieldConstants2026.HUB_ELEVATION,
                 0.001);

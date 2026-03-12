@@ -2,7 +2,6 @@ package org.team100.frc2026.targeting;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.function.Supplier;
 
 import org.team100.frc2026.field.FieldConstants2026;
@@ -20,6 +19,7 @@ public class Targeter {
 
     public Targeter(Supplier<Translation2d> position) {
         m_position = position;
+        // TODO: TUNE
         m_score = new ShooterTable(
                 List.of(
                         new FiringParameters(0, 5, 1, 0.1),
@@ -31,6 +31,7 @@ public class Targeter {
                         new FiringParameters(4.10, 10, 0.48, 0.6),
                         new FiringParameters(4.50, 11, 0.44, 0.7),
                         new FiringParameters(16, 12, 0.5, 2)));
+        // TODO: TUNE
         m_lob = new ShooterTable(
                 List.of(
                         new FiringParameters(0.0, 4, 0.3, 0.3),

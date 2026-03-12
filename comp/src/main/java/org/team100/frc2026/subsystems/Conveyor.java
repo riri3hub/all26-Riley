@@ -26,7 +26,7 @@ public class Conveyor extends SubsystemBase {
     private static final double TOLERANCE_M_S = 1;
     private static final double GEAR_RATIO = 3;
     private static final double WHEEL_DIAMETER_M = 0.035;
-
+    // TODO: TUNE
     private static final double NORMAL_SPEED = 0.5;
 
     private final OutboardLinearVelocityServo m_servo1;
@@ -47,10 +47,16 @@ public class Conveyor extends SubsystemBase {
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
                 double supplyLimit = 120;
+                // TODO: TUNE
                 double statorLimit = 120;
-                SimpleDynamics dynamics = new SimpleDynamics(log, 0.004, 0.002);
+                // SimpleDynamics dynamics = new SimpleDynamics(log, 0.004, 0.002);
+                SimpleDynamics dynamics = new SimpleDynamics(log, 0.00, 0.00);
+
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
+                // TODO: TUNE
+                // PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
+                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.0);
+
                 m1 = new KrakenX44Motor(
                         log1, canID1, NeutralMode100.COAST, MotorPhase.REVERSE,
                         supplyLimit, statorLimit, dynamics, friction, pid);

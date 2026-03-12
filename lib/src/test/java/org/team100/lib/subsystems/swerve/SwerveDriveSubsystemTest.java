@@ -21,7 +21,7 @@ class SwerveDriveSubsystemTest implements Timeless {
     void testWithSetpointGenerator() throws IOException {
         Fixture fixture = new Fixture();
 
-        Experiments.instance.testOverride(Experiment.UseSetpointGenerator, true);
+        Experiments.instance.testOverride(Experiment.UseSwerveLimiter, true);
 
         SwerveDriveSubsystem drive = fixture.drive;
 
@@ -67,7 +67,7 @@ class SwerveDriveSubsystemTest implements Timeless {
     void testWithoutSetpointGenerator() throws IOException {
         Fixture fixture = new Fixture();
 
-        Experiments.instance.testOverride(Experiment.UseSetpointGenerator, false);
+        Experiments.instance.testOverride(Experiment.UseSwerveLimiter, false);
         SwerveDriveSubsystem drive = fixture.drive;
         fixture.collection.reset();
         stepTime();

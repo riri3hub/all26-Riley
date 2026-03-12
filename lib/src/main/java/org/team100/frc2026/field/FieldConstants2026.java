@@ -3,8 +3,6 @@ package org.team100.frc2026.field;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
-import org.team100.lib.targeting.Drag;
-
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -82,64 +80,6 @@ public class FieldConstants2026 {
     public static final Rectangle2d OPPONENT_ZONE = new Rectangle2d(
             new Translation2d(12.512, 0.000),
             new Translation2d(FIELD_LENGTH, FIELD_WIDTH));
-
-    /**
-     * For computing firing solutions.
-     * 
-     * See page 33 of the 2026 manual; this is the midpoint of the range.
-     * 
-     * https://firstfrc.blob.core.windows.net/frc2026/Manual/2026GameManual.pdf
-     */
-    public static double FUEL_MASS_KG = 0.215;
-
-    /**
-     * For computing firing solutions.
-     * 
-     * See page 32 of the 2026 manual, pi*r^2.
-     * 
-     * https://firstfrc.blob.core.windows.net/frc2026/Manual/2026GameManual.pdf
-     * 
-     */
-    public static double FUEL_AREA_M2 = 0.017671;
-
-    /**
-     * Drag coefficient.
-     * 
-     * Reynolds number is around 70000, which is (probably) just below the "drag
-     * crisis".
-     * 
-     * https://www.simscale.com/blog/reynolds-number-calculator/
-     * https://aerotoolbox.com/reynolds-number-calculator/
-     * https://en.wikipedia.org/wiki/Drag_coefficient
-     */
-    public static double FUEL_CD = 0.5;
-
-    /**
-     * Lift coefficient for the Magnus effect.
-     * 
-     * Note the solution is near the drag crisis, which
-     * means that the magnus effect may actually be reversed
-     * 
-     * https://en.wikipedia.org/wiki/Magnus_effect#Inverse_Magnus_effect
-     */
-    public static double FUEL_CL = 0;
-
-    /**
-     * Rotational drag
-     */
-    public static double FUEL_B = 0;
-
-    /**
-     * First-principles drag model.
-     *
-     * TODO: calibrate this if we're going to use it.
-     */
-    public static Drag FUEL_DRAG = new Drag(
-            FieldConstants2026.FUEL_CD,
-            FieldConstants2026.FUEL_CL,
-            FieldConstants2026.FUEL_AREA_M2,
-            FieldConstants2026.FUEL_MASS_KG,
-            FieldConstants2026.FUEL_B);
 
     /**
      * Target depends on robot location.

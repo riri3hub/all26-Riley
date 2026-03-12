@@ -15,7 +15,6 @@ import org.team100.lib.subsystems.swerve.commands.manual.DriveFieldRelative;
 import org.team100.lib.subsystems.swerve.commands.manual.DriveMovingTargetLock;
 
 import edu.wpi.first.wpilibj.RobotState;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
 /**
@@ -26,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 public class InterlinkBinder {
 
     private static final LoggerFactory rootLogger = Logging.instance().rootLogger;
+    @SuppressWarnings("unused")
     private static final LoggerFactory fieldLogger = Logging.instance().fieldLogger;
     private final Machinery m_machinery;
     final LoggerFactory m_log;

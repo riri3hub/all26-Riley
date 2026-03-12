@@ -7,7 +7,7 @@ public enum Experiment {
     /**
      * Smooth chassis speeds.
      */
-    UseSetpointGenerator,
+    UseSwerveLimiter,
     /**
      * Flush network tables as often as possible. Do not enable this experiment in
      * competition, you'll overwhelm the network and the RIO
@@ -18,15 +18,6 @@ public enum Experiment {
      * calibration.
      */
     HeedVision,
-    /**
-     * Compensate for moving shooter and moving target when computing turret
-     * solution.
-     */
-    TurretIntercept,
-    /**
-     * Use "shooting method" for turret solution
-     */
-    TurretShootingMethod,
     /**
      * Treat the robot as "real" for the auton alert messages.
      */

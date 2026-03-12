@@ -21,12 +21,12 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/** Intake must be retracted at startup. */
 public class IntakeExtend extends SubsystemBase {
     private static final CanId CAN_ID = new CanId(16);
     private static final double gearRatio = 15.3;
-
-    private static final double INITIAL_POSITION = 0;
     private static final double RETRACTED_POSITION = 0;
+    // TODO: TUNE
     private static final double EXTENDED_POSITION = 3;
 
     private final AngularPositionServo m_servo;
@@ -42,6 +42,7 @@ public class IntakeExtend extends SubsystemBase {
                 double statorLimit = 80;
                 SimpleDynamics ff = new SimpleDynamics(log, 0.0, 0.0);
                 Friction friction = new Friction(log, 0.26, 0.26, 0.006, 0.5);
+                // TODO: TUNE
                 PIDConstants pid = PIDConstants.makePositionPID(log, 1);
                 motor = new KrakenX44Motor(
                         log, CAN_ID,
@@ -54,8 +55,8 @@ public class IntakeExtend extends SubsystemBase {
             }
         }
         m_servo = OutboardAngularPositionServo.make(
-                log, motor, ref, gearRatio, INITIAL_POSITION,
-                RETRACTED_POSITION, EXTENDED_POSITION);
+                log, motor, ref, gearRatio,
+                RETRACTED_POSITION, RETRACTED_POSITION, EXTENDED_POSITION);
     }
 
     @Override

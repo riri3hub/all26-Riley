@@ -102,7 +102,7 @@ public class DriveBargeAssist extends Command {
         v = GeometryUtil.scale(v, DriverSkill.level().scale());
 
         // Apply field-relative limits.
-        if (Experiments.instance.enabled(Experiment.UseSetpointGenerator)) {
+        if (Experiments.instance.enabled(Experiment.UseSwerveLimiter)) {
             v = m_limiter.apply(v);
         }
         m_drive.setVelocity(v);

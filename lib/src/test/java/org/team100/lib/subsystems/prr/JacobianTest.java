@@ -40,7 +40,7 @@ public class JacobianTest {
         final ElevatorArmWristKinematics k = new ElevatorArmWristKinematics(2, 1);
         Function<Vector<N3>, Vector<N3>> f = q -> Jacobian.pose(k.forward(Jacobian.config(q)));
 
-        Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian2(
+        Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian(
                 Nat.N3(),
                 Nat.N3(),
                 f,
@@ -176,7 +176,7 @@ public class JacobianTest {
             for (double y = -2; y <= 2; y += 0.2) {
                 // for now, end-effector rotation is always zero (i.e. facing up)
                 Pose2d p = new Pose2d(x, y, Rotation2d.kZero);
-                Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian2(
+                Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian(
                         Nat.N3(),
                         Nat.N3(),
                         f,
@@ -208,7 +208,7 @@ public class JacobianTest {
                     p.getY() - prev.getY(),
                     p.getRotation().minus(prev.getRotation()).getRadians());
             EAWConfig c = k.inverse(p);
-            Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian2(
+            Matrix<N3, N3> j = NumericalJacobian100.numericalJacobian(
                     Nat.N3(),
                     Nat.N3(),
                     f,
