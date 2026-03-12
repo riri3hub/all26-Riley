@@ -47,19 +47,18 @@ python3 -m pip install adafruit-circuitpython-lsm6ds --break-system-packages
 
 ## Quick Paste
 
-you can also just paste this into the pi and type y a bunch in 2025
+you can also just paste this into the pi and type y a bunch in 2025, update 2026, need to use old numpy version
 
 ```
 sudo apt update 
 sudo apt upgrade 
-sudo apt install python3-pip 
-sudo apt install python3-setuptools 
-sudo apt install python3-wheel 
-sudo apt install python3-numpy 
-sudo apt install libcamera-dev 
-sudo apt install python3-picamera2 
-sudo apt install python3-aiohttp 
-python3 -m pip install numpy --break-system-packages
+sudo apt install -y python3-pip 
+sudo apt install -y python3-setuptools 
+sudo apt install -y python3-wheel 
+sudo apt install -y python3-numpy 
+sudo apt install -y libcamera-dev 
+sudo apt install -y python3-picamera2 
+sudo apt install -y python3-aiohttp 
 python3 -m pip install robotpy --break-system-packages 
 python3 -m pip install robotpy-cscore --break-system-packages
 python3 -m pip install robotpy-apriltag --break-system-packages
@@ -67,5 +66,6 @@ python3 -m pip install opencv-python --break-system-packages
 python3 -m pip install hidapi --break-system-packages
 python3 -m pip install adafruit-blinka --break-system-packages
 python3 -m pip install adafruit-circuitpython-lsm6ds --break-system-packages
+python3 -m pip install numpy==1.26.4 --break-system-packages
 
 ```
