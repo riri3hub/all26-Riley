@@ -130,7 +130,8 @@ public class RightBumpFullSweepAuton implements AnnotatedCommand {
                 waitSeconds(1),
 
                 ScoreSetUp.until(ScoreSetUp::isDone),
-                machinery.m_shooter.shooterFullspeed().withTimeout(1),
+                machinery.m_shooterHood.autoPosition().withTimeout(0.5),
+                machinery.m_shooter.auto().withTimeout(1),
                 waitSeconds(2),
                 machinery.m_shooter.stop().withTimeout(1));
             }
