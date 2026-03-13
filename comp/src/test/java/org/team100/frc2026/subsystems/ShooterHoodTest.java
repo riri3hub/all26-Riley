@@ -39,7 +39,8 @@ public class ShooterHoodTest implements Timeless2026 {
 
     @Test
     void test1() {
-        ShooterHood hood = new ShooterHood(log, () -> OptionalDouble.of(0.593));
+        // Goal needs to be less than max position
+        ShooterHood hood = new ShooterHood(log, () -> OptionalDouble.of(0.4));
         // Mech starts at zero.
         assertEquals(0, hood.getUnwrappedPositionRad(), DELTA);
         // Goal starts at measurement.
@@ -48,21 +49,21 @@ public class ShooterHoodTest implements Timeless2026 {
         position.initialize();
         position.execute();
         // Goal is OK
-        assertEquals(0.593, hood.getUnwrappedGoal().x(), DELTA);
-        for (int i = 0; i < 25; ++i) {
+        assertEquals(0.4, hood.getUnwrappedGoal().x(), DELTA);
+        for (int i = 0; i < 10; ++i) {
             stepTime();
             position.execute();
             hood.periodic();
         }
         // partway there
-        assertEquals(0.250, hood.getUnwrappedPositionRad(), DELTA);
-        for (int i = 0; i < 50; ++i) {
+        assertEquals(0.292, hood.getUnwrappedPositionRad(), DELTA);
+        for (int i = 0; i < 10; ++i) {
             stepTime();
             position.execute();
             hood.periodic();
         }
         // all the way there
-        assertEquals(0.593, hood.getUnwrappedPositionRad(), DELTA);
+        assertEquals(0.4, hood.getUnwrappedPositionRad(), DELTA);
         // finally on target
         assertTrue(hood.onTarget());
     }

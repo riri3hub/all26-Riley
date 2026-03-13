@@ -24,12 +24,9 @@ import org.team100.lib.subsystems.swerve.commands.manual.DriveMovingTargetLock;
 import edu.wpi.first.wpilibj.RobotState;
 
 /**
- * Binds buttons to commands. Also creates default commands.
- * 
- * See
- * https://docs.google.com/document/d/15HcburjCvwOEBL8ZtQdk-7iotF5qATGK3fO7c5HyWCk
+ * This is a version from pre-SVR testing
  */
-public class Binder {
+public class TestBinder {
     private static final LoggerFactory rootLogger = Logging.instance().rootLogger;
     @SuppressWarnings("unused")
     private static final LoggerFactory fieldLogger = Logging.instance().fieldLogger;
@@ -37,7 +34,7 @@ public class Binder {
     private final Machinery m_machinery;
     private final LoggerFactory m_log;
 
-    public Binder(Machinery machinery) {
+    public TestBinder(Machinery machinery) {
         m_machinery = machinery;
         m_log = rootLogger.name("Commands");
 
@@ -192,6 +189,27 @@ public class Binder {
         // whileTrue(driver::y, m_machinery.m_shooter.testMotor2Command());
         // whileTrue(driver::a, m_machinery.m_shooter.testMotor3Command());
         // whileTrue(driver::b, parallel(runShooter, runSerial, runSerialUpper));
+
+        // for friction and feedforward testing
+
+        // whileTrue(driver::a,
+        // m_machinery.m_intakeExtend.setVelocity(1));
+        // whileTrue(driver::a,
+        // m_machinery.m_intakeExtend.setPosition(3));
+        // whileTrue(driver::a,
+        // m_machinery.m_intake.setVelocity(5));
+        // whileTrue(driver::a,
+        // m_machinery.m_conveyor.setVelocity(2));
+        // whileTrue(driver::a,
+        // m_machinery.m_feeder.setVelocity(2));
+        // whileTrue(driver::a,
+        // m_machinery.m_shooter.setVelocity(15));
+        // whileTrue(driver::a,
+        // m_machinery.m_shooterHood.setVelocity(1));
+        // whileTrue(driver::a,
+        // m_machinery.m_shooterHood.setPosition(0.4));
+        // whileTrue(driver::b,
+        // m_machinery.m_shooterHood.setPosition(0));
 
         whileTrue(driver::a,
                 parallel(

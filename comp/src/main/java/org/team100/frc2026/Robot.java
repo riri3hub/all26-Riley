@@ -1,7 +1,7 @@
 package org.team100.frc2026;
 
 import org.team100.frc2026.auton.AllAutons;
-import org.team100.frc2026.robot.Binder;
+import org.team100.frc2026.robot.TestBinder;
 import org.team100.frc2026.robot.Machinery;
 import org.team100.frc2026.robot.Prewarmer;
 import org.team100.lib.coherence.Cache;
@@ -34,7 +34,7 @@ public class Robot extends TimedRobot100 {
     private final Alerts m_alerts;
     private final AutonAlerts m_autonAlerts;
     private final AllAutons m_allAutons;
-    private final Binder m_binder;
+    private final TestBinder m_binder;
 
     public Robot() {
         Banner.printBanner();
@@ -61,7 +61,7 @@ public class Robot extends TimedRobot100 {
         m_robotLog = new RobotLog();
 
         m_machinery = new Machinery();
-        m_binder = new Binder(m_machinery);
+        m_binder = new TestBinder(m_machinery);
 
         m_allAutons = new AllAutons(m_machinery);
         m_alerts = new Alerts();

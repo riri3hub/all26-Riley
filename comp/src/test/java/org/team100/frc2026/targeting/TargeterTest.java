@@ -1,30 +1,37 @@
 package org.team100.frc2026.targeting;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.targeting.FiringParameters;
 
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class TargeterTest {
     @Test
     void testShoot() {
-        // in the alliance zone, about 6m from the target
         Targeter targeter = new Targeter(() -> new Translation2d(1, 1));
-        double angle = targeter.forRange(6).get().elevation();
-        assertEquals(0.448, angle, 0.001);
-        double speed = targeter.forRange(6).get().speed();
-        assertEquals(11.130, speed, 0.001);
+        // impossible (hits the hub)
+        assertTrue(targeter.forRange(0).isEmpty());
+        // impossible (beyond the wall)
+        assertTrue(targeter.forRange(6).isEmpty());
+
+        // in the alliance zone
+        FiringParameters fp = targeter.forRange(3).get();
+        assertEquals(0.151, fp.elevation(), 0.001);
+        assertEquals(14.019, fp.speed(), 0.001);
+        assertEquals(0.846, fp.tof(), 0.001);
     }
 
     @Test
     void testLob() {
-        // in the center, so about 6m from the target
+        // lob lookup never fails.
         Targeter targeter = new Targeter(() -> new Translation2d(8, 0));
-        double angle = targeter.forRange(6).get().elevation();
-        assertEquals(0.3, angle, 0.001);
-        double speed = targeter.forRange(6).get().speed();
-        assertEquals(10, speed, 0.001);
+        FiringParameters fp = targeter.forRange(6).get();
+        assertEquals(0.25, fp.elevation(), 0.001);
+        assertEquals(17, fp.speed(), 0.001);
+        assertEquals(1.268, fp.tof(), 0.001);
     }
 
 }
