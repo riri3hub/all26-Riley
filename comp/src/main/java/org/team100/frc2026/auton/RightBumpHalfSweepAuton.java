@@ -47,7 +47,7 @@ public class RightBumpHalfSweepAuton implements AnnotatedCommand {
         this.machinery = machinery;
         constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
        // In meters/second
-        double maxBumpVelocity = 1;
+        double maxBumpVelocity = 2;
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
          
         // create a new VelocityRegionContstraint `slow_bump_zone`

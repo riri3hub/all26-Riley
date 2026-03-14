@@ -47,7 +47,7 @@ public class RightBumpFullSweepAuton implements AnnotatedCommand {
         this.machinery = machinery;
         constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
        // In meters/second
-        double maxBumpVelocity = 1;
+        double maxBumpVelocity = 2;
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
          
         // create a new VelocityRegionContstraint `slow_bump_zone`
@@ -114,7 +114,7 @@ public class RightBumpFullSweepAuton implements AnnotatedCommand {
         // Intake, score       
         return sequence(
                 parallel(
-                IntakeSetUp.until(IntakeSetUp::isDone),
+                IntakeSetUp.until(IntakeSetUp::isDone).withTimeout(4),
                 // Assumed that the intake shouldn't deploy over the bump
                 waitSeconds(1).andThen(machinery.m_intakeExtend.goToExtendedPosition())), 
                 waitSeconds(1),
