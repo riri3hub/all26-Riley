@@ -113,7 +113,7 @@ public class Binder {
         /// Left bumper: rotate the robot to hit the target
 
         FeedbackR1 thetaFeedback = new FullStateFeedback(
-                m_log, 3, 0.1, true, 0.025, 0.25);
+                m_log, 6, 0.1, true, 0.025, 0.25);
 
         // button 6
         AzimuthController aim = new AzimuthController(
