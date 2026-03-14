@@ -92,29 +92,32 @@ public enum Camera {
      * ALPHA Climber Camera Left
      */
     CLIMB_LEFT("82c4c3fe4f941e96",
-            new Transform3d()),
+            fromCalibration(new Transform3d(-0.73, -0.137, 0.432, new Rotation3d(0, 0, Math.PI)),
+                    new Transform3d(0.513, 0.077, -0.017, new Rotation3d(-0.21, 0.499, -0.41)))),
 
     /**
      * ALPHA Climber Camera Right
      */
     CLIMB_RIGHT("364f07fb090a3bf7",
-            new Transform3d()),
+            fromCalibration(
+                    new Transform3d(-0.135, 0.843, 0.432, new Rotation3d(0, 0, Math.PI / 2)),
+                    new Transform3d(0.563, -0.068, -0.0356, new Rotation3d(-0.087, 0.529, -0.172)))),
 
     /**
      * ALPHA Shooter Camera
      */
     SHOOTER("e47055a1bcbcead0",
             fromCalibration(
-                    new Transform3d(0.820, 0.112, 0.432, new Rotation3d(0, 0, 0)),
+                    new Transform3d(0.820, -0.112, 0.432, new Rotation3d(0, 0, 0)),
                     new Transform3d(0.551, -0.123, -0.142, new Rotation3d(0.004, 0.714, 0.016)))),
 
     /**
      * For prototyping
      */
-    DEV("364f07fb090a3bf7",
-            new Transform3d(
-                    new Translation3d(0.155, 0.295, 0.372),
-                    new Rotation3d(0.05, -0.14, -.33).unaryMinus())),
+    // DEV("364f07fb090a3bf7",
+    // new Transform3d(
+    // new Translation3d(0.155, 0.295, 0.372),
+    // new Rotation3d(0.05, -0.14, -.33).unaryMinus())),
 
     //
     // For unit tests.
