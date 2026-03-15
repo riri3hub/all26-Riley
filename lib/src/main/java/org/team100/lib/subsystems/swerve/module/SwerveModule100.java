@@ -214,6 +214,8 @@ public abstract class SwerveModule100 implements Player {
         } else {
             m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), nextOmega, 0);
         }
+        // TODO: maybe use a profile to reduce current required?
+        // m_turningServo.setPositionProfiled(nextWrappedAngle.getRadians(), nextOmega);
         m_previousDesiredWrappedAngle = nextWrappedAngle;
     }
 

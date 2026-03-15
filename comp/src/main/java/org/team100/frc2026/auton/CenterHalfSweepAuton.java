@@ -46,7 +46,7 @@ public class CenterHalfSweepAuton implements AnnotatedCommand {
         this.machinery = machinery;
         constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
         // In meters/second
-        double maxBumpVelocity = 1;
+        double maxBumpVelocity = 2;
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
 
         // create a new VelocityRegionContstraint `slow_bump_zone`
@@ -82,7 +82,7 @@ public class CenterHalfSweepAuton implements AnnotatedCommand {
                         new DirectionSE2(1, 1, 0), 1));
         return planner.restToRest(waypoints);
     }
-    
+
     TrajectorySE2 t2(Pose2d startingPose) {
         List<WaypointSE2> waypoints = List.of(
                 new WaypointSE2(startingPose,
@@ -120,7 +120,7 @@ public class CenterHalfSweepAuton implements AnnotatedCommand {
         // Intake, score, climb.
         return sequence(
                 parallel(
-                        IntakeSetUp.until(IntakeSetUp::isDone),
+                        IntakeSetUp.until(IntakeSetUp::isDone).withTimeout(3.5),
                         // Assumed that the intake shouldn't deploy while going over the bump
                         waitSeconds(1).andThen(machinery.m_intakeExtend.goToExtendedPosition())),
                 waitSeconds(1),
@@ -132,9 +132,15 @@ public class CenterHalfSweepAuton implements AnnotatedCommand {
                 waitSeconds(1),
 
                 ScoreSetUp.until(ScoreSetUp::isDone),
-                machinery.m_shooterHood.autoPosition().withTimeout(0.5),
-                machinery.m_shooter.auto().withTimeout(1),
-                waitSeconds(2),
+                parallel(
+                        machinery.m_conveyor.convey(),
+                        machinery.m_feeder.proportional(),
+                        machinery.m_shooterHood.autoPosition(),
+                        machinery.m_shooter.auto()),
+                // .withTimeout(1),
+                // machinery.m_shooterHood.autoPosition().withTimeout(0.5),
+                // machinery.m_shooter.auto().withTimeout(1),
+                waitSeconds(5),
                 machinery.m_shooter.stop().withTimeout(1));
     }
 

@@ -43,7 +43,7 @@ public class DriveWithTrajectoryFunction extends MoveAndHold {
             TrajectoryVisualization viz,
             Function<Pose2d, TrajectorySE2> trajectoryFn) {
         m_log = parent.type(this);
-        m_logDone = m_log.booleanLogger(Level.TRACE, "done");
+        m_logDone = m_log.booleanLogger(Level.DEBUG, "done");
         m_logToGo = m_log.doubleLogger(Level.TRACE, "to go");
         m_drive = drive;
         m_controller = controller;

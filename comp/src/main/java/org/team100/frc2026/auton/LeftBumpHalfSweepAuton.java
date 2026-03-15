@@ -47,7 +47,7 @@ public class LeftBumpHalfSweepAuton implements AnnotatedCommand {
         this.machinery = machinery;
         constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
         // In meters/second
-        double maxBumpVelocity = 1;
+        double maxBumpVelocity = 2;
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
 
         // create a new VelocityRegionContstraint `slow_bump_zone`
@@ -131,7 +131,7 @@ public class LeftBumpHalfSweepAuton implements AnnotatedCommand {
         return sequence(
                 Commands.print("foo"),
                 parallel(
-                        IntakeSetUp.until(IntakeSetUp::isDone),
+                        IntakeSetUp.until(IntakeSetUp::isDone).withTimeout(4),
                         // Assumed that the intake shouldn't deploy over the bump
                         waitSeconds(1).andThen(machinery.m_intakeExtend.goToExtendedPosition())),
                 Commands.print("foo2"),
@@ -148,9 +148,16 @@ public class LeftBumpHalfSweepAuton implements AnnotatedCommand {
                 Commands.print("foo5"),
                 waitSeconds(1),
                 ScoreSetUp.until(ScoreSetUp::isDone),
-                machinery.m_shooterHood.autoPosition().withTimeout(0.5),
-                machinery.m_shooter.auto().withTimeout(1),
-                waitSeconds(2),
+                parallel(
+                        machinery.m_conveyor.convey(),
+                        machinery.m_feeder.proportional(),
+                        machinery.m_shooterHood.autoPosition(),
+                        machinery.m_shooter.auto()),
+                // .withTimeout(1),
+                // machinery.m_shooterHood.autoPosition().withTimeout(0.5),
+                // machinery.m_shooter.auto().withTimeout(1),
+                waitSeconds(5),
+                  
                 machinery.m_shooter.stop().withTimeout(1)
 
                // ClimbSetUp.until(ClimbSetUp::isDone)

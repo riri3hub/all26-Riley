@@ -151,11 +151,11 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
      * Positive error = too slow, negative error = too fast.
      */
     public double error() {
-        if (m_nextSetpoint == null) {
+        if (m_goal == null) {
             // TODO: no setpoint should yield null
-            return 0;
+            return 0;   
         }
-        return m_nextSetpoint.v() - m_mechanism.getVelocityM_S();
+        return m_goal - m_mechanism.getVelocityM_S();
     }
 
     @Override

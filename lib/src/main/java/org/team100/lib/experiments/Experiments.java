@@ -30,13 +30,13 @@ public class Experiments {
 
     /** These experiments are enabled on every robot type. */
     private final Set<Experiment> globalExperiments = Set.of(
-            Experiment.HeedVision,
-            Experiment.UseSwerveLimiter);
+            Experiment.HeedVision);
+            // Experiment.UseSwerveLimiter);
 
     /** These experiments are enabled on specific robot types. */
     private final Map<Identity, Set<Experiment>> experimentsByIdentity = Map.of(
             Identity.COMP_BOT, Set.of(),
-            Identity.BLANK, Set.of(Experiment.UseSwerveLimiter));
+            Identity.BLANK, Set.of());
 
     /** Computed for the actual identity used. */
     private final Set<Experiment> m_experiments;

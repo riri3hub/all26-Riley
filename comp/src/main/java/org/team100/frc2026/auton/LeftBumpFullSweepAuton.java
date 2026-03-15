@@ -25,7 +25,6 @@ import org.team100.lib.trajectory.path.PathSE2Factory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 /** An example of a simple sequence */
 public class LeftBumpFullSweepAuton implements AnnotatedCommand {
@@ -47,7 +46,7 @@ public class LeftBumpFullSweepAuton implements AnnotatedCommand {
         this.machinery = machinery;
         constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
         // In meters/second
-        double maxBumpVelocity = 1;
+        double maxBumpVelocity = 2;
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
 
         // create a new VelocityRegionContstraint `slow_bump_zone`
@@ -117,28 +116,35 @@ public class LeftBumpFullSweepAuton implements AnnotatedCommand {
 
         // Intake, score
         return sequence(
-                Commands.print("foo"),
+                //Commands.print("foo"),
                 parallel(
-                        IntakeSetUp.until(IntakeSetUp::isDone),
+                        IntakeSetUp.until(IntakeSetUp::isDone).withTimeout(4),
                         // Assumed that the intake shouldn't deploy over the bump
                         waitSeconds(1).andThen(machinery.m_intakeExtend.goToExtendedPosition())),
-                Commands.print("foo2"),
+                //Commands.print("foo2"),
                 waitSeconds(1),
-                Commands.print("foo3"),
+                //Commands.print("foo3"),
                 parallel(
                         IntakeBalls,
                         machinery.m_intake.intake()).until(IntakeBalls::isDone),
-                Commands.print("foo4"),
+                //Commands.print("foo4"),
                 // Without telling it to, the intake would only stop spinning
                 // at the end of the auton. Without the timeout, the robot
                 // would not continue the rest of the auton
                 machinery.m_intake.stop().withTimeout(1),
-                Commands.print("foo5"),
+                //Commands.print("foo5"),
                 waitSeconds(1),
                 ScoreSetUp.until(ScoreSetUp::isDone),
-                machinery.m_shooterHood.autoPosition().withTimeout(0.5),
-                machinery.m_shooter.auto().withTimeout(1),
-                waitSeconds(2),
+                
+                parallel(
+                        machinery.m_conveyor.convey(),
+                        machinery.m_feeder.proportional(),
+                        machinery.m_shooterHood.autoPosition(),
+                        machinery.m_shooter.auto()),
+                // .withTimeout(1),
+                // machinery.m_shooterHood.autoPosition().withTimeout(0.5),
+                // machinery.m_shooter.auto().withTimeout(1),
+                waitSeconds(5),
                 machinery.m_shooter.stop().withTimeout(1)
                );
     }

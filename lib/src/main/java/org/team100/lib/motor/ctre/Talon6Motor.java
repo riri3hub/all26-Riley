@@ -40,6 +40,7 @@ import edu.wpi.first.units.measure.Voltage;
  */
 public abstract class Talon6Motor implements BareMotor {
     private final LoggerFactory m_log;
+    private static final boolean DEBUG = false;
 
     private final TalonFX m_motor;
     private final PhoenixConfigurator m_configurator;
@@ -167,7 +168,8 @@ public abstract class Talon6Motor implements BareMotor {
         m_position = Cache.ofDouble(() -> {
             double latency = Utils.fpgaToCurrentTime(Takt.get()) - motorPositionRev.getTimestamp().getTime();
             if (latency > 0.04) {
-                System.out.printf("WARNING: stale position %s latency %f ", canId, latency);
+                if (DEBUG)
+                    System.out.printf("WARNING: stale position %s latency %f ", canId, latency);
                 latency = 0.1;
             }
             double motorRad = motorPositionRev.getValueAsDouble() * 2 * Math.PI;

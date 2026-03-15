@@ -75,8 +75,10 @@ public class CachedSolution {
 
         Optional<Translation2d> oTargetPosition = m_target.get();
 
-        if (oTargetPosition.isEmpty())
+        if (oTargetPosition.isEmpty()) {
+            System.out.println("no target for solve");
             return Optional.empty();
+        }
 
         Translation2d targetPosition = oTargetPosition.get();
 

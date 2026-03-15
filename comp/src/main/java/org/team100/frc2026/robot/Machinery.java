@@ -64,8 +64,10 @@ public class Machinery {
     // 2/26/25: Joel updated the supply limit to 90A, see 1678 code above. This is
     // essentially unlimited, so you'll need to run some other kind of limiter (e.g.
     // acceleration) to keep from browning out.
-    private static final double DRIVE_SUPPLY_LIMIT = 90;
-    private static final double DRIVE_STATOR_LIMIT = 110;
+    // 3/14/26 lowered from 90 to 80
+    private static final double DRIVE_SUPPLY_LIMIT = 80;
+    // 3/14/26 lowered from 110 to 80
+    private static final double DRIVE_STATOR_LIMIT = 80;
 
     private static final LoggerFactory logger = Logging.instance().rootLogger;
     private static final LoggerFactory fieldLogger = Logging.instance().fieldLogger;

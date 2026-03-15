@@ -10,7 +10,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.KrakenX44Motor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
-import org.team100.lib.profile.r1.CurrentLimitedExponentialVelocityProfileR1;
+import org.team100.lib.profile.r1.AccelLimitedVelocityProfileR1;
 import org.team100.lib.profile.r1.VelocityProfileR1;
 import org.team100.lib.reference.r1.VelocityProfileReferenceR1;
 import org.team100.lib.reference.r1.VelocityReferenceR1;
@@ -37,9 +37,11 @@ public class Intake extends SubsystemBase {
         LoggerFactory log1 = log.name("motor1");
         LoggerFactory log2 = log.name("motor2");
         // tuned 3/12/26
-        NORMAL_SPEED = new Mutable(log, "Intake Speed", 7);
-        VelocityProfileR1 profile = new CurrentLimitedExponentialVelocityProfileR1(
-                10, 10, 20, 30);
+        NORMAL_SPEED = new Mutable(log, "Intake Speed", 20);
+        // VelocityProfileR1 profile = new CurrentLimitedExponentialVelocityProfileR1(
+        // 10, 10, 20, 30);
+        VelocityProfileR1 profile = new AccelLimitedVelocityProfileR1(
+                20, 50);
         VelocityReferenceR1 ref = new VelocityProfileReferenceR1(
                 log, () -> profile, 1);
         final BareMotor m1;

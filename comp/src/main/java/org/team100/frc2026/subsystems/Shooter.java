@@ -256,6 +256,7 @@ public class Shooter extends SubsystemBase {
                 System.out.printf("speed %f\n", speed.getAsDouble());
             setVelocityProfiled(speed.getAsDouble());
         } else {
+            System.out.println("no speed for shoot auto");
             stopMotor();
         }
 

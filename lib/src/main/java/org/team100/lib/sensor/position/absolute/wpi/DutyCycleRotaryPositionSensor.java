@@ -34,7 +34,8 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
      * Should sensor disconnect be a fatal error? I think in practice it is, but you
      * might want to turn this off during development.
      */
-    private static final boolean THROW_IF_DISCONNNECTED = true;
+    private static final boolean THROW_IF_DISCONNNECTED = false;
+    private static final boolean DEBUG = false;
     private static final int FREQ_THRESHOLD = 500;
 
     private final int m_channel;
@@ -86,7 +87,8 @@ public abstract class DutyCycleRotaryPositionSensor extends RoboRioRotaryPositio
         if (!isConnected()) {
             m_log_connected.log(() -> false);
             String msg = String.format("*** encoder %d not connected ***", m_channel);
-            System.out.println("WARNING: " + msg);
+            if (DEBUG)
+                System.out.println("WARNING: " + msg);
             if (THROW_IF_DISCONNNECTED)
                 throw new IllegalStateException(msg);
         }

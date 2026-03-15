@@ -37,8 +37,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     // 2/26/25 Joel increased the steering limits *a lot*, they were 10/20, now
     // 60/80, which may mean it's more imporant now to avoid twitching and
     // oscillating.
-    private static final double STEERING_SUPPLY_LIMIT = 60;
-    private static final double STEERING_STATOR_LIMIT = 80;
+    private static final double STEERING_SUPPLY_LIMIT = 20;
+    private static final double STEERING_STATOR_LIMIT = 30;
     /**
      * WCP calls this "rotation ratio" here, we use the "flipped belt" which is the
      * fastest steering ratio.
@@ -149,7 +149,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         SimpleDynamics ff = new SimpleDynamics(parent, 0.004, 0.002);
         // note (10/2/24) 0.4 produces oscillation, on carpet.
         Friction friction = new Friction(parent, 0.26, 0.26, 0.006, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(parent, 0.05);
+        // 3/14/26 lowered P from 0.05 to 0.03 to investigate oscillation
+        PIDConstants pid = PIDConstants.makeVelocityPID(parent, 0.03);
         KrakenX60Motor driveMotor = new KrakenX60Motor(
                 parent,
                 driveMotorCanId,
@@ -268,7 +269,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         // Talon outboard POSITION PID
         // 10/2/24 drive torque produces about a 0.5 degree deviation so maybe
         // this is too low.
-        PIDConstants pid = PIDConstants.makePositionPID(parent, 2.0);
+        PIDConstants pid = PIDConstants.makePositionPID(parent, 1.0);
 
         KrakenX60Motor turningMotor = new KrakenX60Motor(
                 parent,
