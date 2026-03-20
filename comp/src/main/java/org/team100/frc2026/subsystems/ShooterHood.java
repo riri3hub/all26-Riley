@@ -3,6 +3,7 @@ package org.team100.frc2026.subsystems;
 import java.util.OptionalDouble;
 import java.util.function.Supplier;
 
+import org.team100.frc2026.robot.CurrentLimits;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -55,8 +56,7 @@ public class ShooterHood extends SubsystemBase {
         final BareMotor motor;
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
-                double supplyLimit = 30;
-                double statorLimit = 50;
+
                 SimpleDynamics ff = new SimpleDynamics(log, 0.00, 0.00);
                 Friction friction = new Friction(log, 0.350, 0.350, 0.0, 0.5);
                 // tuned 3/12/26
@@ -64,7 +64,7 @@ public class ShooterHood extends SubsystemBase {
 
                 motor = new KrakenX44Motor(
                         log, CAN_ID, NeutralMode100.COAST, MotorPhase.REVERSE,
-                        supplyLimit, statorLimit, ff, friction, pid);
+                        CurrentLimits.SHOOTER_HOOD_SUPPLY, CurrentLimits.SHOOTER_HOOD_STATOR, ff, friction, pid);
 
             }
             default -> {

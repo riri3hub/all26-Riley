@@ -51,6 +51,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
+
 /**
  * This should contain all the hardware of the robot: all the subsystems etc
  * that the Binder and Auton classes may want to use.
@@ -65,9 +66,7 @@ public class Machinery {
     // essentially unlimited, so you'll need to run some other kind of limiter (e.g.
     // acceleration) to keep from browning out.
     // 3/14/26 lowered from 90 to 80
-    private static final double DRIVE_SUPPLY_LIMIT = 60;
-    // 3/14/26 lowered from 110 to 80
-    private static final double DRIVE_STATOR_LIMIT = 90;
+
 
     private static final LoggerFactory logger = Logging.instance().rootLogger;
     private static final LoggerFactory fieldLogger = Logging.instance().fieldLogger;
@@ -112,8 +111,8 @@ public class Machinery {
 
         m_modules = SwerveModuleCollection.get(
                 driveLog,
-                DRIVE_SUPPLY_LIMIT,
-                DRIVE_STATOR_LIMIT,
+                CurrentLimits.DRIVE_SUPPLY,
+                CurrentLimits.DRIVE_STATOR,
                 m_swerveKinodynamics);
         Gyro gyro = GyroFactory.get(
                 driveLog,

@@ -1,5 +1,6 @@
 package org.team100.frc2026.subsystems;
 
+import org.team100.frc2026.robot.CurrentLimits;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -38,8 +39,7 @@ public class IntakeExtend extends SubsystemBase {
         final BareMotor motor;
         switch (Identity.instance) {
             case COMP_BOT -> {
-                double supplyLimit = 30;
-                double statorLimit = 50;
+
                 SimpleDynamics ff = new SimpleDynamics(log, 0.0, 0.0);
                 // friction test 3/12/26
                 Friction friction = new Friction(log, 0.32, 0.32, 0.0, 0.5);
@@ -48,7 +48,7 @@ public class IntakeExtend extends SubsystemBase {
                 motor = new KrakenX44Motor(
                         log, CAN_ID,
                         NeutralMode100.COAST, MotorPhase.REVERSE,
-                        supplyLimit, statorLimit,
+                        CurrentLimits.INTAKE_EXTEND_SUPPLY, CurrentLimits.INTAKE_EXTEND_STATOR,
                         ff, friction, pid);
             }
             default -> {

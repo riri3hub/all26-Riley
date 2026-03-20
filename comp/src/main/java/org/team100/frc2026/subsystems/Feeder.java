@@ -1,5 +1,6 @@
 package org.team100.frc2026.subsystems;
 
+import org.team100.frc2026.robot.CurrentLimits;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -47,9 +48,7 @@ public class Feeder extends SubsystemBase {
         final BareMotor m2;
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
-                double supplyLimit = 30;
-                // tuned 3/12/26
-                double statorLimit = 50;
+
                 SimpleDynamics dynamics = new SimpleDynamics(log, 0.00, 0.00);
                 // friction test 3/12/26
                 Friction friction = new Friction(log, 0.9, 0.9, 0.0, 0.5);
@@ -58,10 +57,10 @@ public class Feeder extends SubsystemBase {
 
                 m1 = new KrakenX44Motor(
                         log1, canID1, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        supplyLimit, statorLimit, dynamics, friction, pid);
+                        CurrentLimits.FEEDER_SUPPLY, CurrentLimits.FEEDER_STATOR, dynamics, friction, pid);
                 m2 = new KrakenX44Motor(
                         log2, canID2, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        supplyLimit, statorLimit, dynamics, friction, pid);
+                        CurrentLimits.FEEDER_SUPPLY, CurrentLimits.FEEDER_STATOR, dynamics, friction, pid);
             }
             default -> {
                 m1 = new SimulatedBareMotor(log1, 600);

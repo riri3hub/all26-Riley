@@ -20,6 +20,7 @@ import org.team100.lib.util.CanId;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import org.team100.frc2026.robot.CurrentLimits;
 
 public class Intake extends SubsystemBase {
     private static final CanId CAN_ID_1 = new CanId(15);
@@ -48,8 +49,7 @@ public class Intake extends SubsystemBase {
         final BareMotor m2;
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
-                double supplyLimit = 30;
-                double statorLimit = 50;
+
                 SimpleDynamics ff = new SimpleDynamics(log, 0.0, 0.0);
                 // friction test 3/12/26
                 Friction friction = new Friction(log, 0.5, 0.5, 0.0, 0.5);
@@ -57,10 +57,10 @@ public class Intake extends SubsystemBase {
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.08);
                 m1 = new KrakenX44Motor(
                         log1, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        supplyLimit, statorLimit, ff, friction, pid);
+                        CurrentLimits.INTAKE_SUPPLY, CurrentLimits.INTAKE_STATOR, ff, friction, pid);
                 m2 = new KrakenX44Motor(
                         log2, CAN_ID_2, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        supplyLimit, statorLimit, ff, friction, pid);
+                        CurrentLimits.INTAKE_SUPPLY, CurrentLimits.INTAKE_STATOR, ff, friction, pid);
             }
             default -> {
                 m1 = new SimulatedBareMotor(log1, 600);
