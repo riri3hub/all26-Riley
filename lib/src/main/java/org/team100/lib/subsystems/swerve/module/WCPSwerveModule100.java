@@ -6,6 +6,7 @@ import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MotorPhase;
@@ -74,6 +75,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
      */
     public static WCPSwerveModule100 getKrakenDrive(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             double supplyLimitAmps,
             double statorLimitAmps,
             CanId driveMotorCanId,
@@ -88,12 +90,14 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         LinearVelocityServo driveServo = driveKrakenServo(
                 parent.name("Drive"),
+                currentLog,
                 supplyLimitAmps,
                 statorLimitAmps,
                 driveMotorCanId,
                 ratio);
         AngularPositionServo turningServo = turningKrakenServo(
                 parent.name("Turning"),
+                currentLog,
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
@@ -110,6 +114,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
      */
     public static WCPSwerveModule100 getFalconDrive(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             double supplyLimitAmps,
             double statorLimitAmps,
             CanId driveMotorCanId,
@@ -123,12 +128,14 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             MotorPhase motorPhase) {
         LinearVelocityServo driveServo = driveFalconServo(
                 parent.name("Drive"),
+                currentLog,
                 supplyLimitAmps,
                 statorLimitAmps,
                 driveMotorCanId,
                 ratio);
         AngularPositionServo turningServo = turningServo(
                 parent.name("Turning"),
+                currentLog,
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
@@ -142,6 +149,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static LinearVelocityServo driveKrakenServo(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             double supplyLimit,
             double statorLimit,
             CanId driveMotorCanId,
@@ -153,6 +161,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         PIDConstants pid = PIDConstants.makeVelocityPID(parent, 0.03);
         KrakenX60Motor driveMotor = new KrakenX60Motor(
                 parent,
+                currentLog,
                 driveMotorCanId,
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,
@@ -175,6 +184,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static LinearVelocityServo driveFalconServo(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             double supplyLimit,
             double statorLimit,
             CanId driveMotorCanId,
@@ -184,6 +194,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         PIDConstants pid = PIDConstants.makeVelocityPID(parent, 0.05);
         Falcon500Motor driveMotor = new Falcon500Motor(
                 parent,
+                currentLog,
                 driveMotorCanId,
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,
@@ -202,6 +213,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static AngularPositionServo turningServo(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             CanId turningMotorCanId,
             RoboRioChannel turningEncoderChannel,
             double turningOffset,
@@ -221,6 +233,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         Falcon500Motor turningMotor = new Falcon500Motor(
                 parent,
+                currentLog,
                 turningMotorCanId,
                 neutral,
                 motorPhase,
@@ -254,6 +267,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
     private static AngularPositionServo turningKrakenServo(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             CanId turningMotorCanId,
             RoboRioChannel turningEncoderChannel,
             double turningOffset,
@@ -273,6 +287,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
 
         KrakenX60Motor turningMotor = new KrakenX60Motor(
                 parent,
+                currentLog,
                 turningMotorCanId,
                 neutral,
                 motorPhase,

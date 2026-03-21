@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.team100.frc2026.Timeless2026;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,10 +19,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class ShooterHoodTest implements Timeless2026 {
     private static final double DELTA = 0.001;
     private static final LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
+    private static final TotalCurrentLog currentLog = new TotalCurrentLog(log);
 
     @Test
     void test0() {
-        ShooterHood hood = new ShooterHood(log, () -> OptionalDouble.empty());
+        ShooterHood hood = new ShooterHood(log, currentLog, () -> OptionalDouble.empty());
         // Mech starts at zero.
         assertEquals(0, hood.getUnwrappedPositionRad(), DELTA);
         // Goal starts at measurement.
@@ -40,7 +42,7 @@ public class ShooterHoodTest implements Timeless2026 {
     @Test
     void test1() {
         // Goal needs to be less than max position
-        ShooterHood hood = new ShooterHood(log, () -> OptionalDouble.of(0.4));
+        ShooterHood hood = new ShooterHood(log, currentLog, () -> OptionalDouble.of(0.4));
         // Mech starts at zero.
         assertEquals(0, hood.getUnwrappedPositionRad(), DELTA);
         // Goal starts at measurement.

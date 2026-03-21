@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
@@ -24,7 +25,7 @@ public class DrumShooterFactory {
     private static final double WHEEL_DIA_M = .33;
 
     public static DualDrumShooter make(
-            LoggerFactory parent, int currentLimit) {
+            LoggerFactory parent, TotalCurrentLog currentLog, int currentLimit) {
         LoggerFactory log = parent.name("shooter");
         LoggerFactory logL = log.name("left");
         LoggerFactory logR = log.name("right");
@@ -36,8 +37,8 @@ public class DrumShooterFactory {
         Friction friction = new Friction(log, 0, 0.07, 0.01, 0.5);
         PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.02);
 
-        BareMotor motorL = getMotor(currentLimit, log, canL, ff, friction, pid);
-        BareMotor motorR = getMotor(currentLimit, log, canR, ff, friction, pid);
+        BareMotor motorL = getMotor(currentLimit, logL, currentLog, canL, ff, friction, pid);
+        BareMotor motorR = getMotor(currentLimit, logR, currentLog, canR, ff, friction, pid);
 
         LinearMechanism mechL = new LinearMechanism(
                 logL, motorL, motorL.encoder(), GEAR_RATIO, WHEEL_DIA_M,
@@ -55,14 +56,16 @@ public class DrumShooterFactory {
                 new OutboardLinearVelocityServo(logR, mechR, ref, 1));
     }
 
-    private static BareMotor getMotor(int currentLimit, LoggerFactory log, CanId canId, SimpleDynamics ff,
+    private static BareMotor getMotor(int currentLimit,
+            LoggerFactory log, TotalCurrentLog currentLog,
+            CanId canId, SimpleDynamics ff,
             Friction friction, PIDConstants pid) {
         return switch (Identity.instance) {
             case BLANK ->
                 new SimulatedBareMotor(log, 600);
             default -> new Neo550CANSparkMotor(
-                    log, canId, NeutralMode100.BRAKE, MotorPhase.REVERSE, currentLimit,
-                    ff, friction, pid);
+                    log, currentLog, canId, NeutralMode100.BRAKE, MotorPhase.REVERSE,
+                    currentLimit, ff, friction, pid);
         };
     }
 

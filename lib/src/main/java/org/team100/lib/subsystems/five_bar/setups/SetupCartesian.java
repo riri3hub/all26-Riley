@@ -2,6 +2,7 @@ package org.team100.lib.subsystems.five_bar.setups;
 
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.subsystems.five_bar.FiveBarCartesian;
 import org.team100.lib.visualization.FiveBarVisualization;
 
@@ -17,9 +18,10 @@ public class SetupCartesian implements Runnable {
     public SetupCartesian() {
         final Logging logging = Logging.instance();
         final LoggerFactory logger = logging.rootLogger;
+        TotalCurrentLog currentLog = new TotalCurrentLog(logger);
         XboxController controller = new XboxController(0);
 
-        m_fiveBar = new FiveBarCartesian(logger);
+        m_fiveBar = new FiveBarCartesian(logger, currentLog);
         m_viz = new FiveBarVisualization(m_fiveBar::getJointPositions);
         m_fiveBar.setDefaultCommand(m_fiveBar.position(
                 () -> new Translation2d(

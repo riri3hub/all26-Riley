@@ -8,6 +8,7 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.LoggerFactory.BooleanLogger;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
@@ -45,7 +46,7 @@ public class Manipulator extends SubsystemBase implements Music {
 
     private final List<Player> m_players;
 
-    public Manipulator(LoggerFactory parent) {
+    public Manipulator(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
 
         LoggerFactory algaeMotorLog = log.name("algae");
@@ -55,21 +56,25 @@ public class Manipulator extends SubsystemBase implements Music {
         switch (Identity.instance) {
             case COMP_BOT -> {
                 // Set specific parameters for the competition robot
-                KrakenX60Motor leftMotor = new KrakenX60Motor(leftMotorLog, new CanId(19), NeutralMode100.COAST,
+                KrakenX60Motor leftMotor = new KrakenX60Motor(
+                        leftMotorLog, currentLog, new CanId(19),
+                        NeutralMode100.COAST,
                         MotorPhase.FORWARD,
                         40, // og 40
                         40, // og 40
                         new SimpleDynamics(leftMotorLog, 0.000, 0.000),
                         new Friction(leftMotorLog, 0.900, 0.900, 0.0, 0.5),
                         PIDConstants.zero(leftMotorLog));
-                KrakenX60Motor rightMotor = new KrakenX60Motor(rightMotorLog, new CanId(20), NeutralMode100.COAST,
+                KrakenX60Motor rightMotor = new KrakenX60Motor(
+                        rightMotorLog, currentLog, new CanId(20), NeutralMode100.COAST,
                         MotorPhase.REVERSE,
                         40, // og 40
                         40, // og 40
                         new SimpleDynamics(rightMotorLog, 0.000, 0.000),
                         new Friction(rightMotorLog, 0.900, 0.900, 0.0, 0.5),
                         PIDConstants.zero(rightMotorLog));
-                KrakenX60Motor algaeMotor = new KrakenX60Motor(algaeMotorLog, new CanId(21), NeutralMode100.COAST,
+                KrakenX60Motor algaeMotor = new KrakenX60Motor(
+                        algaeMotorLog, currentLog, new CanId(21), NeutralMode100.COAST,
                         MotorPhase.FORWARD,
                         120, // og 120
                         120, // og 120

@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -30,7 +31,7 @@ public class Climber extends SubsystemBase {
     private final AngularPositionServo m_servo1;
     private final AngularPositionServo m_servo2;
 
-    public Climber(LoggerFactory parent) {
+    public Climber(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
         LoggerFactory log1 = log.name("motor1");
         LoggerFactory log2 = log.name("motor2");
@@ -47,12 +48,12 @@ public class Climber extends SubsystemBase {
                 Friction friction = new Friction(log, 0, 0, 0, 0);
                 PIDConstants pid = new PIDConstants(log, 1, 0, 0, 0, 0, 0);
                 m1 = new KrakenX60Motor(
-                        log1, new CanId(6),
+                        log1, currentLog, new CanId(6),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
                         supplyLimit, statorLimit,
                         ff, friction, pid);
                 m2 = new KrakenX60Motor(
-                        log2, new CanId(7),
+                        log2, currentLog, new CanId(7),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
                         supplyLimit, statorLimit,
                         ff, friction, pid);

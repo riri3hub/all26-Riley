@@ -49,7 +49,7 @@ public class Robot2025 extends TimedRobot100 {
 
         m_robotLog = new RobotLog();
 
-        m_machinery = new Machinery2025();
+        m_machinery = new Machinery2025(m_robotLog.totalCurrentLog());
         m_allAutons = new AllAutons2025(m_machinery);
         m_binder = new Binder2025(m_machinery);
         m_binder.bind();

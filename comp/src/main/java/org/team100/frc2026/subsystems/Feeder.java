@@ -6,6 +6,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -36,7 +37,7 @@ public class Feeder extends SubsystemBase {
 
     private final Shooter m_Shooter;
 
-    public Feeder(LoggerFactory parent, Shooter shooter) {
+    public Feeder(LoggerFactory parent, TotalCurrentLog currentLog, Shooter shooter) {
         LoggerFactory log = parent.type(this);
         LoggerFactory log1 = log.name("Feeder1");
         LoggerFactory log2 = log.name("Feeder2");
@@ -56,10 +57,10 @@ public class Feeder extends SubsystemBase {
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.05);
 
                 m1 = new KrakenX44Motor(
-                        log1, canID1, NeutralMode100.COAST, MotorPhase.FORWARD,
+                        log1, currentLog, canID1, NeutralMode100.COAST, MotorPhase.FORWARD,
                         CurrentLimits.FEEDER_SUPPLY, CurrentLimits.FEEDER_STATOR, dynamics, friction, pid);
                 m2 = new KrakenX44Motor(
-                        log2, canID2, NeutralMode100.COAST, MotorPhase.FORWARD,
+                        log2, currentLog, canID2, NeutralMode100.COAST, MotorPhase.FORWARD,
                         CurrentLimits.FEEDER_SUPPLY, CurrentLimits.FEEDER_STATOR, dynamics, friction, pid);
             }
             default -> {
@@ -100,7 +101,7 @@ public class Feeder extends SubsystemBase {
 
     /**
      * Feed rate slowdown is proportional to shooter speed error outside the
-     * tolerance.  Never ends, but stops the motor when interrupted.
+     * tolerance. Never ends, but stops the motor when interrupted.
      */
     public Command proportional() {
         return startRun(

@@ -6,6 +6,7 @@ import org.team100.lib.controller.se2.ControllerFactorySE2;
 import org.team100.lib.controller.se2.ControllerSE2;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamicsFactory;
@@ -13,9 +14,10 @@ import org.team100.lib.trajectory.TrajectorySE2;
 
 public class DoubleCircleAutonTest {
     private static final LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
+    private static final TotalCurrentLog currentLog = new TotalCurrentLog(log);
     private static final SwerveKinodynamics dynamics = SwerveKinodynamicsFactory.get(log);
     private static final ControllerSE2 controller = ControllerFactorySE2.byIdentity(log);
-    private static final Machinery machinery = new Machinery();
+    private static final Machinery machinery = new Machinery(currentLog);
 
     @Test
     void test0() {

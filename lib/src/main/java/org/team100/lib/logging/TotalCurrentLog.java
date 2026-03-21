@@ -20,6 +20,10 @@ public class TotalCurrentLog {
         m_logSupplyCurrent = log.doubleLogger(Level.COMP, "total supply current (A)");
     }
 
+    public void register(Reporter r) {
+        m_reporters.add(r);
+    }
+
     public void log() {
         m_logSupplyCurrent
                 .log(() -> m_reporters.stream()
@@ -27,5 +31,4 @@ public class TotalCurrentLog {
                         .reduce(Double::sum)
                         .orElse(0.0));
     }
-
 }

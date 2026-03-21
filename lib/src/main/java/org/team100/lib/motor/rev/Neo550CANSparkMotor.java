@@ -4,6 +4,7 @@ import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.util.CanId;
@@ -19,6 +20,7 @@ import com.revrobotics.spark.SparkMax;
 public class Neo550CANSparkMotor extends CANSparkMotor {
     public Neo550CANSparkMotor(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             CanId canId,
             NeutralMode100 neutral,
             MotorPhase motorPhase,
@@ -26,7 +28,8 @@ public class Neo550CANSparkMotor extends CANSparkMotor {
             SimpleDynamics ff,
             Friction friction,
             PIDConstants pid) {
-        super(parent, new SparkMax(canId.id, MotorType.kBrushless),
+        super(parent, currentLog,
+                new SparkMax(canId.id, MotorType.kBrushless),
                 neutral, motorPhase, statorCurrentLimit, ff, friction, pid);
     }
 

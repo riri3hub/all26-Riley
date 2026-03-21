@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
@@ -24,6 +25,7 @@ public class MecanumDriveFactory {
     public static MecanumDrive100 make(
             LoggerFactory fieldLogger,
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             int statorLimit,
             CanId gyroId,
             CanId canFL,
@@ -49,13 +51,17 @@ public class MecanumDriveFactory {
         slip = slip(slip);
 
         BareMotor motorFL = getMotor(
-                log, canFL, MotorPhase.REVERSE, statorLimit, ff, friction, pid);
+                logFL, currentLog, canFL, MotorPhase.REVERSE,
+                statorLimit, ff, friction, pid);
         BareMotor motorFR = getMotor(
-                log, canFR, MotorPhase.FORWARD, statorLimit, ff, friction, pid);
+                logFR, currentLog, canFR, MotorPhase.FORWARD,
+                statorLimit, ff, friction, pid);
         BareMotor motorRL = getMotor(
-                log, canRL, MotorPhase.REVERSE, statorLimit, ff, friction, pid);
+                logRL, currentLog, canRL, MotorPhase.REVERSE,
+                statorLimit, ff, friction, pid);
         BareMotor motorRR = getMotor(
-                log, canRR, MotorPhase.FORWARD, statorLimit, ff, friction, pid);
+                logRR, currentLog, canRR, MotorPhase.FORWARD,
+                statorLimit, ff, friction, pid);
 
         LinearMechanism mechFL = new LinearMechanism(
                 logFL, motorFL, motorFL.encoder(), gearRatio, wheelDiaM,
@@ -82,12 +88,13 @@ public class MecanumDriveFactory {
 
     /** Real or simulated depending on identity */
     public static BareMotor getMotor(
-            LoggerFactory log, CanId can, MotorPhase phase, int statorLimit,
-            SimpleDynamics ff, Friction friction, PIDConstants pid) {
+            LoggerFactory log, TotalCurrentLog currentLog, CanId can, MotorPhase phase,
+            int statorLimit, SimpleDynamics ff, Friction friction, PIDConstants pid) {
         return switch (Identity.instance) {
             case BLANK -> new SimulatedBareMotor(log, 600);
             default -> new NeoCANSparkMotor(
-                    log, can, NeutralMode100.BRAKE, phase, statorLimit, ff, friction, pid);
+                    log, currentLog, can, NeutralMode100.BRAKE, phase,
+                    statorLimit, ff, friction, pid);
         };
     }
 

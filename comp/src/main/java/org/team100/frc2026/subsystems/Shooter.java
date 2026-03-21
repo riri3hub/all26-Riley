@@ -9,6 +9,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -33,7 +34,7 @@ public class Shooter extends SubsystemBase {
     private static final CanId CAN_ID_2 = new CanId(5);
     private static final CanId CAN_ID_3 = new CanId(14);
 
-    //TODO: find the actuall CanId for the fourth motor
+    // TODO: find the actuall CanId for the fourth motor
     private static final CanId CAN_ID_4 = new CanId(45);
     private static final double TOLERANCE_M_S = 1;
 
@@ -58,7 +59,7 @@ public class Shooter extends SubsystemBase {
      * @param parent log
      * @param speed  speed (m/s) for auto mode
      */
-    public Shooter(LoggerFactory parent, Supplier<OptionalDouble> speed) {
+    public Shooter(LoggerFactory parent, TotalCurrentLog currentLog, Supplier<OptionalDouble> speed) {
         LoggerFactory log = parent.type(this);
         LoggerFactory log1 = log.name("Shooter1");
         LoggerFactory log2 = log.name("Shooter2");
@@ -79,7 +80,7 @@ public class Shooter extends SubsystemBase {
         final BareMotor m4;
         switch (Identity.instance) {
             case TEST_BOARD_B0, COMP_BOT -> {
-  
+
                 SimpleDynamics ff = new SimpleDynamics(log, 0.000, 0.000);
                 // friction test 3/12/262
                 Friction friction = new Friction(log, 0.3, 0.25, 0.0, 0.5);
@@ -87,18 +88,18 @@ public class Shooter extends SubsystemBase {
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.075);
 
                 m1 = new KrakenX60Motor(
-                        log1, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
+                        log1, currentLog, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
                         CurrentLimits.SHOOTER_SUPPLY, CurrentLimits.SHOOTER_STATOR, ff, friction, pid);
                 m2 = new KrakenX60Motor(
-                        log2, CAN_ID_2, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        log2, currentLog, CAN_ID_2, NeutralMode100.COAST, MotorPhase.REVERSE,
                         CurrentLimits.SHOOTER_SUPPLY, CurrentLimits.SHOOTER_STATOR, ff, friction, pid);
                 m3 = new KrakenX60Motor(
-                        log3, CAN_ID_3, NeutralMode100.COAST, MotorPhase.FORWARD,
+                        log3, currentLog, CAN_ID_3, NeutralMode100.COAST, MotorPhase.FORWARD,
                         CurrentLimits.SHOOTER_SUPPLY, CurrentLimits.SHOOTER_STATOR, ff, friction, pid);
                 m4 = new KrakenX60Motor(
-                    log4, CAN_ID_4, NeutralMode100.COAST, MotorPhase.FORWARD,
-                    CurrentLimits.SHOOTER_SUPPLY, CurrentLimits.SHOOTER_STATOR, ff, friction, pid);
-                
+                        log4, currentLog, CAN_ID_4, NeutralMode100.COAST, MotorPhase.FORWARD,
+                        CurrentLimits.SHOOTER_SUPPLY, CurrentLimits.SHOOTER_STATOR, ff, friction, pid);
+
             }
             default -> {
                 m1 = new SimulatedBareMotor(log1, 600);
@@ -115,7 +116,7 @@ public class Shooter extends SubsystemBase {
         m_servo3 = OutboardLinearVelocityServo.make(
                 log3, m3, ref, GEAR_RATIO, WHEEL_DIAMETER_M, TOLERANCE_M_S);
         m_servo4 = OutboardLinearVelocityServo.make(
-            log4, m4, ref, GEAR_RATIO, WHEEL_DIAMETER_M, TOLERANCE_M_S);
+                log4, m4, ref, GEAR_RATIO, WHEEL_DIAMETER_M, TOLERANCE_M_S);
     }
 
     @Override

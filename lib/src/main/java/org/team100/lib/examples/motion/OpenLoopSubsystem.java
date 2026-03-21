@@ -5,6 +5,7 @@ import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -31,7 +32,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class OpenLoopSubsystem extends SubsystemBase {
     private final BareMotor m_motor;
 
-    public OpenLoopSubsystem(LoggerFactory parent) {
+    public OpenLoopSubsystem(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
         /*
          * Here we use the Team 100 "Identity" mechanism to allow different
@@ -48,7 +49,7 @@ public class OpenLoopSubsystem extends SubsystemBase {
                 SimpleDynamics ff = new SimpleDynamics(log, 0.100, 0.100);
                 Friction friction = new Friction(log, 0.100, 0.100, 0.0, 0.1);
                 m_motor = new Falcon500Motor(
-                        log, canId,
+                        log, currentLog, canId,
                         NeutralMode100.COAST, MotorPhase.FORWARD,
                         supplyLimit, statorLimit, ff, friction, pid);
             }

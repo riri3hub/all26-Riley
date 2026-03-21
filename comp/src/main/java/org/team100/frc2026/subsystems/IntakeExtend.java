@@ -6,6 +6,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -32,7 +33,7 @@ public class IntakeExtend extends SubsystemBase {
 
     private final AngularPositionServo m_servo;
 
-    public IntakeExtend(LoggerFactory parent) {
+    public IntakeExtend(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
         TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 16, 32, 0.1);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.1, 0.05);
@@ -46,7 +47,7 @@ public class IntakeExtend extends SubsystemBase {
                 // tuned 3/12/26
                 PIDConstants pid = PIDConstants.makePositionPID(log, 2);
                 motor = new KrakenX44Motor(
-                        log, CAN_ID,
+                        log, currentLog, CAN_ID,
                         NeutralMode100.COAST, MotorPhase.REVERSE,
                         CurrentLimits.INTAKE_EXTEND_SUPPLY, CurrentLimits.INTAKE_EXTEND_STATOR,
                         ff, friction, pid);

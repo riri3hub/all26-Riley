@@ -4,6 +4,7 @@ import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.util.CanId;
@@ -17,6 +18,7 @@ public class Falcon500Motor extends Talon6Motor {
 
     public Falcon500Motor(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             CanId canId,
             NeutralMode100 neutral,
             MotorPhase motorPhase,
@@ -25,7 +27,8 @@ public class Falcon500Motor extends Talon6Motor {
             SimpleDynamics ff,
             Friction friction,
             PIDConstants pid) {
-        super(parent, canId, neutral, motorPhase, supplyLimit, statorLimit, ff, friction, pid);
+        super(parent, currentLog, canId, neutral, motorPhase, supplyLimit,
+                statorLimit, ff, friction, pid);
     }
 
     @Override

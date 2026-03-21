@@ -19,6 +19,7 @@ import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.geometry.WaypointSE2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.LoggerFactory.AccelerationSE2Logger;
 import org.team100.lib.logging.LoggerFactory.ConfigLogger;
 import org.team100.lib.logging.LoggerFactory.JointAccelerationsLogger;
@@ -125,6 +126,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
 
     public CalgamesMech(
             LoggerFactory log,
+            TotalCurrentLog currentLog,
             double armLength,
             double wristLength) {
         LoggerFactory parent = log.type(this);
@@ -166,6 +168,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
 
                 KrakenX60Motor elevatorFrontMotor = new KrakenX60Motor(
                         elevatorfrontLog,
+                        currentLog,
                         new CanId(11),
                         NeutralMode100.BRAKE, MotorPhase.REVERSE,
                         100,
@@ -182,6 +185,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
 
                 KrakenX60Motor elevatorBackMotor = new KrakenX60Motor(
                         elevatorbackLog,
+                        currentLog,
                         new CanId(12),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
                         100, // orginally 60
@@ -197,6 +201,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
 
                 KrakenX60Motor shoulderMotor = new KrakenX60Motor(
                         shoulderLog,
+                        currentLog,
                         new CanId(24),
                         NeutralMode100.BRAKE,
                         MotorPhase.REVERSE,
@@ -229,6 +234,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
 
                 KrakenX60Motor wristMotor = new KrakenX60Motor(
                         wristLog,
+                        currentLog,
                         new CanId(22),
                         NeutralMode100.COAST, MotorPhase.FORWARD,
                         40, // og 60

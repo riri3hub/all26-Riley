@@ -62,7 +62,7 @@ public class Robot extends TimedRobot100 {
 
         m_robotLog = new RobotLog();
 
-        m_machinery = new Machinery();
+        m_machinery = new Machinery(m_robotLog.totalCurrentLog());
         m_binder = new Binder(m_machinery);
 
         m_allAutons = new AllAutons(m_machinery);

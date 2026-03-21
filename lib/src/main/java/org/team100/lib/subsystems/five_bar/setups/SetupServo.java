@@ -2,6 +2,7 @@ package org.team100.lib.subsystems.five_bar.setups;
 
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.subsystems.five_bar.FiveBarServo;
 import org.team100.lib.visualization.FiveBarVisualization;
 
@@ -15,9 +16,10 @@ public class SetupServo implements Runnable {
     public SetupServo() {
         final Logging logging = Logging.instance();
         final LoggerFactory logger = logging.rootLogger;
+        TotalCurrentLog currentLog = new TotalCurrentLog(logger);
         XboxController controller = new XboxController(0);
 
-        m_fiveBar = new FiveBarServo(logger);
+        m_fiveBar = new FiveBarServo(logger, currentLog);
         m_viz = new FiveBarVisualization(m_fiveBar::getJointPositions);
         m_fiveBar.setDefaultCommand(m_fiveBar.position(
                 controller::getLeftX, controller::getRightX));

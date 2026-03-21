@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -29,7 +30,7 @@ public class ClimberExtension extends SubsystemBase {
 
     private final LinearPositionServo m_servo;
 
-    public ClimberExtension(LoggerFactory parent) {
+    public ClimberExtension(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
         ProfileR1 profile = new TrapezoidProfileR1(log, 0.1, 2, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
@@ -41,7 +42,7 @@ public class ClimberExtension extends SubsystemBase {
                 Friction friction = new Friction(log, 0, 0, 0, 0);
                 PIDConstants pid = new PIDConstants(log, 1, 0, 0, 0, 0, 0);
                 motor = new NeoVortexCANSparkMotor(
-                        log, new CanId(2),
+                        log, currentLog, new CanId(2),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
                         statorLimit, ff, friction, pid);
             }

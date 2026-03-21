@@ -11,6 +11,7 @@ import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -99,6 +100,7 @@ public abstract class Talon6Motor implements BareMotor {
 
     protected Talon6Motor(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             CanId canId,
             NeutralMode100 neutral,
             MotorPhase motorPhase,
@@ -107,6 +109,7 @@ public abstract class Talon6Motor implements BareMotor {
             SimpleDynamics ff,
             Friction friction,
             PIDConstants pid) {
+        currentLog.register(this);
         //////////////////////////////////////
         //
         // CONTROL REQUESTS

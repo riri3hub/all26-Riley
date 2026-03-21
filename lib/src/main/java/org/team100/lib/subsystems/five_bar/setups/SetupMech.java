@@ -2,6 +2,7 @@ package org.team100.lib.subsystems.five_bar.setups;
 
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.subsystems.five_bar.FiveBarMech;
 import org.team100.lib.subsystems.five_bar.Pen;
 import org.team100.lib.visualization.FiveBarVisualization;
@@ -18,9 +19,10 @@ public class SetupMech implements Runnable {
     public SetupMech() {
         final Logging logging = Logging.instance();
         final LoggerFactory logger = logging.rootLogger;
+        TotalCurrentLog currentLog = new TotalCurrentLog(logger);
         XboxController controller = new XboxController(0);
 
-        m_fiveBar = new FiveBarMech(logger);
+        m_fiveBar = new FiveBarMech(logger, currentLog);
         m_pen = new Pen();
         m_viz = new FiveBarVisualization(m_fiveBar::getJointPositions);
         m_fiveBar.setDefaultCommand(m_fiveBar.position(

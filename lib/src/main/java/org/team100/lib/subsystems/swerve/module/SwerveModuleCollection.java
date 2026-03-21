@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.team100.lib.config.Identity;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.music.Player;
@@ -55,6 +56,7 @@ public class SwerveModuleCollection implements Player {
      */
     public static SwerveModuleCollection get(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             double supplyLimit,
             double statorLimit,
             SwerveKinodynamics kinodynamics) {
@@ -67,10 +69,11 @@ public class SwerveModuleCollection implements Player {
         switch (Identity.instance) {
             // TODO: turned off while testing
             case COMP_BOT:
-            // case SWERVE_TWO:
+                // case SWERVE_TWO:
                 System.out.println("************** WCP MODULES w/Duty-Cycle Encoders **************");
                 return new SwerveModuleCollection(
-                        WCPSwerveModule100.getKrakenDrive(frontLeftLogger, supplyLimit, statorLimit,
+                        WCPSwerveModule100.getKrakenDrive(
+                                frontLeftLogger, currentLog, supplyLimit, statorLimit,
                                 new CanId(1), // drive
                                 DriveRatio.MEDIUM,
                                 new CanId(3), // steer
@@ -78,7 +81,8 @@ public class SwerveModuleCollection implements Player {
                                 0.108695,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
-                        WCPSwerveModule100.getKrakenDrive(frontRightLogger, supplyLimit, statorLimit,
+                        WCPSwerveModule100.getKrakenDrive(
+                                frontRightLogger, currentLog, supplyLimit, statorLimit,
                                 new CanId(22), // drive
                                 DriveRatio.MEDIUM,
                                 new CanId(18), // steer
@@ -86,15 +90,17 @@ public class SwerveModuleCollection implements Player {
                                 0.363170,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
-                        WCPSwerveModule100.getKrakenDrive(rearLeftLogger, supplyLimit, statorLimit,
+                        WCPSwerveModule100.getKrakenDrive(
+                                rearLeftLogger, currentLog, supplyLimit, statorLimit,
                                 new CanId(0), // drive
                                 DriveRatio.MEDIUM,
                                 new CanId(2), // steer
-                                new RoboRioChannel(7), 
+                                new RoboRioChannel(7),
                                 0.606495,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
-                        WCPSwerveModule100.getKrakenDrive(rearRightLogger, supplyLimit, statorLimit,
+                        WCPSwerveModule100.getKrakenDrive(
+                                rearRightLogger, currentLog, supplyLimit, statorLimit,
                                 new CanId(23), // drive
                                 DriveRatio.MEDIUM,
                                 new CanId(21), // steer
@@ -105,7 +111,8 @@ public class SwerveModuleCollection implements Player {
             case SWERVE_ONE:
                 System.out.println("************** WCP MODULES w/Duty-Cycle Encoders **************");
                 return new SwerveModuleCollection(
-                        WCPSwerveModule100.getFalconDrive(frontLeftLogger, supplyLimit, statorLimit,
+                        WCPSwerveModule100.getFalconDrive(
+                                frontLeftLogger, currentLog, supplyLimit, statorLimit,
                                 new CanId(12), // drive
                                 DriveRatio.FAST,
                                 new CanId(32), // steer
@@ -113,7 +120,8 @@ public class SwerveModuleCollection implements Player {
                                 0.160218,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
-                        WCPSwerveModule100.getFalconDrive(frontRightLogger, supplyLimit, statorLimit,
+                        WCPSwerveModule100.getFalconDrive(
+                                frontRightLogger, currentLog, supplyLimit, statorLimit,
                                 new CanId(11), // drive
                                 DriveRatio.FAST,
                                 new CanId(30), // steer
@@ -121,7 +129,8 @@ public class SwerveModuleCollection implements Player {
                                 0.876519,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
-                        WCPSwerveModule100.getFalconDrive(rearLeftLogger, supplyLimit, statorLimit,
+                        WCPSwerveModule100.getFalconDrive(
+                                rearLeftLogger, currentLog, supplyLimit, statorLimit,
                                 new CanId(21), // drive
                                 DriveRatio.FAST,
                                 new CanId(31), // steer
@@ -129,7 +138,8 @@ public class SwerveModuleCollection implements Player {
                                 0.406423,
                                 kinodynamics,
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
-                        WCPSwerveModule100.getFalconDrive(rearRightLogger, supplyLimit, statorLimit,
+                        WCPSwerveModule100.getFalconDrive(
+                                rearRightLogger, currentLog, supplyLimit, statorLimit,
                                 new CanId(22), // drive
                                 DriveRatio.FAST,
                                 new CanId(33), // steer

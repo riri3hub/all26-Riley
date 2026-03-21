@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
@@ -38,7 +39,7 @@ public class OutboardRotaryPositionSubsystem extends SubsystemBase {
     private final Gravity m_gravity;
     private final AngularPositionServo m_servo;
 
-    public OutboardRotaryPositionSubsystem(LoggerFactory parent) {
+    public OutboardRotaryPositionSubsystem(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
         m_gravity = new Gravity(log,
                 5, // Max gravity torque, Nm
@@ -51,11 +52,11 @@ public class OutboardRotaryPositionSubsystem extends SubsystemBase {
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile,
                 0.01, // position tolerance, rad
                 0.01); // velocity tolerance, rad/s
-        m_servo = new OutboardAngularPositionServo(log, mech(log), ref);
+        m_servo = new OutboardAngularPositionServo(log, mech(log, currentLog), ref);
         m_servo.reset();
     }
 
-    private RotaryMechanism mech(LoggerFactory log) {
+    private RotaryMechanism mech(LoggerFactory log, TotalCurrentLog currentLog) {
         switch (Identity.instance) {
             case BLANK -> {
                 // simulation
@@ -67,6 +68,7 @@ public class OutboardRotaryPositionSubsystem extends SubsystemBase {
                 // real robot
                 CANSparkMotor motor = new NeoCANSparkMotor(
                         log,
+                        currentLog,
                         new CanId(0),
                         NeutralMode100.BRAKE,
                         MotorPhase.FORWARD,

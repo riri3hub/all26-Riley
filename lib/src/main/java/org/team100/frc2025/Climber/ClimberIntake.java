@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -21,13 +22,14 @@ public class ClimberIntake extends SubsystemBase {
     private final BareMotor m_motor;
     private int count;
 
-    public ClimberIntake(LoggerFactory parent, CanId canID) {
+    public ClimberIntake(LoggerFactory parent, TotalCurrentLog currentLog, CanId canID) {
         LoggerFactory log = parent.type(this);
         count = 0;
         switch (Identity.instance) {
             case COMP_BOT -> {
                 m_motor = new KrakenX60Motor(
-                        log, canID, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        log, currentLog,
+                        canID, NeutralMode100.COAST, MotorPhase.REVERSE,
                         20, // og 50
                         20, // og 2
                         new SimpleDynamics(log, 0.004, 0.002),

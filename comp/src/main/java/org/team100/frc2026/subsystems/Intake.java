@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -33,7 +34,7 @@ public class Intake extends SubsystemBase {
     private final OutboardLinearVelocityServo m_servo1;
     private final OutboardLinearVelocityServo m_servo2;
 
-    public Intake(LoggerFactory parent) {
+    public Intake(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
         LoggerFactory log1 = log.name("motor1");
         LoggerFactory log2 = log.name("motor2");
@@ -56,10 +57,10 @@ public class Intake extends SubsystemBase {
                 // tuned 3/12/26
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.08);
                 m1 = new KrakenX44Motor(
-                        log1, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
+                        log1, currentLog, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
                         CurrentLimits.INTAKE_SUPPLY, CurrentLimits.INTAKE_STATOR, ff, friction, pid);
                 m2 = new KrakenX44Motor(
-                        log2, CAN_ID_2, NeutralMode100.COAST, MotorPhase.FORWARD,
+                        log2, currentLog, CAN_ID_2, NeutralMode100.COAST, MotorPhase.FORWARD,
                         CurrentLimits.INTAKE_SUPPLY, CurrentLimits.INTAKE_STATOR, ff, friction, pid);
             }
             default -> {

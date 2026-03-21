@@ -5,6 +5,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
@@ -20,6 +21,7 @@ public class TankDriveFactory {
     public static TankDrive make(
             LoggerFactory fieldLogger,
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             int statorLimit,
             CanId canL,
             CanId canR,
@@ -35,9 +37,9 @@ public class TankDriveFactory {
         PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
 
         BareMotor motorL = getMotor(
-                log, canL, MotorPhase.REVERSE, statorLimit, ff, friction, pid);
+                logL, currentLog, canL, MotorPhase.REVERSE, statorLimit, ff, friction, pid);
         BareMotor motorR = getMotor(
-                log, canR, MotorPhase.FORWARD, statorLimit, ff, friction, pid);
+                logR, currentLog, canR, MotorPhase.FORWARD, statorLimit, ff, friction, pid);
 
         LinearMechanism mechL = new LinearMechanism(
                 logL, motorL, motorL.encoder(), gearRatio, wheelDiaM,
@@ -53,12 +55,13 @@ public class TankDriveFactory {
 
     /** Real or simulated depending on identity */
     public static BareMotor getMotor(
-            LoggerFactory log, CanId can, MotorPhase phase, int statorLimit,
-            SimpleDynamics ff, Friction friction, PIDConstants pid) {
+            LoggerFactory log, TotalCurrentLog currentLog, CanId can, MotorPhase phase,
+            int statorLimit, SimpleDynamics ff, Friction friction, PIDConstants pid) {
         return switch (Identity.instance) {
             case BLANK -> new SimulatedBareMotor(log, 600);
             default -> new NeoCANSparkMotor(
-                    log, can, NeutralMode100.BRAKE, phase, statorLimit, ff, friction, pid);
+                    log, currentLog, can, NeutralMode100.BRAKE, phase,
+                    statorLimit, ff, friction, pid);
         };
     }
 }

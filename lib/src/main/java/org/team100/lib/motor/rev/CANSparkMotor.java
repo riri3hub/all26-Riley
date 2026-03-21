@@ -10,6 +10,7 @@ import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -88,6 +89,7 @@ public abstract class CANSparkMotor implements BareMotor {
 
     protected CANSparkMotor(
             LoggerFactory parent,
+            TotalCurrentLog currentLog,
             SparkBase motor,
             NeutralMode100 neutral,
             MotorPhase motorPhase,
@@ -95,6 +97,7 @@ public abstract class CANSparkMotor implements BareMotor {
             SimpleDynamics ff,
             Friction friction,
             PIDConstants pid) {
+        currentLog.register(this);
         m_motor = motor;
         m_log = parent.type(this);
         m_ff = ff;

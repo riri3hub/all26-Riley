@@ -9,6 +9,7 @@ import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -45,7 +46,7 @@ public class ShooterHood extends SubsystemBase {
      * @param parent log
      * @param angle  angle for auto mode
      */
-    public ShooterHood(LoggerFactory parent, Supplier<OptionalDouble> angle) {
+    public ShooterHood(LoggerFactory parent, TotalCurrentLog currentLog, Supplier<OptionalDouble> angle) {
         LoggerFactory log = parent.type(this);
         m_angle = angle;
         m_tuningSetting = new Mutable(log, "for tuning", 0);
@@ -63,7 +64,7 @@ public class ShooterHood extends SubsystemBase {
                 PIDConstants pid = PIDConstants.makePositionPID(log, 1.0);
 
                 motor = new KrakenX44Motor(
-                        log, CAN_ID, NeutralMode100.COAST, MotorPhase.REVERSE,
+                        log, currentLog, CAN_ID, NeutralMode100.COAST, MotorPhase.REVERSE,
                         CurrentLimits.SHOOTER_HOOD_SUPPLY, CurrentLimits.SHOOTER_HOOD_STATOR, ff, friction, pid);
 
             }

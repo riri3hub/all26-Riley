@@ -20,6 +20,7 @@ import org.team100.lib.localization.SimulatedTagDetector;
 import org.team100.lib.localization.SwerveHistory;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.sensor.gyro.Gyro;
 import org.team100.lib.sensor.gyro.GyroFactory;
 import org.team100.lib.subsystems.swerve.SwerveDriveFactory;
@@ -75,7 +76,7 @@ public class Machinery2025 {
     final SwerveDriveSubsystem m_drive;
     final Beeper m_beeper;
 
-    public Machinery2025() {
+    public Machinery2025(TotalCurrentLog currentLog) {
 
         final LoggerFactory driveLog = logger.name("Drive");
 
@@ -85,10 +86,10 @@ public class Machinery2025 {
         //
         // SUBSYSTEMS
         //
-        m_mech = new CalgamesMech(logger, 0.5, 0.343);
-        m_manipulator = new Manipulator(logger);
-        m_climber = new Climber2025(logger, new CanId(13));
-        m_climberIntake = new ClimberIntake(logger, new CanId(14));
+        m_mech = new CalgamesMech(logger, currentLog, 0.5, 0.343);
+        m_manipulator = new Manipulator(logger, currentLog);
+        m_climber = new Climber2025(logger, currentLog, new CanId(13));
+        m_climberIntake = new ClimberIntake(logger, currentLog, new CanId(14));
 
         ////////////////////////////////////////////////////////////
         //
@@ -104,6 +105,7 @@ public class Machinery2025 {
         //
         m_modules = SwerveModuleCollection.get(
                 driveLog,
+                currentLog,
                 DRIVE_SUPPLY_LIMIT,
                 DRIVE_STATOR_LIMIT,
                 m_swerveKinodynamics);

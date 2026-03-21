@@ -6,6 +6,7 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
@@ -24,7 +25,8 @@ public class PivotSubsystem extends SubsystemBase {
     private final BareMotor m_pivot;
     private final DoubleLogger m_log_angle;
 
-    public PivotSubsystem(LoggerFactory parent, int currentLimit) {
+    public PivotSubsystem(
+            LoggerFactory parent, TotalCurrentLog currentLog, int currentLimit) {
         LoggerFactory logger = parent.type(this);
         m_log_angle = logger.doubleLogger(Level.TRACE, "Angle (rad)");
         m_pivot = (switch (Identity.instance) {
@@ -32,6 +34,7 @@ public class PivotSubsystem extends SubsystemBase {
                 new SimulatedBareMotor(logger, 600);
             default -> new Neo550CANSparkMotor(
                     logger,
+                    currentLog,
                     new CanId(5),
                     NeutralMode100.BRAKE,
                     MotorPhase.FORWARD, currentLimit,

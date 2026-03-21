@@ -7,6 +7,7 @@ import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.controller.r1.FeedbackR1;
 import org.team100.lib.controller.r1.FullStateFeedback;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -61,7 +62,7 @@ public class RotaryPositionSubsystem1d extends SubsystemBase {
 
     private final AngularPositionServo m_servo;
 
-    public RotaryPositionSubsystem1d(LoggerFactory parent) {
+    public RotaryPositionSubsystem1d(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
 
         double positionGain = 4.0;
@@ -96,7 +97,7 @@ public class RotaryPositionSubsystem1d extends SubsystemBase {
                 SimpleDynamics ff = new SimpleDynamics(log, 0.100, 0.100);
                 Friction friction = new Friction(log, 0.100, 0.100, 0.0, 0.1);
                 KrakenX60Motor motor = new KrakenX60Motor(
-                        log, new CanId(1),
+                        log, currentLog, new CanId(1),
                         NeutralMode100.COAST, MotorPhase.REVERSE,
                         supplyLimit, statorLimit, ff, friction, pid);
                 RotaryPositionSensor sensor = new AS5048RotaryPositionSensor(

@@ -20,6 +20,7 @@ import org.team100.lib.localization.OdometryUpdater;
 import org.team100.lib.localization.SwerveHistory;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.sensor.gyro.Gyro;
 import org.team100.lib.sensor.gyro.SimulatedGyro;
@@ -50,6 +51,7 @@ public class DriveWithTrajectoryTest implements Timeless {
 
     private static final double DELTA = 0.001;
     private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
+    private static final TotalCurrentLog currentLog = new TotalCurrentLog(logger);
     private static final LoggerFactory fieldLogger = new TestLoggerFactory(new TestPrimitiveLogger());
     private static final TrajectoryVisualization viz = new TrajectoryVisualization(logger);
 
@@ -154,7 +156,8 @@ public class DriveWithTrajectoryTest implements Timeless {
         Experiments.instance.testOverride(Experiment.UseSwerveLimiter, true);
         // 1m along +x, no rotation.
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
-        SwerveModuleCollection collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
+        SwerveModuleCollection collection = SwerveModuleCollection.get(
+                logger, currentLog, 10, 20, swerveKinodynamics);
         collection.reset();
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood(logger);
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);

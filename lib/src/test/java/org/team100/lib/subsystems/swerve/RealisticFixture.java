@@ -13,6 +13,7 @@ import org.team100.lib.localization.OdometryUpdater;
 import org.team100.lib.localization.SwerveHistory;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.sensor.gyro.Gyro;
 import org.team100.lib.sensor.gyro.SimulatedGyro;
@@ -50,9 +51,10 @@ public class RealisticFixture {
 
     public RealisticFixture() throws IOException {
         logger = new TestLoggerFactory(new TestPrimitiveLogger());
+        TotalCurrentLog currentLog = new TotalCurrentLog(logger);
         fieldLogger = new TestLoggerFactory(new TestPrimitiveLogger());
         swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
-        collection = SwerveModuleCollection.get(logger, 10, 20, swerveKinodynamics);
+        collection = SwerveModuleCollection.get(logger, currentLog, 10, 20, swerveKinodynamics);
         gyro = new SimulatedGyro(logger, swerveKinodynamics, collection, 0);
         swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
         history = new SwerveHistory(

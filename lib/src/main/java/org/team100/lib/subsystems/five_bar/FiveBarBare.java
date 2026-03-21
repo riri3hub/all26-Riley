@@ -7,6 +7,7 @@ import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -31,14 +32,14 @@ public class FiveBarBare extends SubsystemBase {
     /** Right motor, "P5" in the diagram. */
     private final BareMotor m_motorP5;
 
-    public FiveBarBare(LoggerFactory logger) {
+    public FiveBarBare(LoggerFactory logger, TotalCurrentLog currentLog) {
         LoggerFactory loggerP1 = logger.name("p1");
         LoggerFactory loggerP5 = logger.name("p5");
 
         switch (Identity.instance) {
             case COMP_BOT -> {
-                m_motorP1 = makeMotor(loggerP1, new CanId(1));
-                m_motorP5 = makeMotor(loggerP5, new CanId(2));
+                m_motorP1 = makeMotor(loggerP1, currentLog, new CanId(1));
+                m_motorP5 = makeMotor(loggerP5, currentLog, new CanId(2));
             }
             default -> {
                 m_motorP1 = new SimulatedBareMotor(loggerP1, 600);
@@ -49,12 +50,13 @@ public class FiveBarBare extends SubsystemBase {
 
     /////////////////////
 
-    private BareMotor makeMotor(LoggerFactory logger, CanId canId) {
+    private BareMotor makeMotor(LoggerFactory logger, TotalCurrentLog currentLog, CanId canId) {
         SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
         Friction friction = new Friction(logger, 0, 0, 0, 0);
         PIDConstants pid = PIDConstants.zero(logger);
         return new Falcon500Motor(
                 logger,
+                currentLog,
                 canId,
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,

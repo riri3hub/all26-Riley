@@ -6,6 +6,7 @@ import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -56,7 +57,7 @@ public class FiveBarCartesian extends SubsystemBase {
     private final ProxyRotaryPositionSensor m_sensorP5;
     private final RotaryMechanism m_mechP5;
 
-    public FiveBarCartesian(LoggerFactory logger) {
+    public FiveBarCartesian(LoggerFactory logger, TotalCurrentLog currentLog) {
         // zeros
         PIDConstants pid = PIDConstants.zero(logger);
         SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
@@ -65,6 +66,7 @@ public class FiveBarCartesian extends SubsystemBase {
         LoggerFactory loggerP1 = logger.name("p1");
         Falcon500Motor motorP1 = new Falcon500Motor(
                 loggerP1,
+                currentLog,
                 new CanId(1),
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,
@@ -86,6 +88,7 @@ public class FiveBarCartesian extends SubsystemBase {
         LoggerFactory loggerP5 = logger.name("p5");
         Falcon500Motor motorP5 = new Falcon500Motor(
                 loggerP5,
+                currentLog,
                 new CanId(2),
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,
