@@ -2,7 +2,6 @@ package org.team100.frc2026.auton;
 
 import static edu.wpi.first.wpilibj2.command.Commands.parallel;
 import static edu.wpi.first.wpilibj2.command.Commands.sequence;
-import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,14 +71,14 @@ public class RightBumpAnnoyingAuton implements AnnotatedCommand {
 
     @Override
     public String name() {
-        return "Half Sweep from Right Bump";
+        return "Annoying Auton Right Bump";
     }
 
     TrajectorySE2 t1(Pose2d startingPose) {
         List<WaypointSE2> waypoints = List.of(
                 new WaypointSE2(startingPose,
                         new DirectionSE2(1, 0, 0), 1),
-                new WaypointSE2(new Pose2d(7.75, 1, Rotation2d.k180deg),
+                new WaypointSE2(new Pose2d(8.45, 1, new Rotation2d(250 * (Math.PI / 180))),
                         new DirectionSE2(1, 0, 0), 1));
         return planner.restToRest(waypoints);
     }
@@ -88,7 +87,7 @@ public class RightBumpAnnoyingAuton implements AnnotatedCommand {
         List<WaypointSE2> waypoints = List.of(
                 new WaypointSE2(startingPose,
                         new DirectionSE2(0, 1, 0), 1),
-                new WaypointSE2(new Pose2d(7.75, 4, Rotation2d.k180deg),
+                new WaypointSE2(new Pose2d(8.45, 4, new Rotation2d(250 * (Math.PI / 180))),
                         new DirectionSE2(0, 1, 0), 1));
         return planner.restToRest(waypoints);
     }
@@ -124,5 +123,54 @@ public class RightBumpAnnoyingAuton implements AnnotatedCommand {
         DriveWithTrajectoryFunction ScoreSetUp = new DriveWithTrajectoryFunction(
                 log, machinery.m_drive, controller,
                 machinery.m_trajectoryViz, this::t3);
+        // DriveWithTrajectoryFunction ClimbSetUp = new DriveWithTrajectoryFunction(
+        // log, machinery.m_drive, controller,
+        // machinery.m_trajectoryViz, this::t4);
+
+        // Intake, score, climb.
+        return sequence(
+                parallel(
+                        IntakeSetUp.until(IntakeSetUp::isDone).withTimeout(4),
+                        // Assumed that the intake shouldn't deploy over the bump
+                     //   waitSeconds(1).andThen(machinery.m_intakeExtend.goToExtendedPosition())),
+              // waitSeconds(1),
+                
+
+                parallel(
+                        IntakeBalls
+              //          machinery.m_intake.intake()).until(IntakeBalls::isDone),
+                // Without telling it to, the intake would only stop spinning
+                // at the end of the auton. Without the timeout, the robot
+                // would not continue the rest of the auton
+               // machinery.m_intake.stop().withTimeout(1),
+         //       waitSeconds(1),
+                ),
+
+                ScoreSetUp.until(ScoreSetUp::isDone)
+                //parallel(
+                //        machinery.m_conveyor.convey(),
+                //        machinery.m_feeder.proportional(),
+                 //       machinery.m_shooterHood.autoPosition(),
+                 //       machinery.m_shooter.auto()),
+                // .withTimeout(1),
+                // machinery.m_shooterHood.autoPosition().withTimeout(0.5),
+                // machinery.m_shooter.auto().withTimeout(1),
+              //  waitSeconds(5),
+             //   machinery.m_shooter.stop().withTimeout(1)
+                ));
     }
+
+    // ClimbSetUp.until(ClimbSetUp::isDone));
+    // }
+
+    @Override
+    public Pose2d start() {
+        return StartingPositions.RIGHT_BUMP;
+    }
+
+    @Override
+    public List<Function<Pose2d, TrajectorySE2>> trajectoryFns() {
+        return List.of(this::t1, this::t2, this::t3);
+    }
+
 }
