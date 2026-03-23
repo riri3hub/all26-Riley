@@ -2,6 +2,7 @@ package org.team100.frc2025.Climber;
 
 import java.util.function.DoubleSupplier;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -46,7 +47,7 @@ public class Climber2025 extends SubsystemBase {
             case COMP_BOT -> {
                 Falcon500Motor motor = new Falcon500Motor(
                         log, currentLog, canID, NeutralMode100.BRAKE, MotorPhase.REVERSE,
-                        20, 20,
+                        new CurrentLimit(20, 20),
                         new SimpleDynamics(log, 0.001, 0.001),
                         new Friction(log, 0.100, 0.065, 0.0, 0.5),
                         PIDConstants.makePositionPID(log, 0.2));

@@ -3,6 +3,7 @@ package org.team100.lib.sensor.gyro;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.TotalCurrentLog;
@@ -25,7 +26,8 @@ class SimulatedHeadingTest implements Timeless {
     @Test
     void testInitial() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest(logger);
-        SwerveModuleCollection c = SwerveModuleCollection.get(logger, currentLog, 10, 20, l);
+        SwerveModuleCollection c = SwerveModuleCollection.get(
+                logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), l);
         SimulatedGyro h = new SimulatedGyro(logger, l, c, 0);
         assertEquals(0, h.getYawNWU().getRadians(), DELTA);
         assertEquals(0, h.getYawRateNWU(), DELTA);
@@ -34,7 +36,8 @@ class SimulatedHeadingTest implements Timeless {
     @Test
     void testTranslation() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest(logger);
-        SwerveModuleCollection c = SwerveModuleCollection.get(logger, currentLog, 10, 20, l);
+        SwerveModuleCollection c = SwerveModuleCollection.get(
+                logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), l);
         SwerveModulePositions p = c.positions();
         assertEquals(0, p.frontLeft().distanceMeters(), DELTA);
         assertEquals(0, p.frontRight().distanceMeters(), DELTA);
@@ -63,7 +66,8 @@ class SimulatedHeadingTest implements Timeless {
     @Test
     void testRotation() {
         SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest(logger);
-        SwerveModuleCollection c = SwerveModuleCollection.get(logger, currentLog, 10, 20, l);
+        SwerveModuleCollection c = SwerveModuleCollection.get(
+                logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), l);
         SimulatedGyro h = new SimulatedGyro(logger, l, c, 0);
         ChassisSpeeds speeds = new ChassisSpeeds(0, 0, 1);
         // includes discretization
@@ -106,7 +110,8 @@ class SimulatedHeadingTest implements Timeless {
         assertEquals(-0.334, states.rearLeft().angle().get().getRadians(), DELTA);
         assertEquals(-0.205, states.rearRight().angle().get().getRadians(), DELTA);
 
-        SwerveModuleCollection c = SwerveModuleCollection.get(logger, currentLog, 10, 20, l);
+        SwerveModuleCollection c = SwerveModuleCollection.get(
+                logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), l);
         SimulatedGyro h = new SimulatedGyro(logger, l, c, 0);
         c.reset();
 

@@ -3,6 +3,7 @@ package org.team100.lib.subsystems.swerve;
 import java.io.IOException;
 import java.util.function.UnaryOperator;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.controller.se2.ControllerFactorySE2;
 import org.team100.lib.controller.se2.ControllerSE2;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
@@ -56,7 +57,8 @@ public class Fixture {
         fieldLogger = new TestLoggerFactory(new TestPrimitiveLogger());
         swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
         // uses simulated modules
-        collection = SwerveModuleCollection.get(logger, currentLog, 10, 20, swerveKinodynamics);
+        collection = SwerveModuleCollection.get(
+                logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), swerveKinodynamics);
         gyro = new SimulatedGyro(logger, swerveKinodynamics, collection, 0);
         swerveLocal = new SwerveLocal(logger, swerveKinodynamics, collection);
         history = new SwerveHistory(

@@ -1,5 +1,6 @@
 package org.team100.lib.examples.motion;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -72,7 +73,7 @@ public class OutboardRotaryPositionSubsystem extends SubsystemBase {
                         new CanId(0),
                         NeutralMode100.BRAKE,
                         MotorPhase.FORWARD,
-                        10, // Stator current limit, amps
+                        new CurrentLimit(10, 10), // Stator current limit, amps
                         new SimpleDynamics(log, 0.01, 0.01),
                         new Friction(log, 0.5, 0.5, 0.0, 0.5),
                         PIDConstants.makePositionPID(log, 0.2));

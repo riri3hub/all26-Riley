@@ -1,13 +1,14 @@
 package org.team100.lib.subsystems.shooter;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -26,7 +27,7 @@ public class PivotSubsystem extends SubsystemBase {
     private final DoubleLogger m_log_angle;
 
     public PivotSubsystem(
-            LoggerFactory parent, TotalCurrentLog currentLog, int currentLimit) {
+            LoggerFactory parent, TotalCurrentLog currentLog, CurrentLimit limit) {
         LoggerFactory logger = parent.type(this);
         m_log_angle = logger.doubleLogger(Level.TRACE, "Angle (rad)");
         m_pivot = (switch (Identity.instance) {
@@ -37,7 +38,7 @@ public class PivotSubsystem extends SubsystemBase {
                     currentLog,
                     new CanId(5),
                     NeutralMode100.BRAKE,
-                    MotorPhase.FORWARD, currentLimit,
+                    MotorPhase.FORWARD, limit,
                     new SimpleDynamics(logger, 0, 0),
                     new Friction(logger, 0, 0.07, 0.01, 0.5),
                     PIDConstants.zero(logger));

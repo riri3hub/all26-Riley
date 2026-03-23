@@ -1,5 +1,6 @@
 package org.team100.lib.examples.motion;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -99,7 +100,7 @@ public class RotaryPositionSubsystem1d extends SubsystemBase {
                 KrakenX60Motor motor = new KrakenX60Motor(
                         log, currentLog, new CanId(1),
                         NeutralMode100.COAST, MotorPhase.REVERSE,
-                        supplyLimit, statorLimit, ff, friction, pid);
+                        new CurrentLimit(statorLimit, supplyLimit), ff, friction, pid);
                 RotaryPositionSensor sensor = new AS5048RotaryPositionSensor(
                         log, new RoboRioChannel(5), inputOffset, EncoderDrive.DIRECT);
                 RotaryMechanism mech = new RotaryMechanism(

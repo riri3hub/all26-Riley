@@ -1,5 +1,6 @@
 package org.team100.lib.motor.rev;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
@@ -24,13 +25,13 @@ public class NeoCANSparkMotor extends CANSparkMotor {
             CanId canId,
             NeutralMode100 neutral,
             MotorPhase motorPhase,
-            int statorCurrentLimit,
+            CurrentLimit limit,
             SimpleDynamics ff,
             Friction friction,
             PIDConstants pid) {
         super(parent, currentLog,
                 new SparkMax(canId.id, MotorType.kBrushless),
-                neutral, motorPhase, statorCurrentLimit, ff, friction, pid);
+                neutral, motorPhase, limit, ff, friction, pid);
     }
 
     @Override

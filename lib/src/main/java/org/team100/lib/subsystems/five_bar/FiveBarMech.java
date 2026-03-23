@@ -2,10 +2,11 @@ package org.team100.lib.subsystems.five_bar;
 
 import java.util.function.DoubleSupplier;
 
-import org.team100.lib.config.SimpleDynamics;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.RotaryMechanism;
@@ -199,8 +200,7 @@ public class FiveBarMech extends SubsystemBase {
                 canId,
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,
-                SUPPLY_LIMIT,
-                STATOR_LIMIT,
+                new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
                 ff,
                 friction,
                 pid);

@@ -1,5 +1,6 @@
 package org.team100.frc2026.subsystems;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -42,20 +43,19 @@ public class Climber extends SubsystemBase {
         final BareMotor m2;
         switch (Identity.instance) {
             case TEST_BOARD_B0 -> {
-                int supplyLimit = 60;
-                int statorLimit = 40;
+                CurrentLimit limit = new CurrentLimit(60, 40);
                 SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
                 Friction friction = new Friction(log, 0, 0, 0, 0);
                 PIDConstants pid = new PIDConstants(log, 1, 0, 0, 0, 0, 0);
                 m1 = new KrakenX60Motor(
                         log1, currentLog, new CanId(6),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
-                        supplyLimit, statorLimit,
+                        limit,
                         ff, friction, pid);
                 m2 = new KrakenX60Motor(
                         log2, currentLog, new CanId(7),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
-                        supplyLimit, statorLimit,
+                        limit,
                         ff, friction, pid);
             }
             default -> {

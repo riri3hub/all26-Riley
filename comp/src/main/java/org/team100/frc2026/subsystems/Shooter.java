@@ -80,7 +80,7 @@ public class Shooter extends SubsystemBase {
         final BareMotor m4;
         switch (Identity.instance) {
             case TEST_BOARD_B0 -> {
-  
+
                 SimpleDynamics ff = new SimpleDynamics(log, 0.000, 0.000);
                 // friction test 3/12/262
                 Friction friction = new Friction(log, 0.3, 0.25, 0.0, 0.5);
@@ -89,16 +89,16 @@ public class Shooter extends SubsystemBase {
 
                 m1 = new KrakenX60Motor(
                         log1, currentLog, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        CurrentLimits.SHOOTER_SUPPLY, CurrentLimits.SHOOTER_STATOR, ff, friction, pid);
+                        CurrentLimits.SHOOTER, ff, friction, pid);
                 m2 = new KrakenX60Motor(
                         log2, currentLog, CAN_ID_2, NeutralMode100.COAST, MotorPhase.REVERSE,
-                        CurrentLimits.SHOOTER_SUPPLY, CurrentLimits.SHOOTER_STATOR, ff, friction, pid);
+                        CurrentLimits.SHOOTER, ff, friction, pid);
                 m3 = new KrakenX60Motor(
                         log3, currentLog, CAN_ID_3, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        CurrentLimits.SHOOTER_SUPPLY, CurrentLimits.SHOOTER_STATOR, ff, friction, pid);
+                        CurrentLimits.SHOOTER, ff, friction, pid);
                 m4 = new KrakenX60Motor(
                         log4, currentLog, CAN_ID_4, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        CurrentLimits.SHOOTER_SUPPLY, CurrentLimits.SHOOTER_STATOR, ff, friction, pid);
+                        CurrentLimits.SHOOTER, ff, friction, pid);
 
             }
             default -> {

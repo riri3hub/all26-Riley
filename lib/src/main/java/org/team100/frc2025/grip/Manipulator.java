@@ -2,14 +2,15 @@ package org.team100.frc2025.grip;
 
 import java.util.List;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.LoggerFactory.BooleanLogger;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
@@ -60,24 +61,21 @@ public class Manipulator extends SubsystemBase implements Music {
                         leftMotorLog, currentLog, new CanId(19),
                         NeutralMode100.COAST,
                         MotorPhase.FORWARD,
-                        40, // og 40
-                        40, // og 40
+                        new CurrentLimit(40, 40),
                         new SimpleDynamics(leftMotorLog, 0.000, 0.000),
                         new Friction(leftMotorLog, 0.900, 0.900, 0.0, 0.5),
                         PIDConstants.zero(leftMotorLog));
                 KrakenX60Motor rightMotor = new KrakenX60Motor(
                         rightMotorLog, currentLog, new CanId(20), NeutralMode100.COAST,
                         MotorPhase.REVERSE,
-                        40, // og 40
-                        40, // og 40
+                        new CurrentLimit(40, 40),
                         new SimpleDynamics(rightMotorLog, 0.000, 0.000),
                         new Friction(rightMotorLog, 0.900, 0.900, 0.0, 0.5),
                         PIDConstants.zero(rightMotorLog));
                 KrakenX60Motor algaeMotor = new KrakenX60Motor(
                         algaeMotorLog, currentLog, new CanId(21), NeutralMode100.COAST,
                         MotorPhase.FORWARD,
-                        120, // og 120
-                        120, // og 120
+                        new CurrentLimit(120, 120),
                         new SimpleDynamics(algaeMotorLog, 0.000, 0.000),
                         new Friction(algaeMotorLog, 0.900, 0.900, 0.0, 0.5),
                         PIDConstants.zero(algaeMotorLog));

@@ -111,8 +111,8 @@ public class Machinery {
         m_modules = SwerveModuleCollection.get(
                 driveLog,
                 currentLog,
-                CurrentLimits.DRIVE_SUPPLY,
-                CurrentLimits.DRIVE_STATOR,
+                CurrentLimits.DRIVE,
+                CurrentLimits.STEERING,
                 m_swerveKinodynamics);
         Gyro gyro = GyroFactory.get(
                 driveLog,

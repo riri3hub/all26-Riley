@@ -2,6 +2,7 @@ package org.team100.lib.subsystems.swerve.module;
 
 import java.util.function.Supplier;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
@@ -34,12 +35,7 @@ import org.team100.lib.util.RoboRioChannel;
 public class WCPSwerveModule100 extends SwerveModule100 {
     private static final double STEERING_POSITION_TOLERANCE_RAD = 0.05;
     private static final double STEERING_VELOCITY_TOLERANCE_RAD_S = 0.05;
-    // https://github.com/frc1678/C2024-Public/blob/17e78272e65a6ce4f87c00a3514c79f787439ca1/src/main/java/com/team1678/frc2024/Constants.java#L212
-    // 2/26/25 Joel increased the steering limits *a lot*, they were 10/20, now
-    // 60/80, which may mean it's more imporant now to avoid twitching and
-    // oscillating.
-    private static final double STEERING_SUPPLY_LIMIT = 20;
-    private static final double STEERING_STATOR_LIMIT = 30;
+
     /**
      * WCP calls this "rotation ratio" here, we use the "flipped belt" which is the
      * fastest steering ratio.
@@ -76,8 +72,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     public static WCPSwerveModule100 getKrakenDrive(
             LoggerFactory parent,
             TotalCurrentLog currentLog,
-            double supplyLimitAmps,
-            double statorLimitAmps,
+            CurrentLimit driveLimit,
+            CurrentLimit steerLimit,
             CanId driveMotorCanId,
             DriveRatio ratio,
             CanId turningMotorCanId,
@@ -91,13 +87,13 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         LinearVelocityServo driveServo = driveKrakenServo(
                 parent.name("Drive"),
                 currentLog,
-                supplyLimitAmps,
-                statorLimitAmps,
+                driveLimit,
                 driveMotorCanId,
                 ratio);
         AngularPositionServo turningServo = turningKrakenServo(
                 parent.name("Turning"),
                 currentLog,
+                steerLimit,
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
@@ -115,8 +111,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     public static WCPSwerveModule100 getFalconDrive(
             LoggerFactory parent,
             TotalCurrentLog currentLog,
-            double supplyLimitAmps,
-            double statorLimitAmps,
+            CurrentLimit driveLimit,
+            CurrentLimit steerLimit,
             CanId driveMotorCanId,
             DriveRatio ratio,
             CanId turningMotorCanId,
@@ -129,13 +125,13 @@ public class WCPSwerveModule100 extends SwerveModule100 {
         LinearVelocityServo driveServo = driveFalconServo(
                 parent.name("Drive"),
                 currentLog,
-                supplyLimitAmps,
-                statorLimitAmps,
+                driveLimit,
                 driveMotorCanId,
                 ratio);
         AngularPositionServo turningServo = turningServo(
                 parent.name("Turning"),
                 currentLog,
+                steerLimit,
                 turningMotorCanId,
                 turningEncoderChannel,
                 turningOffset,
@@ -150,8 +146,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static LinearVelocityServo driveKrakenServo(
             LoggerFactory parent,
             TotalCurrentLog currentLog,
-            double supplyLimit,
-            double statorLimit,
+            CurrentLimit limit,
             CanId driveMotorCanId,
             DriveRatio ratio) {
         SimpleDynamics ff = new SimpleDynamics(parent, 0.004, 0.002);
@@ -165,8 +160,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 driveMotorCanId,
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,
-                supplyLimit,
-                statorLimit,
+                limit,
                 ff,
                 friction,
                 pid);
@@ -185,8 +179,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static LinearVelocityServo driveFalconServo(
             LoggerFactory parent,
             TotalCurrentLog currentLog,
-            double supplyLimit,
-            double statorLimit,
+            CurrentLimit limit,
             CanId driveMotorCanId,
             DriveRatio ratio) {
         SimpleDynamics ff = new SimpleDynamics(parent, 0.003, 0.003);
@@ -198,8 +191,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 driveMotorCanId,
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,
-                supplyLimit,
-                statorLimit,
+                limit,
                 ff,
                 friction,
                 pid);
@@ -214,6 +206,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static AngularPositionServo turningServo(
             LoggerFactory parent,
             TotalCurrentLog currentLog,
+            CurrentLimit limit,
             CanId turningMotorCanId,
             RoboRioChannel turningEncoderChannel,
             double turningOffset,
@@ -237,8 +230,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningMotorCanId,
                 neutral,
                 motorPhase,
-                STEERING_SUPPLY_LIMIT,
-                STEERING_STATOR_LIMIT,
+                limit,
                 ff,
                 friction,
                 pid);
@@ -268,6 +260,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
     private static AngularPositionServo turningKrakenServo(
             LoggerFactory parent,
             TotalCurrentLog currentLog,
+            CurrentLimit limit,
             CanId turningMotorCanId,
             RoboRioChannel turningEncoderChannel,
             double turningOffset,
@@ -291,8 +284,7 @@ public class WCPSwerveModule100 extends SwerveModule100 {
                 turningMotorCanId,
                 neutral,
                 motorPhase,
-                STEERING_SUPPLY_LIMIT,
-                STEERING_STATOR_LIMIT,
+                limit,
                 ff,
                 friction,
                 pid);

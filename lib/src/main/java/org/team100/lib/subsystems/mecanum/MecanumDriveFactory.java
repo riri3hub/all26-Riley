@@ -1,5 +1,6 @@
 package org.team100.lib.subsystems.mecanum;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -26,7 +27,7 @@ public class MecanumDriveFactory {
             LoggerFactory fieldLogger,
             LoggerFactory parent,
             TotalCurrentLog currentLog,
-            int statorLimit,
+            CurrentLimit limit,
             CanId gyroId,
             CanId canFL,
             CanId canFR,
@@ -52,16 +53,16 @@ public class MecanumDriveFactory {
 
         BareMotor motorFL = getMotor(
                 logFL, currentLog, canFL, MotorPhase.REVERSE,
-                statorLimit, ff, friction, pid);
+                limit, ff, friction, pid);
         BareMotor motorFR = getMotor(
                 logFR, currentLog, canFR, MotorPhase.FORWARD,
-                statorLimit, ff, friction, pid);
+                limit, ff, friction, pid);
         BareMotor motorRL = getMotor(
                 logRL, currentLog, canRL, MotorPhase.REVERSE,
-                statorLimit, ff, friction, pid);
+                limit, ff, friction, pid);
         BareMotor motorRR = getMotor(
                 logRR, currentLog, canRR, MotorPhase.FORWARD,
-                statorLimit, ff, friction, pid);
+                limit, ff, friction, pid);
 
         LinearMechanism mechFL = new LinearMechanism(
                 logFL, motorFL, motorFL.encoder(), gearRatio, wheelDiaM,
@@ -89,12 +90,12 @@ public class MecanumDriveFactory {
     /** Real or simulated depending on identity */
     public static BareMotor getMotor(
             LoggerFactory log, TotalCurrentLog currentLog, CanId can, MotorPhase phase,
-            int statorLimit, SimpleDynamics ff, Friction friction, PIDConstants pid) {
+            CurrentLimit limit, SimpleDynamics ff, Friction friction, PIDConstants pid) {
         return switch (Identity.instance) {
             case BLANK -> new SimulatedBareMotor(log, 600);
             default -> new NeoCANSparkMotor(
                     log, currentLog, can, NeutralMode100.BRAKE, phase,
-                    statorLimit, ff, friction, pid);
+                    limit, ff, friction, pid);
         };
     }
 

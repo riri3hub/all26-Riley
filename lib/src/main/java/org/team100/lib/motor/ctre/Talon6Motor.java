@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.team100.lib.coherence.Cache;
 import org.team100.lib.coherence.DoubleCache;
 import org.team100.lib.coherence.Takt;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
@@ -104,8 +105,7 @@ public abstract class Talon6Motor implements BareMotor {
             CanId canId,
             NeutralMode100 neutral,
             MotorPhase motorPhase,
-            double supplyLimit,
-            double statorLimit,
+            CurrentLimit limit,
             SimpleDynamics ff,
             Friction friction,
             PIDConstants pid) {
@@ -136,8 +136,7 @@ public abstract class Talon6Motor implements BareMotor {
                 m_motor,
                 neutral,
                 motorPhase,
-                supplyLimit,
-                statorLimit,
+                limit,
                 pid);
         m_configurator.logCrashStatus();
         m_configurator.baseConfig();

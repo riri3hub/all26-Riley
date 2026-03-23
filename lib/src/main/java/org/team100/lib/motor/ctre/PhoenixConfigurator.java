@@ -2,6 +2,7 @@ package org.team100.lib.motor.ctre;
 
 import java.util.function.Supplier;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -35,22 +36,19 @@ public class PhoenixConfigurator {
     private final TalonFX m_motor;
     private final NeutralMode100 m_neutral;
     private final MotorPhase m_phase;
-    private final double m_supply;
-    private final double m_stator;
+    private final CurrentLimit m_limit;
     private final PIDConstants m_pid;
 
     public PhoenixConfigurator(
             TalonFX motor,
             NeutralMode100 neutral,
             MotorPhase phase,
-            double supply,
-            double stator,
+            CurrentLimit limit,
             PIDConstants pid) {
         m_motor = motor;
         m_neutral = neutral;
         m_phase = phase;
-        m_supply = supply;
-        m_stator = stator;
+        m_limit = limit;
         m_pid = pid;
         // reapply the pid parameters if any change.
         m_pid.register(this::pidConfig);
@@ -105,9 +103,9 @@ public class PhoenixConfigurator {
      */
     public void currentConfig() {
         CurrentLimitsConfigs currentConfigs = new CurrentLimitsConfigs();
-        currentConfigs.SupplyCurrentLimit = m_supply;
+        currentConfigs.SupplyCurrentLimit = m_limit.supply();
         currentConfigs.SupplyCurrentLimitEnable = true;
-        currentConfigs.StatorCurrentLimit = m_stator;
+        currentConfigs.StatorCurrentLimit = m_limit.stator();
         currentConfigs.StatorCurrentLimitEnable = true;
         crash(() -> m_motor.getConfigurator().apply(currentConfigs, TIMEOUT_SEC));
     }
@@ -118,7 +116,7 @@ public class PhoenixConfigurator {
      */
     public void overrideStatorLimit(double limit) {
         CurrentLimitsConfigs currentConfigs = new CurrentLimitsConfigs();
-        currentConfigs.SupplyCurrentLimit = m_supply;
+        currentConfigs.SupplyCurrentLimit = m_limit.supply();
         currentConfigs.SupplyCurrentLimitEnable = true;
         currentConfigs.StatorCurrentLimit = limit;
         currentConfigs.StatorCurrentLimitEnable = true;

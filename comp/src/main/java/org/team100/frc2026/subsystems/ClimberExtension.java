@@ -1,5 +1,6 @@
 package org.team100.frc2026.subsystems;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -37,14 +38,14 @@ public class ClimberExtension extends SubsystemBase {
         final BareMotor motor;
         switch (Identity.instance) {
             case TEST_BOARD_6B -> {
-                int statorLimit = 40;
+                CurrentLimit limit = new CurrentLimit(40, 40);
                 SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
                 Friction friction = new Friction(log, 0, 0, 0, 0);
                 PIDConstants pid = new PIDConstants(log, 1, 0, 0, 0, 0, 0);
                 motor = new NeoVortexCANSparkMotor(
                         log, currentLog, new CanId(2),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
-                        statorLimit, ff, friction, pid);
+                        limit, ff, friction, pid);
             }
             default -> {
                 motor = new SimulatedBareMotor(log, 600);

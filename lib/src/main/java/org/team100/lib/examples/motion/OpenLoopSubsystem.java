@@ -1,9 +1,10 @@
 package org.team100.lib.examples.motion;
 
-import org.team100.lib.config.SimpleDynamics;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.motor.BareMotor;
@@ -42,8 +43,7 @@ public class OpenLoopSubsystem extends SubsystemBase {
         switch (Identity.instance) {
             case COMP_BOT -> {
                 CanId canId = new CanId(1);
-                int supplyLimit = 60;
-                int statorLimit = 90;
+                CurrentLimit limit = new CurrentLimit(90, 60);
                 PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.05);
                 // you should make a case in the feedforward class for your constants
                 SimpleDynamics ff = new SimpleDynamics(log, 0.100, 0.100);
@@ -51,7 +51,7 @@ public class OpenLoopSubsystem extends SubsystemBase {
                 m_motor = new Falcon500Motor(
                         log, currentLog, canId,
                         NeutralMode100.COAST, MotorPhase.FORWARD,
-                        supplyLimit, statorLimit, ff, friction, pid);
+                        limit, ff, friction, pid);
             }
             default -> {
                 m_motor = new SimulatedBareMotor(log, 600);

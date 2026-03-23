@@ -1,5 +1,6 @@
 package org.team100.lib.subsystems.tank;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -22,7 +23,7 @@ public class TankDriveFactory {
             LoggerFactory fieldLogger,
             LoggerFactory parent,
             TotalCurrentLog currentLog,
-            int statorLimit,
+            CurrentLimit limit,
             CanId canL,
             CanId canR,
             double trackWidthM,
@@ -37,9 +38,9 @@ public class TankDriveFactory {
         PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
 
         BareMotor motorL = getMotor(
-                logL, currentLog, canL, MotorPhase.REVERSE, statorLimit, ff, friction, pid);
+                logL, currentLog, canL, MotorPhase.REVERSE, limit, ff, friction, pid);
         BareMotor motorR = getMotor(
-                logR, currentLog, canR, MotorPhase.FORWARD, statorLimit, ff, friction, pid);
+                logR, currentLog, canR, MotorPhase.FORWARD, limit, ff, friction, pid);
 
         LinearMechanism mechL = new LinearMechanism(
                 logL, motorL, motorL.encoder(), gearRatio, wheelDiaM,
@@ -56,12 +57,12 @@ public class TankDriveFactory {
     /** Real or simulated depending on identity */
     public static BareMotor getMotor(
             LoggerFactory log, TotalCurrentLog currentLog, CanId can, MotorPhase phase,
-            int statorLimit, SimpleDynamics ff, Friction friction, PIDConstants pid) {
+            CurrentLimit limit, SimpleDynamics ff, Friction friction, PIDConstants pid) {
         return switch (Identity.instance) {
             case BLANK -> new SimulatedBareMotor(log, 600);
             default -> new NeoCANSparkMotor(
                     log, currentLog, can, NeutralMode100.BRAKE, phase,
-                    statorLimit, ff, friction, pid);
+                    limit, ff, friction, pid);
         };
     }
 }

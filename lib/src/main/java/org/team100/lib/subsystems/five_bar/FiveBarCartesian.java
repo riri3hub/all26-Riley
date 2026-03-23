@@ -3,6 +3,7 @@ package org.team100.lib.subsystems.five_bar;
 import java.util.function.Supplier;
 
 import org.team100.lib.config.SimpleDynamics;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.LoggerFactory;
@@ -70,8 +71,7 @@ public class FiveBarCartesian extends SubsystemBase {
                 new CanId(1),
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,
-                SUPPLY_LIMIT,
-                STATOR_LIMIT,
+                new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
                 ff,
                 friction,
                 pid);
@@ -92,8 +92,7 @@ public class FiveBarCartesian extends SubsystemBase {
                 new CanId(2),
                 NeutralMode100.COAST,
                 MotorPhase.FORWARD,
-                SUPPLY_LIMIT,
-                STATOR_LIMIT,
+                new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
                 ff,
                 friction,
                 pid);

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 import org.junit.jupiter.api.Test;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.controller.se2.ControllerFactorySE2;
 import org.team100.lib.controller.se2.ControllerSE2;
 import org.team100.lib.experiments.Experiment;
@@ -157,7 +158,7 @@ public class DriveWithTrajectoryTest implements Timeless {
         // 1m along +x, no rotation.
         SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
         SwerveModuleCollection collection = SwerveModuleCollection.get(
-                logger, currentLog, 10, 20, swerveKinodynamics);
+                logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), swerveKinodynamics);
         collection.reset();
         List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood(logger);
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);

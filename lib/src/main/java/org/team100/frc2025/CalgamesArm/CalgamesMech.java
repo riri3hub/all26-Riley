@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.team100.lib.commands.MoveAndHold;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.ElevatorUtil.ScoringLevel;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
@@ -19,7 +20,6 @@ import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.geometry.WaypointSE2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.logging.LoggerFactory.AccelerationSE2Logger;
 import org.team100.lib.logging.LoggerFactory.ConfigLogger;
 import org.team100.lib.logging.LoggerFactory.JointAccelerationsLogger;
@@ -27,6 +27,7 @@ import org.team100.lib.logging.LoggerFactory.JointForceLogger;
 import org.team100.lib.logging.LoggerFactory.JointVelocitiesLogger;
 import org.team100.lib.logging.LoggerFactory.Pose2dLogger;
 import org.team100.lib.logging.LoggerFactory.VelocitySE2Logger;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MotorPhase;
@@ -171,8 +172,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         currentLog,
                         new CanId(11),
                         NeutralMode100.BRAKE, MotorPhase.REVERSE,
-                        100,
-                        100,
+                        new CurrentLimit(100, 100),
                         new SimpleDynamics(elevatorfrontLog, 0.002, 0.002),
                         new Friction(elevatorfrontLog, 0.100, 0.100, 0.005, 0.5),
                         PIDConstants.makePositionPID(elevatorfrontLog, 1));
@@ -188,8 +188,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         currentLog,
                         new CanId(12),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
-                        100, // orginally 60
-                        100, // originally 90
+                        new CurrentLimit(100, 100),
                         new SimpleDynamics(elevatorbackLog, 0.002, 0.002),
                         new Friction(elevatorbackLog, 0.100, 0.100, 0.005, 0.5),
                         PIDConstants.makePositionPID(elevatorbackLog, 1));
@@ -205,8 +204,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         new CanId(24),
                         NeutralMode100.BRAKE,
                         MotorPhase.REVERSE,
-                        100, // og 60
-                        100, // og 90
+                        new CurrentLimit(100, 100),
                         new SimpleDynamics(shoulderLog, 0.002, 0.002),
                         new Friction(shoulderLog, 0.100, 0.100, 0.005, 0.5),
                         PIDConstants.makePositionPID(shoulderLog, 1));
@@ -237,8 +235,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         currentLog,
                         new CanId(22),
                         NeutralMode100.COAST, MotorPhase.FORWARD,
-                        40, // og 60
-                        60, // og 90
+                        new CurrentLimit(40, 60),
                         new SimpleDynamics(wristLog, 0.002, 0.002),
                         new Friction(wristLog, 0.100, 0.100, 0.005, 0.5),
                         PIDConstants.makePositionPID(wristLog, 1));

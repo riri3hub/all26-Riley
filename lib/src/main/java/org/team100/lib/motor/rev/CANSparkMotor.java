@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import org.team100.lib.coherence.Cache;
 import org.team100.lib.coherence.DoubleCache;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
@@ -93,7 +94,7 @@ public abstract class CANSparkMotor implements BareMotor {
             SparkBase motor,
             NeutralMode100 neutral,
             MotorPhase motorPhase,
-            int statorCurrentLimit,
+            CurrentLimit limit,
             SimpleDynamics ff,
             Friction friction,
             PIDConstants pid) {
@@ -108,7 +109,7 @@ public abstract class CANSparkMotor implements BareMotor {
                 m_motor,
                 neutral,
                 motorPhase,
-                statorCurrentLimit,
+                limit,
                 pid);
         m_configurator.longCANTimeout();
         m_configurator.baseConfig();

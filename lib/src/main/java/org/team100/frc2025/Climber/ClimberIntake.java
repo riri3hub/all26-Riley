@@ -1,5 +1,6 @@
 package org.team100.frc2025.Climber;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
@@ -30,8 +31,7 @@ public class ClimberIntake extends SubsystemBase {
                 m_motor = new KrakenX60Motor(
                         log, currentLog,
                         canID, NeutralMode100.COAST, MotorPhase.REVERSE,
-                        20, // og 50
-                        20, // og 2
+                        new CurrentLimit(20, 20),
                         new SimpleDynamics(log, 0.004, 0.002),
                         new Friction(log, 0.26, 0.26, 0.006, 0.5),
                         PIDConstants.zero(log));

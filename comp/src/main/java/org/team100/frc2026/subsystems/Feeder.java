@@ -58,10 +58,10 @@ public class Feeder extends SubsystemBase {
 
                 m1 = new KrakenX44Motor(
                         log1, currentLog, canID1, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        CurrentLimits.FEEDER_SUPPLY, CurrentLimits.FEEDER_STATOR, dynamics, friction, pid);
+                        CurrentLimits.FEEDER, dynamics, friction, pid);
                 m2 = new KrakenX44Motor(
                         log2, currentLog, canID2, NeutralMode100.COAST, MotorPhase.FORWARD,
-                        CurrentLimits.FEEDER_SUPPLY, CurrentLimits.FEEDER_STATOR, dynamics, friction, pid);
+                        CurrentLimits.FEEDER, dynamics, friction, pid);
             }
             default -> {
                 m1 = new SimulatedBareMotor(log1, 600);

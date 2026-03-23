@@ -11,6 +11,7 @@ import org.team100.frc2025.Climber.ClimberVisualization;
 import org.team100.frc2025.grip.Manipulator;
 import org.team100.frc2025.indicator.LEDIndicator;
 import org.team100.lib.coherence.Takt;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.indicator.Beeper;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
 import org.team100.lib.localization.AprilTagRobotLocalizer;
@@ -106,8 +107,8 @@ public class Machinery2025 {
         m_modules = SwerveModuleCollection.get(
                 driveLog,
                 currentLog,
-                DRIVE_SUPPLY_LIMIT,
-                DRIVE_STATOR_LIMIT,
+                new CurrentLimit(DRIVE_STATOR_LIMIT, DRIVE_SUPPLY_LIMIT),
+                new CurrentLimit(30, 20),
                 m_swerveKinodynamics);
         final Gyro gyro = GyroFactory.get(
                 driveLog,

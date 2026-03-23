@@ -2,6 +2,7 @@ package org.team100.lib.motor.rev;
 
 import java.util.function.Supplier;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motor.MotorPhase;
@@ -35,7 +36,8 @@ public class RevConfigurator {
     private final PIDConstants m_pid;
 
     /**
-     * statorCurrentLimit is mutable.
+     * Stator current limit is mutable.
+     * Does not support supply limit.
      * pid has mutable parts.
      */
     public RevConfigurator(
@@ -43,12 +45,12 @@ public class RevConfigurator {
             SparkBase motor,
             NeutralMode100 neutral,
             MotorPhase phase,
-            int statorCurrentLimit,
+            CurrentLimit limit,
             PIDConstants pid) {
         m_motor = motor;
         m_neutral = neutral;
         m_phase = phase;
-        m_statorCurrentLimit = new Mutable(log, "stator current limit (a)", statorCurrentLimit, (x) -> currentConfig());
+        m_statorCurrentLimit = new Mutable(log, "stator current limit (a)", limit.stator(), (x) -> currentConfig());
         m_pid = pid;
         // reapply the pid parameters if any change.
         m_pid.register(this::pidConfig);
