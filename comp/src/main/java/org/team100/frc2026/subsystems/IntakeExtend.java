@@ -85,7 +85,7 @@ public class IntakeExtend extends SubsystemBase {
     public Command goToExtendedPosition() {
         return startRun(
                 this::reset,
-                () -> actuateWithProfile2(EXTENDED_POSITION, m_gravity.applyAsDouble(EXTENDED_POSITION)))
+                () -> actuateWithGravity(EXTENDED_POSITION))
                 .until(m_servo::atGoal)
                 .withName("Intake Extend GoToExtendedPosition");
     }
@@ -193,8 +193,7 @@ public class IntakeExtend extends SubsystemBase {
         m_servo.actuateWithProfile(value, 0);
     }
 
-    // Needs an actual name
-    private void actuateWithProfile2(double value, double torqueNm) {
+    private void actuateWithGravity(double value) {
         m_servo.actuateWithProfile(value, gravityTorque());
     }
 
