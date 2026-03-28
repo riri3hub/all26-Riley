@@ -105,12 +105,11 @@ public class TrenchScallopLobAutonLeft implements AnnotatedCommand {
         return List.of(this::t1);
     }
 
-    TrajectorySE2 t1(Pose2d startingPose) {
+     TrajectorySE2 t1(Pose2d startingPose) {
         List<WaypointSE2> waypoints = List.of(
-                new WaypointSE2(startingPose, new DirectionSE2(1, 1, 0), 1),
-
+                new WaypointSE2(startingPose, new DirectionSE2(1, -0.3, 0), 1),
                 
-                new WaypointSE2(new Pose2d(6, 6.8, new Rotation2d(165 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1),
+                new WaypointSE2(new Pose2d(6, 7.5, new Rotation2d(165 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1),
 
                 new WaypointSE2(new Pose2d(9, 6, new Rotation2d(165 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1),
                 new WaypointSE2(new Pose2d(7, 5.9, new Rotation2d(165 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1),

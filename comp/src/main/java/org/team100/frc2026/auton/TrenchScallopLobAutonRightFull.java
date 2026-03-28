@@ -136,7 +136,8 @@ public class TrenchScallopLobAutonRightFull implements AnnotatedCommand {
 
                 new WaypointSE2(new Pose2d(9, 5.8, new Rotation2d(170 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1),
                 
-                new WaypointSE2(new Pose2d(7, 6.4, new Rotation2d(170 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1),
+                new WaypointSE2(new Pose2d(7, 6.4,
+                new Rotation2d(170 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1),
                 new WaypointSE2(new Pose2d(9, 6.7, new Rotation2d(170 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1)
 
 
