@@ -105,9 +105,6 @@ public class RightBumpHalfSweepAuton implements AnnotatedCommand {
                                 .andThen(machinery.m_intake.intake().withTimeout(3)))
                         .until(IntakeSetUp::isDone),
                     parallel(
-                        machinery.m_conveyor.convey(),
-                        machinery.m_feeder.proportional(),
-                        machinery.m_shooterHood.autoPosition(),
                         machinery.m_shooter.auto())
                     );
     }

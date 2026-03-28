@@ -131,9 +131,7 @@ public class LeftBumpFullSweepAuton implements AnnotatedCommand {
                                 machinery.m_intake.stop(),
                           //      machinery.m_intakeExtend.goToRetractedPosition(),
 
-                                machinery.m_conveyor.convey(),
-                                machinery.m_feeder.proportional(),
-                                machinery.m_shooterHood.autoPosition(),
+                               
                                 machinery.m_shooter.auto())
                                 .withTimeout(4)
                                 )),

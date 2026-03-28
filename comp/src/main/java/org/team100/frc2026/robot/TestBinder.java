@@ -58,14 +58,9 @@ public class TestBinder {
                 m_machinery.m_intake.stop());
         m_machinery.m_intakeExtend.setDefaultCommand(
                 m_machinery.m_intakeExtend.stop());
-        m_machinery.m_conveyor.setDefaultCommand(
-                m_machinery.m_conveyor.stop());
         m_machinery.m_shooter.setDefaultCommand(
                 m_machinery.m_shooter.stop());
-        m_machinery.m_feeder.setDefaultCommand(
-                m_machinery.m_feeder.stop());
-        m_machinery.m_shooterHood.setDefaultCommand(
-                m_machinery.m_shooterHood.stop());
+        
 
         ////////////////////////////////////////////////////
         ///
@@ -164,13 +159,10 @@ public class TestBinder {
 
         whileTrue(driver::leftTrigger,
                 parallel(
-                        m_machinery.m_shooterHood.autoPosition(),
                         m_machinery.m_shooter.auto(),
-                        m_machinery.m_conveyor.convey(),
                         repeatingSequence(
                                 waitUntil(
-                                        m_machinery.m_shooter::atSpeed),
-                                m_machinery.m_feeder.testFeed()
+                                        m_machinery.m_shooter::atSpeed)
                                         .onlyWhile(m_machinery.m_shooter::atSpeed))));
 
         //////////////////
@@ -205,10 +197,6 @@ public class TestBinder {
         // whileTrue(driver::b,
         // m_machinery.m_shooterHood.setPosition(0));
 
-        whileTrue(driver::a,
-                parallel(
-                        m_machinery.m_conveyor.setVelocity(2),
-                        m_machinery.m_feeder.setVelocity(2)));
         // whileTrue(driver::b,
         // parallel(
         // m_machinery.m_conveyor.testConveyorBack(),
@@ -262,13 +250,12 @@ public class TestBinder {
         // .andThen(runIntakeWobbleRetractOut).withTimeout(0.5)));
         // };
 
-        whileTrue(driver::y,
-                repeatingSequence(
-                        m_machinery.m_intakeExtend.goToWobbleSlightlyInExtendedPosition().withTimeout(0.5),
-                        m_machinery.m_intakeExtend.goToWobbleSlightlyOutRetractedPosition().withTimeout(0.5)));
+        // whileTrue(driver::y,
+        //         repeatingSequence(
+        //                 m_machinery.m_intakeExtend.goToWobbleSlightlyInExtendedPosition().withTimeout(0.5),
+        //                 m_machinery.m_intakeExtend.goToWobbleSlightlyOutRetractedPosition().withTimeout(0.5)));
 
-        whileTrue(driver::povUp, parallel(
-                m_machinery.m_shooterHood.tune(),
+        whileTrue(driver::povUp,(
                 m_machinery.m_shooter.tune()));
 
         Tester tester = new Tester(m_machinery);

@@ -29,9 +29,6 @@ public class JustShoot implements AnnotatedCommand {
     @Override
     public Command command() {
         return parallel(
-                m_machinery.m_conveyor.convey(),
-                m_machinery.m_feeder.proportional(),
-                m_machinery.m_shooterHood.autoPosition(),
                 m_machinery.m_shooter.auto()).withName("Shoot").withTimeout(5);
     }
 

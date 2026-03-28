@@ -94,9 +94,6 @@ public class RightBumpPreloadedAuton implements AnnotatedCommand {
         return sequence(
                 parallel(
                         ScoreSetUp.until(ScoreSetUp::isDone).withTimeout(3.5),
-                        machinery.m_conveyor.convey(),
-                        machinery.m_feeder.proportional(),
-                        machinery.m_shooterHood.autoPosition(),
                         machinery.m_shooter.auto()),
 
                 waitSeconds(5),

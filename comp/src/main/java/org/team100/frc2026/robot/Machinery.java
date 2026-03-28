@@ -88,10 +88,8 @@ public class Machinery {
     public final Shooter m_shooter;
     public final Intake m_intake;
     public final IntakeExtend m_intakeExtend;
-    public final Conveyor m_conveyor;
-    public final ShooterHood m_shooterHood;
     public final ControllerSE2 m_holonomicController;
-    public final Feeder m_feeder;
+
 
     public Machinery(TotalCurrentLog currentLog) {
 
@@ -194,10 +192,7 @@ public class Machinery {
 
         m_intake = new Intake(logger, currentLog);
         m_intakeExtend = new IntakeExtend(logger, currentLog);
-        m_conveyor = new Conveyor(logger, currentLog);
         m_shooter = new Shooter(logger, currentLog, m_cachedSolution::speed);
-        m_feeder = new Feeder(logger, currentLog, m_shooter);
-        m_shooterHood = new ShooterHood(logger, currentLog, m_cachedSolution::elevation);
 
         ////////////////////////////////////////////////////////////
         ///

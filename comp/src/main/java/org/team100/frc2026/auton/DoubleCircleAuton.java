@@ -142,14 +142,10 @@ public class DoubleCircleAuton implements AnnotatedCommand {
                 toggle(
                         this::inAllianceZone,
                         parallel(
-                                machinery.m_conveyor.convey(),
-                                machinery.m_feeder.proportional(),
-                                machinery.m_shooterHood.autoPosition(),
+                                machinery.m_intake.intake(),
                                 machinery.m_shooter.auto()),
                         parallel(
-                                machinery.m_conveyor.stop(),
-                                machinery.m_feeder.stop(),
-                                machinery.m_shooterHood.stop(),
+                                machinery.m_intake.intake(),
                                 machinery.m_shooter.stop())));
     }
 

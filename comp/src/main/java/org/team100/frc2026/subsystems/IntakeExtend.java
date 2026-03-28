@@ -20,62 +20,78 @@ import org.team100.lib.servo.OutboardAngularPositionServo;
 import org.team100.lib.util.CanId;
 import org.team100.lib.servo.Gravity;
 
-
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /** Intake must be retracted at startup. */
 public class IntakeExtend extends SubsystemBase {
-    private static final CanId CAN_ID = new CanId(4);
-    private static final double gearRatio = 52;
+    private static final CanId CAN_ID = new CanId(19);
+    private static final CanId CAN_ID2 = new CanId(17);
+    private static final double gearRatio = 74.667;
     private static final double RETRACTED_POSITION = 0;
     // seems fine, 3/12/26
-    private static final double EXTENDED_POSITION = 2.568002;
+    private static final double EXTENDED_POSITION = 2.140017;
 
     private final Gravity m_gravity;
     private final AngularPositionServo m_servo;
+    private final AngularPositionServo m_Servo2;
 
     public IntakeExtend(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
-        m_gravity = new Gravity(log, 
-            5, //Max gravity torque, Nm
-            0); // Gravity torque position offset, rad
-        TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 8, 16, 0.1);
+         LoggerFactory log1 = log.name("Extend1");
+        LoggerFactory log2 = log.name("Extend2");
+        m_gravity = new Gravity(log,
+                0, // Max gravity torque, Nm
+                0); // Gravity torque position offset, rad
+        TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 4, 8, 0.1);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.1, 0.05);
         final BareMotor motor;
+        final BareMotor motor2;
         switch (Identity.instance) {
-            case TEST_BOARD_B0 -> {
+            case TEST_BOARD_B0, COMP_BOT -> {
 
                 SimpleDynamics ff = new SimpleDynamics(log, 0.0, 0.0);
                 // friction test 3/12/26
                 Friction friction = new Friction(log, 0.32, 0.32, 0.0, 0.5);
                 // tuned 3/12/26
-                PIDConstants pid = PIDConstants.makePositionPID(log, 2);
+                // TODO: get correct pid value
+                PIDConstants pid = PIDConstants.makePositionPID(log, 1);
                 motor = new KrakenX44Motor(
-                        log, currentLog, CAN_ID,
+                        log1, currentLog, CAN_ID,
                         NeutralMode100.COAST, MotorPhase.REVERSE,
+                        CurrentLimits.INTAKE_EXTEND,
+                        ff, friction, pid);
+                motor2 = new KrakenX44Motor(
+                        log2, currentLog, CAN_ID2,
+                        NeutralMode100.COAST, MotorPhase.FORWARD,
                         CurrentLimits.INTAKE_EXTEND,
                         ff, friction, pid);
             }
             default -> {
-                motor = new SimulatedBareMotor(log, 600);
+                motor = new SimulatedBareMotor(log1, 600);
+                motor2 = new SimulatedBareMotor(log2, 600);
             }
         }
         m_servo = OutboardAngularPositionServo.make(
-                log, motor, ref, gearRatio,
+                log1, motor, ref, gearRatio,
+                RETRACTED_POSITION, RETRACTED_POSITION, EXTENDED_POSITION);
+        m_Servo2 = OutboardAngularPositionServo.make(
+                log2, motor2, ref, gearRatio,
                 RETRACTED_POSITION, RETRACTED_POSITION, EXTENDED_POSITION);
     }
 
     @Override
     public void periodic() {
         m_servo.periodic();
+        m_Servo2.periodic();
     }
 
     /** Current position is out, or nearly so */
     public boolean isOut() {
-        return MathUtil.isNear(
-                m_servo.getUnwrappedPositionRad(), EXTENDED_POSITION, 1);
+        return MathUtil.isNear(m_servo.getUnwrappedPositionRad(), EXTENDED_POSITION, 1)
+                &&
+                MathUtil.isNear(m_Servo2.getUnwrappedPositionRad(), EXTENDED_POSITION, 1);
     }
 
     /**
@@ -104,7 +120,7 @@ public class IntakeExtend extends SubsystemBase {
 
     /** Servo is at goal. False immediately after reset. */
     public boolean atGoal() {
-        return m_servo.atGoal();
+        return m_servo.atGoal() && m_Servo2.atGoal();
     }
 
     /**
@@ -130,43 +146,14 @@ public class IntakeExtend extends SubsystemBase {
                 .withName("Stop Intake Extend");
     }
 
-    public Command goToWobbleSlightlyInExtendedPosition() {
-        return startRun(
-                this::reset,
-                () -> actuateWithProfile(0.75))
-                .until(m_servo::atGoal)
-                .withName("Intake Extend GoToWobbleExtendedPosition");
-    }
-
-    public Command goToWobbleSlightlyOutRetractedPosition() {
-        return startRun(
-                this::reset,
-                () -> actuateWithProfile(0.25))
-                .until(m_servo::atGoal)
-                .withName("Intake Extend GoToWobbleRetractedPosition");
-    }
-
-    public Command goToWobbleOutExtendedPosition() {
-        return startRun(
-                this::reset,
-                () -> actuateWithProfile(2.25))
-                .until(m_servo::atGoal)
-                .withName("Intake Extend GoToWobbleExtendedPosition");
-    }
-
-    public Command goToWobbleInRetractedPosition() {
-        return startRun(
-                this::reset,
-                () -> actuateWithProfile(1.75))
-                .until(m_servo::atGoal)
-                .withName("Intake Extend GoToWobbleRetractedPosition");
-    }
-
     /** For testing friction only */
     public Command setVelocity(double rad_S) {
         return startRun(
                 this::reset,
-                () -> m_servo.setVelocity(rad_S))
+                () -> {
+                    m_servo.setVelocity(rad_S);
+                    m_Servo2.setVelocity(rad_S);
+                })
                 .withName("set velocity");
     }
 
@@ -175,6 +162,7 @@ public class IntakeExtend extends SubsystemBase {
                 this::reset,
                 () -> {
                     m_servo.actuateWithProfile(rad, 0);
+                    m_Servo2.actuateWithProfile(rad, 0);
                 })
                 .withName("set position");
     }
@@ -183,25 +171,32 @@ public class IntakeExtend extends SubsystemBase {
 
     private void stopServo() {
         m_servo.stop();
+        m_Servo2.stop();
     }
 
     private void reset() {
         m_servo.reset();
+        m_Servo2.reset();
     }
 
     private void actuateWithProfile(double value) {
         m_servo.actuateWithProfile(value, 0);
+        m_Servo2.actuateWithProfile(value, 0);
     }
 
     private void actuateWithGravity(double value) {
         m_servo.actuateWithProfile(value, gravityTorque());
+        m_Servo2.actuateWithProfile(value, gravityTorque());
     }
 
     public boolean atExtendedPosition() {
-        return MathUtil.isNear(m_servo.getUnwrappedPositionRad(), EXTENDED_POSITION, 0.1);
+        return MathUtil.isNear(m_servo.getUnwrappedPositionRad(), EXTENDED_POSITION, 0.1)
+                && MathUtil.isNear(m_Servo2.getUnwrappedPositionRad(), EXTENDED_POSITION, 0.1);
     }
 
     private double gravityTorque() {
-        return m_gravity.applyAsDouble(m_servo.getWrappedPositionRad());
+        return (m_gravity.applyAsDouble(m_servo.getWrappedPositionRad()) +
+                m_gravity.applyAsDouble(m_Servo2.getUnwrappedPositionRad())) / 2;
+
     }
 }

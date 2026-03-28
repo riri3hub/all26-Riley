@@ -14,7 +14,7 @@ import org.team100.lib.config.CurrentLimit;
  */
 public class CurrentLimits {
     public static final CurrentLimit INTAKE = new CurrentLimit(50, 30);
-    public static final CurrentLimit INTAKE_EXTEND = new CurrentLimit(40, 30);
+    public static final CurrentLimit INTAKE_EXTEND = new CurrentLimit(20, 40);
     public static final CurrentLimit CONVEYOR = new CurrentLimit(50, 30);
     public static final CurrentLimit FEEDER = new CurrentLimit(50, 30);
     public static final CurrentLimit SHOOTER = new CurrentLimit(60, 80);

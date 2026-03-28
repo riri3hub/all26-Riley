@@ -58,8 +58,6 @@ public class InterlinkBinder {
                 m_machinery.m_intake.stop());
         m_machinery.m_intakeExtend.setDefaultCommand(
                 m_machinery.m_intakeExtend.stop());
-        m_machinery.m_shooterHood.setDefaultCommand(
-                m_machinery.m_shooterHood.stop());
 
         ////////////////////////////////////////////////////
         ///
@@ -104,14 +102,12 @@ public class InterlinkBinder {
         ///
         /// SHOOT
         ///
-        whileTrue(driver::i,
-                parallel(
-                        m_machinery.m_shooter.shooterFullspeed(),
-                        m_machinery.m_shooterHood.autoPosition(),
-                        Commands.repeatingSequence(
-                                waitUntil(m_machinery.m_shooter::atSpeed),
-                                m_machinery.m_conveyor.convey()
-                                        .onlyWhile(m_machinery.m_shooter::atSpeed))));
+        // whileTrue(driver::i,
+        //         parallel(
+        //                 m_machinery.m_shooter.shooterFullspeed(),
+        //                 Commands.repeatingSequence(
+        //                         waitUntil(m_machinery.m_shooter::atSpeed)
+        //                                 .onlyWhile(m_machinery.m_shooter::atSpeed))));
 
         ////////////////////////////////////////////////////
         ///
