@@ -38,8 +38,7 @@ public class Shooter extends SubsystemBase {
     private static final double GEAR_RATIO = 1;
     private static final double WHEEL_DIAMETER_M = .115;
 
-    /** Speed used in selftest. */
-    private static final double FULL_SPEED = 20;
+    private static final double FULL_SPEED = 30;
 
     private final Supplier<OptionalDouble> m_speed;
 

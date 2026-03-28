@@ -30,9 +30,8 @@ public class Experiments {
 
     /** These experiments are enabled on every robot type. */
     private final Set<Experiment> globalExperiments = Set.of(
-            Experiment.HeedVision,
-            // 3/15/26 turn limiter back on, after browning most of the day
-            Experiment.UseSwerveLimiter);
+            Experiment.HeedVision);
+            // Experiment.UseSwerveLimiter);
 
     /** These experiments are enabled on specific robot types. */
     private final Map<Identity, Set<Experiment>> experimentsByIdentity = Map.of(
