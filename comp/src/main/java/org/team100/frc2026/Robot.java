@@ -13,7 +13,7 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.indicator.Alerts;
 import org.team100.lib.indicator.AutonAlerts;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.Logging;
+import org.team100.lib.logging.Logging; 
 import org.team100.lib.logging.RobotLog;
 import org.team100.lib.network.Sync;
 import org.team100.lib.util.Banner;

@@ -44,7 +44,7 @@ public class IntakeExtend extends SubsystemBase {
         m_gravity = new Gravity(log,
                 0, // Max gravity torque, Nm
                 0); // Gravity torque position offset, rad
-        TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 10, 8, 0.1);
+        TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 4, 8, 0.1);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.1, 0.05);
         final BareMotor motor;
         final BareMotor motor2;
