@@ -131,7 +131,8 @@ public class Shooter extends SubsystemBase {
     public Command shooterFullspeed() {
         return startRun(
                 this::reset,
-                () -> setVelocityProfiled(FULL_SPEED))
+                // () -> setVelocityProfiled(FULL_SPEED))
+                () -> dutyCycleAll())
                 .withName("Shoot full speed");
     }
 

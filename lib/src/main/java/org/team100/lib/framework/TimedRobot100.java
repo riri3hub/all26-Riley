@@ -18,6 +18,7 @@ import edu.wpi.first.hal.NotifierJNI;
  * Copy of {@link edu.wpi.first.wpilibj.TimedRobot} in an effort to improve
  * instrumentation.
  */
+// public class TimedRobot100 extends IterativeRobotBase100 {
 public class TimedRobot100 extends IterativeRobotBase100 {
 
     static class Callback implements Comparable<Callback> {
