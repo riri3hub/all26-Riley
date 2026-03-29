@@ -109,7 +109,7 @@ public class MiddleDefenseRTrench implements AnnotatedCommand {
      TrajectorySE2 t1(Pose2d startingPose) {
         List<WaypointSE2> waypoints = List.of(
                 new WaypointSE2(startingPose, new DirectionSE2(1, 0, 0), 1),
-                new WaypointSE2(new Pose2d(8, 0.6, new Rotation2d(180 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1)
+                new WaypointSE2(new Pose2d(8.5, 1, new Rotation2d(180 * (Math.PI / 180))), new DirectionSE2(1, 0, 0), 1)
 
 
         //
