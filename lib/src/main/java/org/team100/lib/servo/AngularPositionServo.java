@@ -6,6 +6,8 @@ import org.team100.lib.state.ModelR1;
 /**
  * Angular position control, e.g. for swerve steering axes or arm axes.
  * 
+ * The "servo" layer wraps the mechanism control with a profile, if desired.
+ * 
  * An angular servo should generally get "wrapped" input. It figures out what
  * "unwrapped" commands to give the underlying mechanism.
  */
@@ -26,6 +28,8 @@ public interface AngularPositionServo extends Player {
 
     /**
      * Invalidates the current profile.
+     * 
+     * You need to keep calling this to keep actuating.
      */
     void setDutyCycle(double dutyCycle);
 
@@ -33,6 +37,8 @@ public interface AngularPositionServo extends Player {
 
     /**
      * Initializes the profile if necessary.
+     * 
+     * You need to keep calling this to keep actuating.
      * 
      * Sets the goal, updates the setpoint to the "next step" value towards it,
      * uses the current and next setpoints for actuation.
@@ -52,6 +58,8 @@ public interface AngularPositionServo extends Player {
      * Invalidates the current profile, sets the setpoint directly, using the
      * supplied position and zero for acceleration.
      * 
+     * You need to keep calling this to keep actuating.
+     * 
      * This is really only appropriate for the Outboard control case, because the
      * feedback controller there can be much firmer than in the Outboard case, but
      * it does work with Onboard feedback.
@@ -70,10 +78,16 @@ public interface AngularPositionServo extends Player {
 
     /**
      * For unwrapped goal.
+     * 
+     * You need to keep calling this to keep actuating.
      */
     void actuateWithProfile(double unwrappedGoalX, double torqueNm);
 
-    /** Unwrapped setpoint, no profile. */
+    /**
+     * Unwrapped setpoint, no profile.
+     * 
+     * You need to keep calling this to keep actuating.
+     */
     void actuateDirect(double unwrappedSetpoint, double torqueNm);
 
     /**

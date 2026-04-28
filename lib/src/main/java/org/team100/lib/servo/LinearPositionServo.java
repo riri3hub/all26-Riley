@@ -4,6 +4,8 @@ import org.team100.lib.reference.r1.SetpointsR1;
 
 /**
  * Linear position control, e.g. for elevators.
+ * 
+ * The "servo" layer wraps the mechanism control with a profile, if desired.
  */
 public interface LinearPositionServo {
     /**
@@ -20,6 +22,8 @@ public interface LinearPositionServo {
      * Initializes the profile if necessary.
      * This is movement and force on the output.
      * 
+     * You need to keep calling this to keep actuating.
+     * 
      * @param goalM             meters
      * @param feedForwardTorque used for gravity compensation
      */
@@ -29,6 +33,8 @@ public interface LinearPositionServo {
      * Invalidates the current profile, sets the setpoint directly.
      * This takes both current and next setpoints so that the implementation can
      * choose the current one for feedback and the next one for feedforward.
+     *
+     * You need to keep calling this to keep actuating. 
      */
     void setPositionDirect(SetpointsR1 setpoint, double feedForwardTorqueNm);
 

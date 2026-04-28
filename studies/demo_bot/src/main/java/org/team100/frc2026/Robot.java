@@ -11,12 +11,12 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.RobotLog;
 import org.team100.lib.logging.TotalCurrentLog;
-import org.team100.lib.subsystems.shooter.DrumShooterFactory;
 import org.team100.lib.subsystems.shooter.DualDrumShooter;
+import org.team100.lib.subsystems.shooter.DualDrumShooterFactory;
+import org.team100.lib.subsystems.shooter.IndexerFactory;
 import org.team100.lib.subsystems.shooter.PivotDefault;
 import org.team100.lib.subsystems.shooter.PivotSubsystem;
-import org.team100.lib.subsystems.shooter.SimpleIndexerFactory;
-import org.team100.lib.subsystems.shooter.SimpleIndexerSubsystem;
+import org.team100.lib.subsystems.shooter.ShooterIndexer;
 import org.team100.lib.subsystems.tank.TankDrive;
 import org.team100.lib.subsystems.tank.TankDriveFactory;
 import org.team100.lib.subsystems.tank.commands.TankManual;
@@ -44,8 +44,7 @@ public class Robot extends TimedRobot100 {
     private final TankDrive m_drive;
     private final Command m_auton;
     private final DualDrumShooter m_shooter;
-    // private final PWMIndexerServo m_indexer;
-    private final SimpleIndexerSubsystem m_indexer;
+    private final ShooterIndexer m_indexer;
     private final PivotSubsystem m_pivot;
 
     public Robot() {
@@ -78,26 +77,45 @@ public class Robot extends TimedRobot100 {
                 logger, driverControl::rightY, driverControl::rightX,
                 MAX_SPEED_M_S, MAX_OMEGA_RAD_S, m_drive));
 
-        m_shooter = DrumShooterFactory.make(
+        //////////////////////////////////////////////////////
+        ///
+        /// There are multiple shooter implementations
+        ///
+        // m_shooter = DualDrumShooterFactory.makeDutyCycleShooter(
+        // logger,
+        // m_currentLog,
+        // 0.1, // full output duty cycle
+        // new CurrentLimit(20, 20),
+        // new CanId(39),
+        // new CanId(8));
+        m_shooter = DualDrumShooterFactory.makeVelocityShooter(
                 logger,
                 m_currentLog,
+                10,
+                true,
                 new CurrentLimit(20, 20),
                 new CanId(39),
                 new CanId(8),
                 SHOOTER_GEAR_RATIO,
                 SHOOTER_WHEEL_DIA_M);
-        m_shooter.setDefaultCommand(m_shooter.run(m_shooter::stop));
+        m_shooter.setDefaultCommand(m_shooter.stop());
 
+        /////////////////////////////////////////////////
+        ///
+        /// There are several indexer implementations.
+        ///
         // m_indexer = new PWMIndexerServo(logger, 0);
-        m_indexer = SimpleIndexerFactory.make(
-                logger,
-                m_currentLog,
+        // m_indexer = IndexerFactory.makeVelocityIndexer(
+        // logger, m_currentLog,
+        // new CurrentLimit(20, 20),
+        // new CanId(100), // TODO: CANID
+        // 1.0, 0.1);
+        m_indexer = IndexerFactory.makePositionIndexer(
+                logger, m_currentLog,
                 new CurrentLimit(20, 20),
                 new CanId(100), // TODO: CANID
-                1.0,
-                0.1);
-
-        m_indexer.setDefaultCommand(m_indexer.run(m_indexer::stop));
+                1.0, 0.1, false);
+        m_indexer.setDefaultCommand(m_indexer.stop());
 
         m_pivot = new PivotSubsystem(
                 logger,
@@ -109,33 +127,19 @@ public class Robot extends TimedRobot100 {
 
         /////////////////////////////////////////////////////////////////////////////////////
         ///
-        /// SHOOTER CONTROL
-        ///
-        /// Simpler shooter controls, all left hand.
+        /// SHOOTER CONTROLS
         ///
         new Trigger(driverControl::leftTrigger)
-                .whileTrue(m_shooter.spinDirect(10)
+                .whileTrue(m_shooter.spin()
                         .withName("Shooter spin"));
         new Trigger(driverControl::leftBumper)
-                .whileTrue(m_indexer.spinDirect(1.0)
-                        .withName("Indexer feed"));
+                .onTrue(m_indexer.single()
+                        .withName("Indexer single"));
+        new Trigger(driverControl::rightBumper)
+                .whileTrue(m_indexer.continuous()
+                        .withName("Indexer continuous"));
 
         m_auton = null;
-
-        /////////////////////////////////////////////////////////////////////////////////////
-        ///
-        /// parking lot
-        ///
-        // this shows two ways to do the "shoot when spinning fast enough" thing.
-        // a command class that contains the condition
-        // new Trigger(driverControl::a).whileTrue(new Shoot(m_shooter, m_indexer));
-        // "fluent" command assembly.
-        // new Trigger(driverControl::y).whileTrue(
-        // parallel(
-        // m_shooter.spin(10),
-        // repeatingSequence(
-        // waitUntil(m_shooter::atGoal),
-        // m_indexer.feed().withTimeout(0.5))));
     }
 
     /**
