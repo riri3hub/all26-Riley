@@ -20,7 +20,7 @@ import com.revrobotics.spark.SparkMax;
  */
 public class MinionSparkMotor extends CANSparkMotor {
     /** See SparkMaxConfig.Presets.CTRE_Minion */
-    private static final double COMMUTATION_DEGREES = 120;
+    private static final double COMMUTATION_DEGREES = 60;
 
     public MinionSparkMotor(
             LoggerFactory parent,
@@ -37,7 +37,8 @@ public class MinionSparkMotor extends CANSparkMotor {
         super(parent, currentLog,
                 new SparkMax(canId.id, MotorType.kBrushless),
                 neutral, motorPhase, limit, ff, friction, pid,
-                COMMUTATION_DEGREES, averageDepth, measurementPeriod);
+                COMMUTATION_DEGREES, averageDepth, measurementPeriod,
+                false);
     }
 
     @Override

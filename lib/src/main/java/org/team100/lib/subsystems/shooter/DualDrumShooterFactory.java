@@ -77,11 +77,11 @@ public class DualDrumShooterFactory {
         LoggerFactory logR = log.name("right");
         SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
         Friction friction = new Friction(log, 0.07, 0.07, 0.01, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.02);
+        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
 
         BareMotor left = getMotor(
                 limit, logL, currentLog, 600, canL,
-                MotorPhase.REVERSE, ff, friction, pid);
+                MotorPhase.FORWARD, ff, friction, pid);
 
         BareMotor right = getMotor(
                 limit, logR, currentLog, 600, canR,
@@ -98,7 +98,7 @@ public class DualDrumShooterFactory {
 
         SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
         Friction friction = new Friction(log, 0.07, 0.07, 0.01, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.02);
+        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
 
         // for simulation
         double maxSpeedM_S = 10;
@@ -106,11 +106,11 @@ public class DualDrumShooterFactory {
 
         LinearMechanism mechL = getMech(
                 currentLog, limit, canL, gearRatio, wheelDiaM, logL, ff, friction, pid,
-                freeSpeedRad_S);
+                freeSpeedRad_S, MotorPhase.FORWARD);
 
         LinearMechanism mechR = getMech(
                 currentLog, limit, canR, gearRatio, wheelDiaM, logR, ff, friction, pid,
-                freeSpeedRad_S);
+                freeSpeedRad_S, MotorPhase.REVERSE);
 
         VelocityProfileR1 profile = new AccelLimitedVelocityProfileR1(10);
         VelocityReferenceR1 ref = new VelocityProfileReferenceR1(
@@ -134,10 +134,11 @@ public class DualDrumShooterFactory {
             SimpleDynamics ff,
             Friction friction,
             PIDConstants pid,
-            double freeSpeedRad_S) {
+            double freeSpeedRad_S,
+            MotorPhase motorPhase) {
         BareMotor motor = getMotor(
                 limit, log, currentLog, freeSpeedRad_S, canId,
-                MotorPhase.REVERSE, ff, friction, pid);
+                motorPhase, ff, friction, pid);
         LinearMechanism mech = new LinearMechanism(
                 log, motor, motor.encoder(), gearRatio, wheelDiaM,
                 Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);

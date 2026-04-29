@@ -34,7 +34,7 @@ public class NeoCANSparkMotor extends CANSparkMotor {
         super(parent, currentLog,
                 new SparkMax(canId.id, MotorType.kBrushless),
                 neutral, motorPhase, limit, ff, friction, pid,
-                0, averageDepth, measurementPeriod);
+                0, averageDepth, measurementPeriod, false);
     }
 
     @Override

@@ -46,12 +46,12 @@ public class Robot extends TimedRobot100 {
      */
     private static final double MAXIMUM_BALL_VELOCITY_M_S = 20;
 
-    private static final ShooterType SHOOTER = ShooterType.VELOCITY;
-    private static final double MAXIMUM_SHOOTER_DUTY_CYCLE = 0.1;
+    private static final ShooterType SHOOTER = ShooterType.DUTY_CYCLE;
+    private static final double MAXIMUM_SHOOTER_DUTY_CYCLE = 0.2;
     private static final double SHOOTER_GEAR_RATIO = 1.00;
     private static final double SHOOTER_WHEEL_DIA_M = 0.16;
 
-    private static final IndexerType INDEXER = IndexerType.POSITION;
+    private static final IndexerType INDEXER = IndexerType.DUTY_CYCLE;
     private static final double MAXIMUM_INDEXER_DUTY_CYCLE = 1.0;
     private static final double MAX_INDEXER_VELOCITY_M_S = 10;
     private static final double INDEXER_WHEEL_DIAMETER = 0.1;
@@ -89,7 +89,7 @@ public class Robot extends TimedRobot100 {
                 fieldLogger,
                 logger,
                 m_currentLog,
-                new CurrentLimit(20, 20),
+                new CurrentLimit(15, 15),
                 new CanId(3),
                 new CanId(2),
                 0.4,
@@ -120,18 +120,18 @@ public class Robot extends TimedRobot100 {
                 new RoboRioChannel(0),
                 MAXIMUM_INDEXER_DUTY_CYCLE,
                 MAX_INDEXER_VELOCITY_M_S,
-                new CurrentLimit(20, 20),
-                new CanId(100), // TODO: CANID
+                new CurrentLimit(30, 30),
+                new CanId(7),
                 INDEXER_GEAR_RATIO,
                 INDEXER_WHEEL_DIAMETER,
-                false);
+                true);
         m_indexer = indexerFactory.get(INDEXER);
         m_indexer.setDefaultCommand(m_indexer.stop());
 
         m_pivot = new PivotSubsystem(
                 logger,
                 m_currentLog,
-                new CurrentLimit(15, 15),
+                new CurrentLimit(20, 20),
                 new CanId(5));
         m_pivot.setDefaultCommand(
                 new PivotDefault(xbox::leftY, m_pivot));

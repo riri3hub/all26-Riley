@@ -34,7 +34,7 @@ public class NeoVortexCANSparkMotor extends CANSparkMotor {
         super(parent, currentLog,
                 new SparkFlex(canId.id, MotorType.kBrushless),
                 neutral, motorPhase, limit, ff, friction, pid,
-                0, averageDepth, measurementPeriod);
+                0, averageDepth, measurementPeriod, true);
     }
 
     @Override

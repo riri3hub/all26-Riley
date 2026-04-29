@@ -22,6 +22,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 /** Configuration for one SparkBase motor */
 public class RevConfigurator {
+    private static final boolean ACTUALLY_CRASH = false;
     /**
      * The CAN report period for the built-in encoder.
      * This is longer than the equivalent CTRE number, maybe
@@ -116,7 +117,35 @@ public class RevConfigurator {
         conf.limitSwitch.reverseLimitSwitchTriggerBehavior(Behavior.kKeepMovingMotor);
         conf.limitSwitch.forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyClosed);
         conf.limitSwitch.reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyClosed);
-        crash(() -> m_motor.configure(conf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
+        crash(() -> m_motor.configure(conf, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters));
+    }
+
+    /**
+     * Configure velocity measurement.
+     * 
+     * Velocity control wants less filtering (less latency).
+     * Position control wants more filtering (more accuracy).
+     * 
+     * @param isFlex Max uses "uvw" and Flex uses "quadrature"
+     */
+    public void velocityConfig(boolean isFlex) {
+        SparkMaxConfig conf = new SparkMaxConfig();
+        if (m_averageDepth != 0) {
+            if (isFlex) {
+                conf.encoder.uvwAverageDepth(m_averageDepth);
+            } else {
+                conf.encoder.quadratureAverageDepth(m_averageDepth);
+            }
+        }
+        if (m_measurementPeriod != 0) {
+            if (isFlex) {
+                conf.encoder.uvwMeasurementPeriod(m_measurementPeriod);
+            } else {
+                conf.encoder.quadratureMeasurementPeriod(m_measurementPeriod);
+            }
+        }
+
+        crash(() -> m_motor.configure(conf, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters));
     }
 
     public void motorConfig() {
@@ -133,17 +162,6 @@ public class RevConfigurator {
         // Minion motor uses different commutation angle.
         if (m_commutationDegrees != 0) {
             conf.advanceCommutation(m_commutationDegrees);
-        }
-
-        // Velocity control wants less filtering.
-        // Max uses "uvw" and Flex uses "quadrature"
-        if (m_averageDepth != 0) {
-            conf.encoder.quadratureAverageDepth(m_averageDepth);
-            conf.encoder.uvwAverageDepth(m_averageDepth);
-        }
-        if (m_measurementPeriod != 0) {
-            conf.encoder.quadratureMeasurementPeriod(m_measurementPeriod);
-            conf.encoder.uvwMeasurementPeriod(m_measurementPeriod);
         }
 
         conf.signals.primaryEncoderVelocityPeriodMs(ENCODER_REPORT_PERIOD_MS);
@@ -220,10 +238,15 @@ public class RevConfigurator {
         crash(() -> m_motor.configure(conf, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters));
     }
 
-    private static void crash(Supplier<REVLibError> s) {
+    private void crash(Supplier<REVLibError> s) {
         REVLibError errorCode = s.get();
         if (errorCode != REVLibError.kOk) {
-            throw new IllegalStateException(errorCode.name());
+            if (ACTUALLY_CRASH)
+                throw new IllegalStateException(errorCode.name());
+            System.out.println("WARNING: ******************************************************");
+            System.out.printf("WARNING: ****** Motor ID %d\n", m_motor.getDeviceId());
+            System.out.println("WARNING: ****** MOTOR CONFIG HAS FAILED MOTOR IS NOT SET CORRECTLY ******");
+            System.out.println("WARNING: " + errorCode.toString());
         }
     }
 }

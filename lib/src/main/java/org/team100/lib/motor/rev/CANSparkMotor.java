@@ -102,7 +102,8 @@ public abstract class CANSparkMotor implements BareMotor {
             PIDConstants pid,
             double commutationDegrees,
             int averageDepth,
-            int measurementPeriod) {
+            int measurementPeriod,
+            boolean isFlex) {
         currentLog.register(this);
         m_motor = motor;
         m_log = parent.type(this);
@@ -122,6 +123,7 @@ public abstract class CANSparkMotor implements BareMotor {
         m_configurator.longCANTimeout();
         m_configurator.baseConfig();
         m_configurator.motorConfig();
+        m_configurator.velocityConfig(isFlex);
         m_configurator.currentConfig();
         m_configurator.pidConfig();
         m_configurator.zeroCANTimeout();

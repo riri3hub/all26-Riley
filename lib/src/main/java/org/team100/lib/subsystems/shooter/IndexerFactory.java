@@ -98,13 +98,14 @@ public class IndexerFactory {
         LoggerFactory log = parent.name("indexer");
         SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
         Friction friction = new Friction(log, 0.07, 0.07, 0.01, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.02);
+        // duty cycle, no feedback.
+        PIDConstants pid = PIDConstants.zero(log);
         // for simulation
         double maxSpeedM_S = 10;
         double freeSpeedRad_S = maxSpeedM_S * gearRatio / (0.5 * wheelDiaM);
         BareMotor motor = getMotor(
                 limit, log, currentLog, freeSpeedRad_S, canId,
-                MotorPhase.REVERSE, ff, friction, pid);
+                MotorPhase.FORWARD, ff, friction, pid);
         return new DutyCycleIndexer(parent, fullDutyCycle, motor);
     }
 
@@ -112,7 +113,7 @@ public class IndexerFactory {
         if (canId == null)
             throw new IllegalArgumentException();
         LoggerFactory log = parent.name("indexer");
-        LinearMechanism mech = getMech(
+        LinearMechanism mech = getPositionMech(
                 log, currentLog, limit, canId, gearRatio, wheelDiaM);
         TrapezoidProfileR1 profile = new TrapezoidProfileR1(
                 log, VELOCITY, ACCEL, 0.02);
@@ -140,6 +141,28 @@ public class IndexerFactory {
         return new VelocityIndexer(parent, fullVelocityM_S, servo, profiled);
     }
 
+    private static LinearMechanism getPositionMech(
+            LoggerFactory log,
+            TotalCurrentLog currentLog,
+            CurrentLimit limit,
+            CanId canId,
+            double gearRatio,
+            double wheelDiaM) {
+        SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
+        Friction friction = new Friction(log, 0.07, 0.07, 0.01, 0.5);
+        PIDConstants pid = PIDConstants.makePositionPID(log, 0.02);
+        // for simulation
+        double maxSpeedM_S = 10;
+        double freeSpeedRad_S = maxSpeedM_S * gearRatio / (0.5 * wheelDiaM);
+        BareMotor motor = getMotor(
+                limit, log, currentLog, freeSpeedRad_S, canId,
+                MotorPhase.FORWARD, ff, friction, pid);
+        LinearMechanism mech = new LinearMechanism(
+                log, motor, motor.encoder(), gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        return mech;
+    }
+
     private static LinearMechanism getMech(
             LoggerFactory log,
             TotalCurrentLog currentLog,
@@ -155,7 +178,7 @@ public class IndexerFactory {
         double freeSpeedRad_S = maxSpeedM_S * gearRatio / (0.5 * wheelDiaM);
         BareMotor motor = getMotor(
                 limit, log, currentLog, freeSpeedRad_S, canId,
-                MotorPhase.REVERSE, ff, friction, pid);
+                MotorPhase.FORWARD, ff, friction, pid);
         LinearMechanism mech = new LinearMechanism(
                 log, motor, motor.encoder(), gearRatio, wheelDiaM,
                 Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Indexer using duty cycle control.
  */
 public class DutyCycleIndexer extends SubsystemBase implements ShooterIndexer {
+    private static final double BLIP_DURATION = 0.12;
     /** full output duty cycle */
     private final double m_full;
     private final BareMotor m_motor;
@@ -22,7 +23,7 @@ public class DutyCycleIndexer extends SubsystemBase implements ShooterIndexer {
     @Override
     public Command single() {
         return run(this::full)
-                .withTimeout(0.5);
+                .withTimeout(BLIP_DURATION);
     }
 
     @Override
