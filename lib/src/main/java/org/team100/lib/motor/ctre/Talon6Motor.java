@@ -37,7 +37,7 @@ import edu.wpi.first.units.measure.Voltage;
 /**
  * Superclass for TalonFX motors.
  * 
- * Relies on Memo and Takt, so you must put Memo.resetAll() and Takt.update() in
+ * Relies on Cache and Takt, so you must put Cache.refresh() and Takt.update() in
  * Robot.robotPeriodic().
  */
 public abstract class Talon6Motor implements BareMotor {

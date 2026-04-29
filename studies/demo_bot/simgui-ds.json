@@ -1,5 +1,15 @@
 {
+  "FMS": {
+    "window": {
+      "visible": false
+    }
+  },
   "Joysticks": {
+    "window": {
+      "visible": false
+    }
+  },
+  "System Joysticks": {
     "window": {
       "visible": false
     }
@@ -11,9 +21,7 @@
         {},
         {
           "decKey": 69,
-          "decayRate": 0.0,
-          "incKey": 82,
-          "keyRate": 0.009999999776482582
+          "incKey": 82
         },
         {},
         {
@@ -26,12 +34,16 @@
         }
       ],
       "axisCount": 6,
-      "buttonCount": 4,
+      "buttonCount": 8,
       "buttonKeys": [
-        90,
-        88,
-        67,
-        86
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56
       ],
       "povConfig": [
         {

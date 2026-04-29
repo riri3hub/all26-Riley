@@ -29,14 +29,16 @@ import com.revrobotics.spark.SparkLimitSwitch;
 /**
  * Base class for REV motors.
  * 
- * Relies on Memo and Takt, so you must put Memo.resetAll() and Takt.update() in
+ * Relies on Cache and Takt, so you must put Cache.refresh() and Takt.update() in
  * Robot.robotPeriodic().
  * 
  * Current limit is stator current.
  * 
+ * Supply current is unmeasured and unlimited.
+ * 
  * WARNING! REV motors are not good for velocity-controlled flywheels, because
  * the built-in encoder is noisy. The default filters induce much too much delay
- * to be useful; turning the filters all the way down may help a tiny bit.
+ * to be useful; turning the filters all the way down helps.
  * 
  * https://www.chiefdelphi.com/t/psa-default-neo-sparkmax-velocity-readings-are-still-bad-for-flywheels/454453
  * https://www.chiefdelphi.com/t/psa-rev-spark-default-velocity-filtering-is-still-really-bad-for-flywheels/514567
@@ -121,6 +123,7 @@ public abstract class CANSparkMotor implements BareMotor {
                 averageDepth,
                 measurementPeriod);
         m_configurator.longCANTimeout();
+        m_configurator.resetDefaults();
         m_configurator.baseConfig();
         m_configurator.motorConfig();
         m_configurator.velocityConfig(isFlex);
@@ -254,7 +257,7 @@ public abstract class CANSparkMotor implements BareMotor {
 
     @Override
     public double getSupplyCurrent() {
-        // TODO: does REV provide supply current??
+        // NOTE: REV does not provide supply current.
         return 0;
     }
 

@@ -30,7 +30,7 @@ public class DualDrumShooterFactory {
         VELOCITY
     }
 
-    private final LoggerFactory parent;
+    private final LoggerFactory log;
     private final TotalCurrentLog currentLog;
     private final double fullDutyCycle;
     private final double fullSpeedM_S;
@@ -52,7 +52,7 @@ public class DualDrumShooterFactory {
             double gearRatio,
             double wheelDiaM,
             boolean profiled) {
-        this.parent = parent;
+        this.log = parent.name("Shooter");
         this.currentLog = currentLog;
         this.fullDutyCycle = fullDutyCycle;
         this.fullSpeedM_S = fullSpeedM_S;
@@ -72,7 +72,6 @@ public class DualDrumShooterFactory {
     }
 
     public DualDrumDutyCycleShooter makeDutyCycleShooter() {
-        LoggerFactory log = parent.name("shooter");
         LoggerFactory logL = log.name("left");
         LoggerFactory logR = log.name("right");
         SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
@@ -88,11 +87,10 @@ public class DualDrumShooterFactory {
                 MotorPhase.REVERSE, ff, friction, pid);
 
         return new DualDrumDutyCycleShooter(
-                parent, fullDutyCycle, left, right);
+                log, fullDutyCycle, left, right);
     }
 
     public DualDrumVelocityShooter makeVelocityShooter() {
-        LoggerFactory log = parent.name("shooter");
         LoggerFactory logL = log.name("left");
         LoggerFactory logR = log.name("right");
 
@@ -117,7 +115,7 @@ public class DualDrumShooterFactory {
                 log, () -> profile, 1);
 
         return new DualDrumVelocityShooter(
-                parent,
+                log,
                 fullSpeedM_S,
                 new OutboardLinearVelocityServo(logL, mechL, ref, 1),
                 new OutboardLinearVelocityServo(logR, mechR, ref, 1),

@@ -16,7 +16,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotState;
 
 /**
- * Relies on Memo and Takt, so you must put Memo.resetAll() and Takt.update() in
+ * Relies on Cache and Takt, so you must put Cache.refresh() and Takt.update() in
  * Robot.robotPeriodic().
  */
 public class SimulatedBareMotor implements BareMotor {

@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.RobotController;
  * change it), and in the swerve factory, (in order to preserve the
  * selectable-encoder code paths).
  * 
- * Relies on Memo and Takt, so you must put Memo.resetAll() and Takt.update() in
+ * Relies on Cache and Takt, so you must put Cache.refresh() and Takt.update() in
  * Robot.robotPeriodic().
  */
 public class AnalogRotaryPositionSensor extends RoboRioRotaryPositionSensor {

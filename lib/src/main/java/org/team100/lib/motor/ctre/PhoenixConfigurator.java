@@ -75,6 +75,7 @@ public class PhoenixConfigurator {
         }
     }
 
+    /** This is like "reset factory defaults" */
     public void baseConfig() {
         TalonFXConfiguration base = new TalonFXConfiguration();
         crash(() -> m_motor.getConfigurator().apply(base, TIMEOUT_SEC));

@@ -19,7 +19,10 @@ import com.revrobotics.spark.SparkMax;
  * @see https://store.ctr-electronics.com/products/minion-brushless-motor
  */
 public class MinionSparkMotor extends CANSparkMotor {
-    /** See SparkMaxConfig.Presets.CTRE_Minion */
+    /**
+     * See SparkMaxConfig.Presets.CTRE_Minion
+     * https://www.chiefdelphi.com/t/minion-motors-on-sparkmax/518200/2
+     */
     private static final double COMMUTATION_DEGREES = 60;
 
     public MinionSparkMotor(

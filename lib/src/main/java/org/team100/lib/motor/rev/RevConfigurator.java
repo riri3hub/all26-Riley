@@ -73,6 +73,11 @@ public class RevConfigurator {
      * Stator current limit is mutable.
      * Does not support supply limit.
      * pid has mutable parts.
+     * 
+     * @param averageDepth      for Max, must be in [1,64], default 64
+     *                          for Flex, must be one of 1,2,4, or 8, default 8
+     * @param measurementPeriod for Max, must be in [1,100], default 100
+     *                          for Flex, must be in [8, 64], default 32
      */
     public RevConfigurator(
             LoggerFactory log,
@@ -109,6 +114,15 @@ public class RevConfigurator {
      */
     public void zeroCANTimeout() {
         crash(() -> m_motor.setCANTimeout(0));
+    }
+
+    /**
+     * This is like the old resetFactoryDefaults() method.
+     * This is the *only* place that "kResetSafeParameters" should be used.
+     */
+    public void resetDefaults() {
+        SparkMaxConfig conf = new SparkMaxConfig();
+        crash(() -> m_motor.configure(conf, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters));
     }
 
     public void baseConfig() {

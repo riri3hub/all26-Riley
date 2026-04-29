@@ -55,8 +55,8 @@ public abstract class CameraReader<T> {
     /**
      * Read queued network input, and give it to the consumers.
      * 
-     * This runs once per cycle, in SwerveDriveSubsystem.update() which is called by
-     * Memo.updateAll(), which runs in Robot.robotPeriodic().
+     * This runs once per cycle (see FreshSwerveEstimate) called by
+     * Cache.refresh(), which runs in Robot.robotPeriodic().
      */
     public void update() {
         if (DEBUG) {
