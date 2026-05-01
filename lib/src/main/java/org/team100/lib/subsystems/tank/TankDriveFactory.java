@@ -11,6 +11,7 @@ import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
+import org.team100.lib.motor.rev.Neo550CANSparkMotor;
 import org.team100.lib.motor.rev.NeoCANSparkMotor;
 import org.team100.lib.motor.sim.SimulatedBareMotor;
 import org.team100.lib.reference.r1.NoVelocityReferenceR1;
@@ -34,8 +35,8 @@ public class TankDriveFactory {
         LoggerFactory logL = log.name("left");
         LoggerFactory logR = log.name("right");
 
-        SimpleDynamics ff = new SimpleDynamics(log, 0.01, 0.01);
-        Friction friction = new Friction(log, 0.5, 0.5, 0.0, 0.5);
+        SimpleDynamics ff = new SimpleDynamics(log, 0.00, 0.00);
+        Friction friction = new Friction(log, 0.2, 0.2, 0.0, 0.5);
         PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
 
         // ensure the simulated motor can go fast enough.
@@ -43,17 +44,21 @@ public class TankDriveFactory {
 
         BareMotor motorL = getMotor(
                 logL, currentLog, freeSpeedRad_S, canL,
-                MotorPhase.REVERSE, limit, ff, friction, pid);
+                MotorPhase.FORWARD, limit, ff, friction, pid);
         BareMotor motorR = getMotor(
                 logR, currentLog, freeSpeedRad_S, canR,
-                MotorPhase.FORWARD, limit, ff, friction, pid);
+                MotorPhase.REVERSE, limit, ff, friction, pid);
 
         LinearMechanism mechL = new LinearMechanism(
-                logL, motorL, motorL.encoder(), gearRatio, wheelDiaM,
-                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                logL, motorL, motorL.encoder(),
+                gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY);
         LinearMechanism mechR = new LinearMechanism(
-                logR, motorR, motorR.encoder(), gearRatio, wheelDiaM,
-                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+                logR, motorR, motorR.encoder(),
+                gearRatio, wheelDiaM,
+                Double.NEGATIVE_INFINITY,
+                Double.POSITIVE_INFINITY);
 
         return new TankDrive(
                 log,
@@ -81,6 +86,9 @@ public class TankDriveFactory {
             PIDConstants pid) {
         return switch (Identity.instance) {
             case BLANK -> new SimulatedBareMotor(log, freeSpeedRad_S);
+            case DEMO_BOT -> new Neo550CANSparkMotor(
+                    log, currentLog, can, NeutralMode100.BRAKE, phase,
+                    limit, ff, friction, pid, 2, 4);
             default -> new NeoCANSparkMotor(
                     log, currentLog, can, NeutralMode100.BRAKE, phase,
                     limit, ff, friction, pid, 2, 4);

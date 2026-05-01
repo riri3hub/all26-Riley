@@ -40,12 +40,13 @@ public class TankDrive extends SubsystemBase {
     private Pose2d m_pose;
 
     public TankDrive(
-            LoggerFactory log,
+            LoggerFactory parent,
             LoggerFactory fieldLogger,
             double trackWidthM,
             double maxSpeedM_S,
             OutboardLinearVelocityServo left,
             OutboardLinearVelocityServo right) {
+        LoggerFactory log = parent.type(this);
         m_logChassisSpeeds = log.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_logLeft = log.doubleLogger(Level.TRACE, "left");
         m_logRight = log.doubleLogger(Level.TRACE, "right");

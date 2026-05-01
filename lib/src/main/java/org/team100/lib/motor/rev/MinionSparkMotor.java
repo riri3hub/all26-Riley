@@ -22,8 +22,11 @@ public class MinionSparkMotor extends CANSparkMotor {
     /**
      * See SparkMaxConfig.Presets.CTRE_Minion
      * https://www.chiefdelphi.com/t/minion-motors-on-sparkmax/518200/2
+     * This value appears to make the motor run backwards
      */
-    private static final double COMMUTATION_DEGREES = 60;
+    // private static final double COMMUTATION_DEGREES = 60;
+    /** This value appears to work correctly. */
+    private static final double COMMUTATION_DEGREES = -120;
 
     public MinionSparkMotor(
             LoggerFactory parent,

@@ -75,8 +75,8 @@ public class DualDrumShooterFactory {
         LoggerFactory logL = log.name("left");
         LoggerFactory logR = log.name("right");
         SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
-        Friction friction = new Friction(log, 0.07, 0.07, 0.01, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
+        Friction friction = new Friction(log, 0.0, 0.0, 0.0, 0.5);
+        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
 
         BareMotor left = getMotor(
                 limit, logL, currentLog, 600, canL,
@@ -95,8 +95,8 @@ public class DualDrumShooterFactory {
         LoggerFactory logR = log.name("right");
 
         SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
-        Friction friction = new Friction(log, 0.07, 0.07, 0.01, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
+        Friction friction = new Friction(log, 0.0, 0.0, 0.0, 0.5);
+        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
 
         // for simulation
         double maxSpeedM_S = 10;
@@ -104,11 +104,11 @@ public class DualDrumShooterFactory {
 
         LinearMechanism mechL = getMech(
                 currentLog, limit, canL, gearRatio, wheelDiaM, logL, ff, friction, pid,
-                freeSpeedRad_S, MotorPhase.FORWARD);
+                freeSpeedRad_S, MotorPhase.REVERSE);
 
         LinearMechanism mechR = getMech(
                 currentLog, limit, canR, gearRatio, wheelDiaM, logR, ff, friction, pid,
-                freeSpeedRad_S, MotorPhase.REVERSE);
+                freeSpeedRad_S, MotorPhase.FORWARD);
 
         VelocityProfileR1 profile = new AccelLimitedVelocityProfileR1(10);
         VelocityReferenceR1 ref = new VelocityProfileReferenceR1(
@@ -159,6 +159,9 @@ public class DualDrumShooterFactory {
         return switch (Identity.instance) {
             case BLANK ->
                 new SimulatedBareMotor(log, freeSpeedRad_S);
+            case DEMO_BOT -> new MinionSparkMotor(
+                    log, currentLog, canId, NeutralMode100.BRAKE, phase,
+                    limit, ff, friction, pid, 2, 4);
             default -> new MinionSparkMotor(
                     log, currentLog, canId, NeutralMode100.BRAKE, phase,
                     limit, ff, friction, pid, 2, 4);

@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class Robot extends TimedRobot100 {
+    private static final ShooterType SHOOTER = ShooterType.VELOCITY;
     /**
      * Ball velocity is the most sensitive variable influencing safety.
      * 
@@ -47,23 +48,23 @@ public class Robot extends TimedRobot100 {
      * https://docs.google.com/document/d/14Ebyd1gQzmyat9dlTWtNtymE9XSHsTXXHNyspYBy_Ys
      */
     private static final double MAXIMUM_BALL_VELOCITY_M_S = 20;
-
-    private static final ShooterType SHOOTER = ShooterType.DUTY_CYCLE;
     private static final double MAXIMUM_SHOOTER_DUTY_CYCLE = 0.2;
     private static final double SHOOTER_GEAR_RATIO = 1.00;
     private static final double SHOOTER_WHEEL_DIA_M = 0.16;
 
-    private static final IndexerType INDEXER = IndexerType.DUTY_CYCLE;
+    private static final IndexerType INDEXER = IndexerType.VELOCITY;
     private static final double MAXIMUM_INDEXER_DUTY_CYCLE = 1.0;
-    private static final double MAX_INDEXER_VELOCITY_M_S = 10;
+    private static final double MAX_INDEXER_VELOCITY_M_S = 5;
     private static final double INDEXER_WHEEL_DIAMETER = 0.1;
     private static final double INDEXER_GEAR_RATIO = 1.0;
 
     private static final double FIVE_TO_ONE = 5.2307692308;
     private static final double DRIVE_GEAR_RATIO = FIVE_TO_ONE * FIVE_TO_ONE;
     private static final double DRIVE_WHEEL_DIAM = 0.098425;
-    private static final double MAX_SPEED_M_S = 3.0;
-    private static final double MAX_OMEGA_RAD_S = 3.0;
+    // measured 4/30/26, used to be 0.4.
+    private static final double TRACK_WIDTH = 0.5;
+    private static final double MAX_SPEED_M_S = 2.0;
+    private static final double MAX_OMEGA_RAD_S = 4.0;
 
     private final SolidIndicator m_led;
     private final RobotLog m_robotLog;
@@ -100,13 +101,17 @@ public class Robot extends TimedRobot100 {
                 new CurrentLimit(15, 15),
                 new CanId(3),
                 new CanId(2),
-                0.4,
+                TRACK_WIDTH,
                 MAX_SPEED_M_S,
                 DRIVE_GEAR_RATIO,
                 DRIVE_WHEEL_DIAM);
         m_drive.setDefaultCommand(new TankManual(
-                logger, xbox::rightY, xbox::rightX,
-                MAX_SPEED_M_S, MAX_OMEGA_RAD_S, m_drive));
+                logger,
+                () -> xbox.rightY() * -1.0,
+                () -> xbox.rightX() * -1.0,
+                MAX_SPEED_M_S,
+                MAX_OMEGA_RAD_S,
+                m_drive));
 
         DualDrumShooterFactory shooterFactory = new DualDrumShooterFactory(
                 logger,
@@ -142,7 +147,9 @@ public class Robot extends TimedRobot100 {
                 new CurrentLimit(20, 20),
                 new CanId(5));
         m_pivot.setDefaultCommand(
-                new PivotDefault(xbox::leftY, m_pivot));
+                new PivotDefault(
+                        () -> xbox.leftY() * -1.0,
+                        m_pivot));
 
         /////////////////////////////////////////////////////////////////////////////////////
         ///

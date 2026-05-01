@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Indexer using velocity control.
  */
 public class VelocityIndexer extends SubsystemBase implements ShooterIndexer {
+    private static final double SINGLE_DURATION = 0.1;
     /** full output velocity */
     private final double m_full;
     private final LinearVelocityServo m_servo;
@@ -25,7 +26,7 @@ public class VelocityIndexer extends SubsystemBase implements ShooterIndexer {
     @Override
     public Command single() {
         return run(this::full)
-                .withTimeout(0.5);
+                .withTimeout(SINGLE_DURATION);
     }
 
     @Override

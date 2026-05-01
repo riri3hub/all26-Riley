@@ -33,7 +33,7 @@ public class PositionIndexer extends SubsystemBase implements ShooterIndexer {
 
     @Override
     public Command continuous() {
-        return single().repeatedly();
+        return single().withTimeout(0.1).repeatedly();
     }
 
     @Override

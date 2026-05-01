@@ -95,8 +95,8 @@ public class IndexerFactory {
             throw new IllegalArgumentException();
         if (fullDutyCycle == 0)
             throw new IllegalArgumentException();
-        SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
-        Friction friction = new Friction(log, 0.07, 0.07, 0.01, 0.5);
+        SimpleDynamics ff = new SimpleDynamics(log, 0.001, 0.001);
+        Friction friction = new Friction(log, 0.02, 0.02, 0.0, 0.5);
         // duty cycle, no feedback.
         PIDConstants pid = PIDConstants.zero(log);
         // for simulation
@@ -127,10 +127,10 @@ public class IndexerFactory {
             throw new IllegalArgumentException();
         if (fullVelocityM_S == 0)
             throw new IllegalArgumentException();
-        LinearMechanism mech = getMech(
+        LinearMechanism mech = getVelocityMech(
                 log, currentLog, limit,
                 canId, gearRatio, wheelDiaM);
-        VelocityProfileR1 profile = new AccelLimitedVelocityProfileR1(10);
+        VelocityProfileR1 profile = new AccelLimitedVelocityProfileR1(100);
         VelocityReferenceR1 ref = new VelocityProfileReferenceR1(
                 log, () -> profile, 1);
         OutboardLinearVelocityServo servo = new OutboardLinearVelocityServo(
@@ -145,37 +145,37 @@ public class IndexerFactory {
             CanId canId,
             double gearRatio,
             double wheelDiaM) {
-        SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
-        Friction friction = new Friction(log, 0.07, 0.07, 0.01, 0.5);
-        PIDConstants pid = PIDConstants.makePositionPID(log, 0.02);
+        SimpleDynamics ff = new SimpleDynamics(log, 0.001, 0.001);
+        Friction friction = new Friction(log, 0.02, 0.02, 0.00, 0.5);
+        PIDConstants pid = PIDConstants.makePositionPID(log, 0.5);
         // for simulation
         double maxSpeedM_S = 10;
         double freeSpeedRad_S = maxSpeedM_S * gearRatio / (0.5 * wheelDiaM);
         BareMotor motor = getMotor(
                 limit, log, currentLog, freeSpeedRad_S, canId,
-                MotorPhase.FORWARD, ff, friction, pid);
+                MotorPhase.REVERSE, ff, friction, pid);
         LinearMechanism mech = new LinearMechanism(
                 log, motor, motor.encoder(), gearRatio, wheelDiaM,
                 Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
         return mech;
     }
 
-    private static LinearMechanism getMech(
+    private static LinearMechanism getVelocityMech(
             LoggerFactory log,
             TotalCurrentLog currentLog,
             CurrentLimit limit,
             CanId canId,
             double gearRatio,
             double wheelDiaM) {
-        SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
-        Friction friction = new Friction(log, 0.07, 0.07, 0.01, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.02);
+        SimpleDynamics ff = new SimpleDynamics(log, 0.001, 0.001);
+        Friction friction = new Friction(log, 0.02, 0.02, 0.0, 0.5);
+        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
         // for simulation
         double maxSpeedM_S = 10;
         double freeSpeedRad_S = maxSpeedM_S * gearRatio / (0.5 * wheelDiaM);
         BareMotor motor = getMotor(
                 limit, log, currentLog, freeSpeedRad_S, canId,
-                MotorPhase.FORWARD, ff, friction, pid);
+                MotorPhase.REVERSE, ff, friction, pid);
         LinearMechanism mech = new LinearMechanism(
                 log, motor, motor.encoder(), gearRatio, wheelDiaM,
                 Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
@@ -198,6 +198,9 @@ public class IndexerFactory {
         return switch (Identity.instance) {
             case BLANK ->
                 new SimulatedBareMotor(log, freeSpeedRad_S);
+            case DEMO_BOT -> new MinionSparkMotor(
+                    log, currentLog, canId, NeutralMode100.BRAKE, phase,
+                    limit, ff, friction, pid, 2, 4);
             default -> new MinionSparkMotor(
                     log, currentLog, canId, NeutralMode100.BRAKE, phase,
                     limit, ff, friction, pid, 2, 4);
