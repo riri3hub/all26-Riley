@@ -37,6 +37,13 @@ class Size:
                     width=1408,
                     height=1088,
                 )
+            case Model.THRIFTY:
+                return Size(
+                    sensor_width=1600,
+                    sensor_height=1304,
+                    width=1600,
+                    height=1304,
+                )
             case _:
                 return Size(
                     sensor_width=100,

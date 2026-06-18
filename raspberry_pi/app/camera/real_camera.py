@@ -98,6 +98,8 @@ class RealCamera(Camera):
     def __get_config(
         identity: Identity, cam: Picamera2, size: Size  # type: ignore
     ) -> dict[str, Any]:
+        return cam.create_still_configuration() # type:ignore
+    
         """Consult https://datasheets.raspberrypi.com/camera/picamera2-manual.pdf"""
         camera_config: dict[str, Any] = cam.create_still_configuration(  # type:ignore
             # more buffers seem to make the pipeline a little smoother
@@ -152,7 +154,7 @@ class RealCamera(Camera):
         # see libcamera/src/libcamera/transform.cpp
         if identity in (
             Identity.FLIPPED,
-            Identity.FUNNEL,
+            # Identity.FUNNEL,
             Identity.CLIMB_RIGHT,
         ):
             camera_config["transform"] = libcamera.Transform(  # type: ignore

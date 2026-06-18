@@ -10,6 +10,7 @@ class Model(Enum):
     V3_WIDE = "imx708_wide"
     V2 = "imx219"
     GS = "imx296"
+    THRIFTY = "SPCA2630 PC Camera: PC Camera"
     UNKNOWN = "unknown"
 
     @classmethod

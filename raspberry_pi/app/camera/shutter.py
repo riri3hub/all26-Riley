@@ -8,6 +8,8 @@ class Shutter:
         match model:
             case Model.GS:
                 self._rolling = False
+            case Model.THRIFTY:
+                self._rolling = False
             case _:
                 self._rolling = True
 
