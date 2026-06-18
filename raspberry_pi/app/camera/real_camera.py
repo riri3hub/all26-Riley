@@ -154,7 +154,7 @@ class RealCamera(Camera):
             Identity.FLIPPED,
             Identity.FUNNEL,
             Identity.CLIMB_RIGHT,
-        )
+        ):
             camera_config["transform"] = libcamera.Transform(  # type: ignore
                 rotation=0, hflip=True, vflip=True, transpose=False
             )

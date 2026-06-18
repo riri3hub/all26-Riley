@@ -10,6 +10,8 @@ from picamera2.request import _MappedBuffer  # type: ignore
 from app.camera.request_protocol import Request
 from app.util.timer import Timer
 
+# Extra constant delay.
+EXTRA_DELAY_MS: float = 2.5
 
 class RealRequest(Request):
     def __init__(self, req: CompletedRequest, fps: float, rolling: bool):  # type: ignore
@@ -37,13 +39,7 @@ class RealRequest(Request):
         exposure_term_us = cast(int, metadata["ExposureTime"] * 0.5)
         exposure_term_ns = exposure_term_us * 1000
 
-        # Extra constant delay.
-        # 2/21/26 using a real robot.  I think this is correcting for
-        # roborio loop delay, not just camera delay.
-        frame_term_ms = 30
-        # 2/20/26 this from the "camera_delay" project
-        # frame_term_ms = 2
-        frame_term_ns = cast(int, frame_term_ms * 1000000)
+        frame_term_ns = cast(int, EXTRA_DELAY_MS * 1000000)
 
         exposure_timestamp_ns = sensor_timestamp_ns - frame_term_ns - exposure_term_ns
 

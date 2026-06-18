@@ -37,6 +37,10 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 
 public class Robot extends TimedRobot100 {
+    /** 
+     * Offset in turns, between the camera and the sensor.
+     */
+    private static final double STATIC_OFFSET = 0.951;
     private static final boolean DEBUG = false;
     /**
      * The sensor itself has a propagation delay of 100 us and a sampling rate of 10
@@ -103,7 +107,7 @@ public class Robot extends TimedRobot100 {
             m_motor = new NeoVortexCANSparkMotor(
                     log,
                     currentLog,
-                    new CanId(1),
+                    new CanId(9),
                     NeutralMode100.COAST,
                     MotorPhase.FORWARD,
                     new CurrentLimit(20, 20),
@@ -115,13 +119,13 @@ public class Robot extends TimedRobot100 {
             m_motor = new SimulatedBareMotor(log, 600);
         }
 
-        RoboRioChannel sensorChannel = new RoboRioChannel(1);
+        RoboRioChannel sensorChannel = new RoboRioChannel(0);
         // The offset here is from the testboard, experimenting until the "sensor minus
         // camera" is zero at rest.
         m_sensor = new AS5048RotaryPositionSensor(
                 log,
                 sensorChannel,
-                0.515, // offset in turns
+                STATIC_OFFSET, // offset in turns
                 EncoderDrive.INVERSE);
 
         m_motorBuffer = new TimeInterpolatableBuffer100<>(
