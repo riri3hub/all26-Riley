@@ -1,10 +1,3 @@
-"""Represents the Raspberry Pi identity, used to select configuration.
-
-Don't put anything in this class about the actual configuration, use a different class for that.
-
-Keep this synchronized with java team100.config.Camera.
-"""
-
 # pylint: disable=C0103
 
 from enum import Enum, unique
@@ -28,6 +21,13 @@ except FileNotFoundError:
 
 @unique
 class Identity(Enum):
+    """Represents the Raspberry Pi identity, used to select configuration.
+
+    Don't put anything in this class about the actual configuration, use a different class for that.
+
+    Keep this synchronized with java team100.config.Camera.
+    """
+
     #
     # Camera-bot 2026
     #

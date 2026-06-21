@@ -17,6 +17,7 @@ from app.camera.intrinsic import Intrinsic
 from app.camera.model import Model
 from app.camera.real_request import RealRequest
 from app.camera.size import Size
+from app.camera.delay import Delay
 from app.config.identity import Identity
 from app.decoder.decoder_protocol import Decoder
 from app.util.timer import Timer
@@ -40,9 +41,10 @@ class RealCamera(Camera):
         Picamera2.set_logging(Picamera2.INFO)  # type: ignore
         # debug logs with every frame (!)
         # Picamera2.set_logging(Picamera2.DEBUG)  # type: ignore
-        print("GLOBAL CAMERA INFO")
+
+        print("\n*** GLOBAL CAMERA INFO")
         pprint(Picamera2.global_camera_info())  # type: ignore
-        print("+==================")
+
         self._cam: Picamera2 = Picamera2()  # type: ignore
 
         print("\n*** SENSOR MODES AVAILABLE")
@@ -60,18 +62,20 @@ class RealCamera(Camera):
         model: Model = Model.get(self._cam.camera_properties)  # type: ignore
         self._size: Size = Size.from_model(model)
 
-        print("\n\n*** CONFIG! ***\n\n")
         config: Config = ConfigFactory.get(identity, self._size)
         self._camera_config: dict[str, Any] = self._get_config(  # type: ignore
             config, identity, self._cam  # type: ignore
         )
         self._decoder: Decoder = config.decoder()
+        self._delay: Delay = Delay(config)
+
         print("\n*** REQUESTED CONFIG")
-        print(self._camera_config)
+        pprint(self._camera_config)
+
         # optimal alignment makes the ISP a little faster
         self._cam.align_configuration(self._camera_config, optimal=True)  # type:ignore
         print("\n*** ALIGNED CONFIG")
-        print(self._camera_config)
+        pprint(self._camera_config)
 
         self._cam.configure(self._camera_config)  # type:ignore
         self._check_config(config)
@@ -89,12 +93,12 @@ class RealCamera(Camera):
         total_time_ms = (capture_start - self._frame_time) / 1000000
         self._frame_time = capture_start
         fps = 1000 / total_time_ms
-        return RealRequest(req, fps, self._decoder)  # type: ignore
+        return RealRequest(req, fps, self._decoder, self._delay)  # type: ignore
 
     @override
     def stop(self) -> None:
         self._cam.stop()  # type: ignore
-        print("Camera stop")
+        print("\n*** Camera stop")
 
     @override
     def get_size(self) -> Size:
@@ -122,7 +126,7 @@ class RealCamera(Camera):
         UVC cameras, so it's gone.  There's just one "main"
         stream."""
         controls = conf.controls()
-        print("\nREQUESTED CONTROLS:")
+        print("\n*** REQUESTED CONTROLS:")
         pprint(controls)
         return cam.create_still_configuration(  # type:ignore
             buffer_count=conf.buffer_count(),
@@ -137,6 +141,7 @@ class RealCamera(Camera):
     def _check_config(self, config: Config):
         """Verify the requested config matches the camera config."""
         if not config.ok(self._camera_config, self._cam.camera_config):  # type:ignore
+            print("\n*** CONFIG CHECK FAIL")
             pprint(self._camera_config)
             pprint(self._cam.camera_config)  # type:ignore
             raise ValueError("Config check fail")

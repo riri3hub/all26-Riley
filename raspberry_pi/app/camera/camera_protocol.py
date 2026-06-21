@@ -1,4 +1,3 @@
-
 # pylint: disable=R0903,W2301
 
 from typing import Protocol

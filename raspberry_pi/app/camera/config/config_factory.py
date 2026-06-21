@@ -3,7 +3,6 @@
 from app.camera.config.config_protocol import Config
 from app.camera.size import Size
 from app.config.identity import Identity
-from app.camera.config.config_thrifty_yuyv import ConfigThriftyYuyv # pyright: ignore[reportUnusedImport]
 from app.camera.config.config_thrifty_mjpeg import ConfigThriftyMjpeg
 from app.camera.config.config_gs_color import ConfigGsColor
 from app.camera.config.config_gs_mono import ConfigGsMono

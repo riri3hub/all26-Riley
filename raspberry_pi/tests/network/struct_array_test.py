@@ -1,5 +1,3 @@
-"""Resolve my confusion about struct array listeners."""
-
 # pylint: disable=W0212
 import dataclasses
 import unittest
@@ -17,6 +15,8 @@ class Datum:
 
 
 class StructArrayTest(unittest.TestCase):
+    """Resolve my confusion about struct array listeners."""
+
     def test_struct(self) -> None:
         """A simple struct pub/sub case."""
         inst = ntcore.NetworkTableInstance.getDefault()
@@ -76,7 +76,7 @@ class StructArrayTest(unittest.TestCase):
         queue: list[ntcore.Event] = poller.readQueue()
         self.assertEqual(1, len(queue))
         event: ntcore.Event = queue.pop()
-        item = cast(ntcore.ValueEventData, event.data) # type: ignore
+        item = cast(ntcore.ValueEventData, event.data)  # type: ignore
         # the value type is not known here
         self.assertEqual(ntcore.Value, type(item.value))
         value = wpistruct.unpack(Datum, item.value.getRaw())
@@ -95,7 +95,7 @@ class StructArrayTest(unittest.TestCase):
         self.assertEqual(1, len(queue))
         event = queue.pop()
         # item =  event.data
-        item = cast(ntcore.ValueEventData, event.data) # type: ignore
+        item = cast(ntcore.ValueEventData, event.data)  # type: ignore
         self.assertEqual(ntcore.Value, type(item.value))
         item_size = wpistruct.getSize(Datum)
         self.assertEqual(8, item_size)

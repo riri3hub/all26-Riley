@@ -1,29 +1,34 @@
-# pylint: disable=E0401
+# pylint: disable=E0401,R0913,R0917
+
 from contextlib import AbstractContextManager
-from typing import cast
 from typing_extensions import Buffer, override
 from picamera2 import CompletedRequest  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
 from app.camera.request_protocol import Request
-from app.util.timer import Timer
 from app.decoder.decoder_protocol import Decoder
+from app.camera.delay import Delay
 
 # Extra constant delay.
 EXTRA_DELAY_MS: float = 2.5
 
 
 class RealRequest(Request):
-    def __init__(self, req: CompletedRequest, fps: float, decoder: Decoder):  # type: ignore
+    def __init__(
+        self,
+        req: CompletedRequest,  # type: ignore
+        fps: float,
+        decoder: Decoder,
+        delay: Delay,
+    ):
         # Before we get a CompletedRequest, its constructor has used the
         # camera allocator sync property to:
         # * instantiate a DMA allocator sync for each buffer
         # * tell the camera allocator to mark the buffers as 'in use'
         # * __enter__() each buffer's DmaSync, which calls ioctl DMA_BUF_SYNC_START
         self._req: CompletedRequest = req
-        # print("METADATA")
-        # pprint(req.get_metadata())  # type: ignore
         self._fps = fps
         self._decoder = decoder
+        self._delay = delay
 
     @override
     def decoder(self) -> Decoder:
@@ -36,26 +41,7 @@ class RealRequest(Request):
 
     @override
     def delay_us(self) -> int:
-        metadata = self._req.get_metadata()  # type: ignore
-        # Time of first row received, this is roughly the "readout timestamp"
-        sensor_timestamp_ns = cast(int, metadata["SensorTimestamp"])
-
-        # Half the exposure time.
-        # Note UVC camera does not have this field
-        # exposure_term_us = cast(int, metadata["ExposureTime"] * 0.5)
-        # exposure_term_ns = exposure_term_us * 1000
-        # TODO: fake a real exposure time
-        exposure_term_ns = 0
-
-        frame_term_ns = cast(int, EXTRA_DELAY_MS * 1000000)
-
-        exposure_timestamp_ns = sensor_timestamp_ns - frame_term_ns - exposure_term_ns
-
-        # The delay is the difference between the exposure time and the current instant.
-        delay_ns: int = Timer.time_ns() - exposure_timestamp_ns
-        delay_us = delay_ns // 1000
-
-        return delay_us
+        return self._delay.delay_us(self._req.get_metadata())  # type: ignore
 
     @override
     def buffer(self) -> AbstractContextManager[Buffer]:

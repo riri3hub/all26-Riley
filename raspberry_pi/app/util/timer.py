@@ -1,7 +1,3 @@
-"""
-This is a clock that works on both Raspberry Pi and on Windows, for testing.
-"""
-
 # pylint: disable=R0903
 
 try:
@@ -21,6 +17,8 @@ except ImportError:
 
 
 class Timer:
+    """This is a clock that works on both Raspberry Pi and on Windows, for testing."""
+
     @staticmethod
     def time_ns() -> int:
         """Nanoseconds since boot, aligns with SensorTimestamp."""

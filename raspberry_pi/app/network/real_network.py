@@ -1,5 +1,3 @@
-"""This is a wrapper for network tables."""
-
 # pylint: disable=R0902,R0903,W0212
 
 

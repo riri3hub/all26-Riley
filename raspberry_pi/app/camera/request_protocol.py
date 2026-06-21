@@ -7,6 +7,13 @@ from app.decoder.decoder_protocol import Decoder
 
 
 class Request(Protocol):
+    """The request makes available both a context-managed zero-copy
+    frame buffer, and a decoder that produces OpenCV-compatible frames.
+    The decoder make a copy of the frame (e.g. to decode JPEG), but
+    it might not (e.g. a color frame from RGB888, or a grayscale
+    frame from YUV420), so don't use the decoder output outside
+    the scope of the buffer."""
+
     def decoder(self) -> Decoder:
         """Decoder for the format of this request."""
         ...

@@ -20,6 +20,10 @@ class ConfigThriftyMjpeg(Config):
         return MjpegDecoder(self._size)
 
     @override
+    def extra_delay_ms(self) -> float:
+        return 2.5
+
+    @override
     def main(self) -> dict[str, Any]:
         return {"format": "MJPEG", "size": (self._size.width, self._size.height)}
 

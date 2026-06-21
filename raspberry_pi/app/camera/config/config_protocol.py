@@ -17,6 +17,10 @@ class Config(Protocol):
         """Decoder for the format of this config."""
         ...
 
+    def extra_delay_ms(self) -> float:
+        """Delay found using the camera delay tester, in milliseconds."""
+        ...
+
     def buffer_count(self) -> int:
         """Even though we always take the most-recent buffer,
         adding a few more seems to make the pipeline a little smoother."""

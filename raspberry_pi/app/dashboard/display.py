@@ -1,5 +1,3 @@
-"""Interface spec for dashboard video."""
-
 from typing import Protocol
 
 from cv2.typing import MatLike
@@ -8,6 +6,8 @@ from wpimath.geometry import Transform3d
 
 
 class Display(Protocol):
+    """Interface spec for dashboard video."""
+
     def tag(
         self, image: MatLike, tag: AprilTagDetection, pose: Transform3d
     ) -> None: ...

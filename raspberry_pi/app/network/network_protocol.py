@@ -1,5 +1,3 @@
-"""Interface for network (for testing)"""
-
 # pylint: disable=R0903
 
 from typing import Protocol
@@ -19,6 +17,8 @@ class TargetSender(Protocol):
 
 
 class Network(Protocol):
+    """Interface for network (for testing)"""
+
     def calibrate(self) -> bool: ...
     def flush(self) -> None: ...
     def get_double_sender(self, leaf: str) -> DoubleSender: ...

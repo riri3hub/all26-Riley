@@ -2,7 +2,6 @@
 
 from typing import Any
 from typing_extensions import override
-
 from app.camera.config.config_protocol import Config
 from app.camera.size import Size
 from app.decoder.yuyv_decoder import YuyvDecoder
@@ -17,6 +16,10 @@ class ConfigThriftyYuyv(Config):
     @override
     def decoder(self) -> YuyvDecoder:
         return YuyvDecoder(self._size)
+
+    @override
+    def extra_delay_ms(self) -> float:
+        return 2.5
 
     @override
     def main(self) -> dict[str, Any]:

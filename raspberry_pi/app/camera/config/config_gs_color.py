@@ -22,6 +22,10 @@ class ConfigGsColor(Config):
         return Rgb888Decoder(self._size)
 
     @override
+    def extra_delay_ms(self) -> float:
+        return 2.0
+
+    @override
     def sensor(self) -> dict[str, Any]:
         # for rpi camera
         return {
@@ -41,7 +45,6 @@ class ConfigGsColor(Config):
         return {
             # ANALOGUE GAIN
             # To minimize blur, set this as high as possible.
-            # TODO: try much larger values, up to 250.
             "AnalogueGain": 8,
             #
             # AUTO EXPOSURE

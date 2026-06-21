@@ -1,5 +1,3 @@
-"""For testing."""
-
 from typing_extensions import override
 from app.network.structs import Blip, Target
 from app.network.network_protocol import DoubleSender, BlipSender, TargetSender, Network
@@ -33,6 +31,8 @@ class FakeTargetSender(TargetSender):
 
 
 class FakeNetwork(Network):
+    """For testing."""
+
     def __init__(self) -> None:
         self.doubles: list[float] = []
         self.blips: list[Blip] = []
