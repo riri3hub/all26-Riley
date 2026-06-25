@@ -31,9 +31,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class FiveBarMech extends SubsystemBase {
     private static final boolean DEBUG = false;
+    private static final boolean ENFORCE_FEASIBILITY = false;
     /** Low current limits */
-    private static final double SUPPLY_LIMIT = 5;
-    private static final double STATOR_LIMIT = 5;
+    private static final double SUPPLY_LIMIT = 10;
+    private static final double STATOR_LIMIT = 10;
     private static final double Q1_MIN = 0;
     private static final double Q1_MAX = 2 * Math.PI / 3 - 0.1;
     private static final double Q5_MIN = Math.PI / 3 + 0.1;
@@ -70,9 +71,9 @@ public class FiveBarMech extends SubsystemBase {
         LoggerFactory loggerP1 = logger.name("p1");
         LoggerFactory loggerP5 = logger.name("p5");
         switch (Identity.instance) {
-            case COMP_BOT -> {
+            case SWERVE_TWO -> {
                 Falcon500Motor motorP1 = makeMotor(loggerP1, currentLog, new CanId(1));
-                Falcon500Motor motorP5 = makeMotor(loggerP5, currentLog, new CanId(2));
+                Falcon500Motor motorP5 = makeMotor(loggerP5, currentLog, new CanId(5));
                 m_motorP1 = motorP1;
                 m_motorP5 = motorP5;
 
@@ -86,15 +87,15 @@ public class FiveBarMech extends SubsystemBase {
                         motorP1,
                         m_sensorP1,
                         1.0,
-                        0.0,
-                        1.0);
+                        -100.0,
+                        100.0);
                 m_mechP5 = new RotaryMechanism(
                         loggerP5,
                         motorP5,
                         m_sensorP5,
                         1.0,
-                        0.0,
-                        1.0);
+                        -100.0,
+                        100.0);
             }
             default -> {
                 SimulatedBareMotor motorP1 = new SimulatedBareMotor(loggerP1, 600);
@@ -138,8 +139,13 @@ public class FiveBarMech extends SubsystemBase {
     public void setPosition(double p1, double p5) {
         if (DEBUG)
             System.out.printf("FiveBarMech.setPosition %f %f\n", p1, p5);
-        if (!feasible(p1, p5))
-            return;
+        if (ENFORCE_FEASIBILITY) {
+            if (!feasible(p1, p5)) {
+                if (DEBUG)
+                    System.out.println("infeasible!");
+                return;
+            }
+        }
         m_mechP1.setUnwrappedPosition(p1, 0, 0, 0);
         m_mechP5.setUnwrappedPosition(p5, 0, 0, 0);
     }

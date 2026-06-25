@@ -27,7 +27,7 @@ public class SetupMech implements Runnable {
         m_viz = new FiveBarVisualization(m_fiveBar::getJointPositions);
         m_fiveBar.setDefaultCommand(m_fiveBar.position(
                 () -> CONTROL_SCALE * controller.getLeftX(), // axis 0, "a" and "d" in the sim
-                () -> CONTROL_SCALE * controller.getLeftY())); // axis 1, "w" and "s" in the sim
+                () -> CONTROL_SCALE * controller.getRightX()));
 
         // These bindings are remembered by the trigger event loop, so we don't need to
         // retain them.
