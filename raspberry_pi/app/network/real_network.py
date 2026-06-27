@@ -111,7 +111,7 @@ class RealNetwork(Network):
     @override
     def get_blip_with_corners_sender(self) -> RealBlipWithCornersSender:
         """Send blips to the Rio."""
-        name: str = "vision/" + self._identity.value + "/blips"
+        name: str = "vision/" + self._identity.value + "/blips_with_corners"
         return RealBlipWithCornersSender(
             self._inst.getStructArrayTopic(name, BlipWithCorners).publish()
         )
@@ -124,4 +124,4 @@ class RealNetwork(Network):
 
     @override
     def server_time(self, localtime: int) -> int:
-        return localtime + self._drift.get()
+        return self._drift.server_time(localtime)

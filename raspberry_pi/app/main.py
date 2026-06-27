@@ -21,17 +21,19 @@ from app.dashboard.display import Display
 from app.dashboard.display_factory import DisplayFactory
 from app.network.network_protocol import Network
 from app.network.real_network import RealNetwork
+from app.util.timestamps import Timestamps
 
 
 def main() -> None:
     identity: Identity = Identity.get()
-    done: Event = Event() # to shut down all threads
+    done: Event = Event()  # to shut down all threads
     try:
         camera: Camera = CameraFactory.get(identity)
         display: Display = DisplayFactory.get(identity, camera)
         network: Network = RealNetwork(identity, done)
+        timestamps = Timestamps(network)
         interpreter: Interpreter = InterpreterFactory.get(
-            identity, camera, display, network
+            identity, camera, display, network, timestamps
         )
         camera_loop: CameraLoop = CameraLoop(camera, interpreter, done)
         Thread(target=camera_loop.run).start()

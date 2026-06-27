@@ -7,8 +7,10 @@ from app.interpreter.interpreter_factory import InterpreterFactory
 from app.config.identity import Identity
 from app.dashboard.display import Display
 from app.dashboard.fake_display import FakeDisplay
+from app.interpreter.interpreter_protocol import Interpreter
 from app.network.fake_network import FakeNetwork
 from app.network.network_protocol import Network
+from app.util.timestamps import Timestamps
 
 
 class IntrinsicTest(unittest.TestCase):
@@ -17,4 +19,8 @@ class IntrinsicTest(unittest.TestCase):
         cam: Camera = FakeCamera("images/tag_and_board.jpg", (5504, 3096), -0.1)
         display: Display = FakeDisplay()
         network: Network = FakeNetwork()
-        InterpreterFactory.get(identity, cam, display, network)
+        timestamps = Timestamps(network)
+        interpreter: Interpreter = InterpreterFactory.get(
+            identity, cam, display, network, timestamps
+        )
+        self.assertIsNotNone(interpreter)

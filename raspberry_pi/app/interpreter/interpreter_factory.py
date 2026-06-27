@@ -3,14 +3,15 @@ import numpy as np
 from numpy.typing import NDArray
 
 from app.camera.camera_protocol import Camera
-from app.interpreter.interpreter_protocol import Interpreter
 from app.config.identity import Identity
 from app.dashboard.display import Display
-from app.localization.combined_detector import CombinedDetector
-from app.localization.target_detector import TargetDetector
-from app.localization.tag_detector import TagDetector
+from app.interpreter.interpreter_protocol import Interpreter
 from app.interpreter.viewfinder import Viewfinder
+from app.localization.combined_detector import CombinedDetector
+from app.localization.tag_detector import TagDetector
+from app.localization.target_detector import TargetDetector
 from app.network.network_protocol import Network
+from app.util.timestamps import Timestamps
 
 USE_NULL: bool = False
 
@@ -18,7 +19,11 @@ USE_NULL: bool = False
 class InterpreterFactory:
     @staticmethod
     def get(
-        identity: Identity, cam: Camera, display: Display, network: Network
+        identity: Identity,
+        cam: Camera,
+        display: Display,
+        network: Network,
+        timestamps: Timestamps,
     ) -> Interpreter:
         if USE_NULL:
             # For testing.
@@ -35,12 +40,13 @@ class InterpreterFactory:
 
         match identity:
             case Identity.FUNNEL:
-                return TagDetector(identity, cam, display, network)
+                return TagDetector(identity, cam, display, network, timestamps)
             case Identity.GAME_PIECE:
                 return TargetDetector(
                     cam,
                     display,
                     network,
+                    timestamps,
                     object_lower,
                     object_higher,
                 )
@@ -58,15 +64,16 @@ class InterpreterFactory:
                 | Identity.SWERVE_RIGHT
                 | Identity.SWERVE_LEFT
             ):
-                return TagDetector(identity, cam, display, network)
+                return TagDetector(identity, cam, display, network, timestamps)
             case Identity.DEV2:
                 return CombinedDetector(
                     identity,
                     cam,
                     display,
                     network,
+                    timestamps,
                     object_lower,
                     object_higher,
                 )
             case _:
-                return TagDetector(identity, cam, display, network)
+                return TagDetector(identity, cam, display, network, timestamps)

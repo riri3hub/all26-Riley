@@ -1,7 +1,6 @@
 # pylint: disable=E0611,E1101,R0902,R0903,R0913,R0914,R0917,W0212,W0611
-
 import os
-from typing import cast  # pyright: ignore[reportUnusedImport]
+from typing import Any
 import cv2
 from cv2.typing import MatLike
 import ntcore
@@ -9,16 +8,16 @@ import numpy as np
 from numpy.typing import NDArray
 from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
 from typing_extensions import override, Buffer
+from wpimath.geometry._geometry import Transform3d
 from app.camera.camera_protocol import Camera, Request, Size
-from app.interpreter.interpreter_protocol import Interpreter
 from app.config.identity import Identity
 from app.dashboard.display import Display
-from app.network.network_protocol import Network
-from app.network.structs import Blip
 from app.decoder.decoder_protocol import Decoder
-
-# Tag corners for computing homography.
-SRC_POINTS = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
+from app.interpreter.interpreter_protocol import Interpreter
+from app.localization.detector_util import DetectorUtil
+from app.network.network_protocol import Network
+from app.network.structs import Blip, BlipWithCorners
+from app.util.timestamps import Timestamps
 
 
 class TagDetector(Interpreter):
@@ -32,6 +31,7 @@ class TagDetector(Interpreter):
         cam: Camera,
         display: Display,
         network: Network,
+        timestamps: Timestamps,
     ) -> None:
         """Debug is very slow.  It writes apriltag detector debug images
         into the same filenames over and over, and also writes
@@ -41,6 +41,7 @@ class TagDetector(Interpreter):
         self._cam = cam
         self._display = display
         self._network = network
+        self._timestamps = timestamps
 
         print("\n*** Interpreter: TagDetector")
 
@@ -118,6 +119,7 @@ class TagDetector(Interpreter):
 
         # network output for tag sightings
         self._blips = network.get_blip_sender()
+        self._blips_with_corners = network.get_blip_with_corners_sender()
 
         # network output for camera FPS
         self._fps = network.get_double_sender("fps")
@@ -146,50 +148,18 @@ class TagDetector(Interpreter):
 
             result: list[AprilTagDetection] = self._at_detector.detect(img.data)
 
-            # microsecond age of frame
-            delay_us: int = req.delay_us()
+            # Capture timestamp in boottime.
+            timestamp_boottime_us = req.timestamp_boottime_us()
 
-            # localtime in microseconds
-            localtime: int = int(ntcore._now() - delay_us)
-            servertime: int = self._network.server_time(localtime)
+            # Microsecond age of frame.
+            delay_us = Timestamps.delta_us(timestamp_boottime_us)
 
-            blips: list[Blip] = []
-            result_item: AprilTagDetection
-            for result_item in result:
-                if result_item.getHamming() > 0:
-                    continue
-                # This homography is wrong, because it used the distorted corners.
-                # homography = result_item.getHomography()
+            # Capture timestamp in servertime.
+            servertime: int = self._timestamps.boot_time_to_server_time(
+                timestamp_boottime_us
+            )
 
-                # Undistorted corners
-                corners = self.tag_corners(result_item)
-                # Redo the homography using the undistorted corners
-                dst_points = np.array(
-                    [
-                        [corners[0], corners[1]],
-                        [corners[2], corners[3]],
-                        [corners[4], corners[5]],
-                        [corners[6], corners[7]],
-                    ]
-                )
-                cv2_homography, _ = cv2.findHomography(SRC_POINTS, dst_points)
-                homography = (
-                    cv2_homography[0, 0],
-                    cv2_homography[0, 1],
-                    cv2_homography[0, 2],
-                    cv2_homography[1, 0],
-                    cv2_homography[1, 1],
-                    cv2_homography[1, 2],
-                    cv2_homography[2, 0],
-                    cv2_homography[2, 1],
-                    cv2_homography[2, 2],
-                )
-                pose = self._estimator.estimate(homography, corners)
-                blips.append(Blip(servertime, result_item.getId(), pose))
-                self._display.tag(img, result_item, pose)
-
-            # Send sightings to network.
-            self._blips.send(blips)
+            self.detect_tags(img, result, servertime)
 
             # Send camera FPS to network.
             fps: float = req.fps()
@@ -207,47 +177,47 @@ class TagDetector(Interpreter):
             self._display.text(img, f"DELAY (ms) {delay_us/1000:2.0f}", (10, 160))
             self._display.put(img)
 
-    def tag_corners(
-        self, result_item: AprilTagDetection
-    ) -> tuple[float, float, float, float, float, float, float, float]:
-        """Return undistorted tag corners."""
+    def detect_tags(
+        self,
+        img: MatLike,
+        result: list[AprilTagDetection],
+        servertime: int,
+    ):
+        blips: list[Blip] = []
+        blips_with_corners: list[BlipWithCorners] = []
+        tag: AprilTagDetection
+        for tag in result:
+            if tag.getHamming() > 0:
+                continue
 
-        # UNDISTORT EACH ITEM
-        # undistortPoints is at least 10X faster than undistort on the whole image.
-        # the order is:
-        # lower left, lower right, upper right, upper left
-        corners: tuple[float, float, float, float, float, float, float, float] = (
-            result_item.getCorners((0, 0, 0, 0, 0, 0, 0, 0))
-        )
+            # Extract raw (x,y) corners from the tag.
+            raw_corners: tuple[
+                float, float, float, float, float, float, float, float
+            ] = DetectorUtil.raw_corners(tag)
 
-        # undistortPoints wants [[x0,y0],[x1,y1],...]
-        pairs = np.reshape(corners, [4, 2])
-        # undistortImagePoints takes [u,v] pixel pairs
-        # this is just undistortPoints with mtx as the new intrinsic.
-        # the default iterates 5 times and often doesn't get there.
-        # TODO: maybe 40 iterations is too many?
-        pairs = cv2.undistortImagePoints(
-            pairs,
-            self._mtx,
-            self._dist,
-            None,
-            (cv2.TermCriteria_COUNT | cv2.TermCriteria_EPS, 40, 0.01),
-        )
-        # pairs = cv2.undistortImagePoints(pairs, self._mtx, self._dist)
+            # Undistort the corners.
+            undistorted_corners: tuple[
+                float, float, float, float, float, float, float, float
+            ] = DetectorUtil.undistorted_corners(self._mtx, self._dist, raw_corners)
 
-        # the estimator wants [x0, y0, x1, y1, ...]
-        # pairs has an extra dimension, so redo it:
-        corners = (
-            pairs[0][0][0],
-            pairs[0][0][1],
-            pairs[1][0][0],
-            pairs[1][0][1],
-            pairs[2][0][0],
-            pairs[2][0][1],
-            pairs[3][0][0],
-            pairs[3][0][1],
-        )
-        return corners
+            # Redo the homography using the undistorted corners.
+            homography: tuple[Any, Any, Any, Any, Any, Any, Any, Any, Any] = (
+                DetectorUtil.homography(undistorted_corners)
+            )
+
+            # Estimate the pose.
+            pose: Transform3d = self._estimator.estimate(
+                homography, undistorted_corners
+            )
+            blips.append(Blip(servertime, tag.getId(), pose))
+            blips_with_corners.append(
+                BlipWithCorners.make(servertime, tag.getId(), raw_corners, pose)
+            )
+            self._display.tag(img, tag, pose)
+
+            # Send sightings to network.
+        self._blips.send(blips)
+        self._blips_with_corners.send(blips_with_corners)
 
     def log_temperature(self) -> None:
         """Log the CPU temperature in Celsius.
@@ -271,6 +241,8 @@ class TagDetector(Interpreter):
         To retrieve these files, use, e.g.:
 
         scp pi@10.1.0.11:images/* .
+
+        Note the single dot at the end of the line above, which means "current directory"
 
         These will accumulate forever, so remember to clean it out:
 

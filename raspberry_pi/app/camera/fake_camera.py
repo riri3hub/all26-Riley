@@ -50,23 +50,49 @@ class FakeCamera(Camera):
         # cv2.imwrite("debug.jpg", self.img)
 
     def redistort(self, undistorted_img: MatLike) -> MatLike:
-        """Use "remap" to invert the undistortion function."""
-        # Create a grid of every pixel coordinate in the target image
-        grid_y, grid_x = np.indices((self.h, self.w), dtype=np.float32)
-        flat_grid = np.stack([grid_x.ravel(), grid_y.ravel()], axis=-1).reshape(
-            -1, 1, 2
-        )
+        """Use "remap" to invert the undistortion function.
 
-        # Use the numerical inverter to find where clean pixels map to
-        distort_map = cv2.undistortPoints(
-            flat_grid, self.get_intrinsic(), self.get_dist(), P=self.get_intrinsic()
+        undistortPoints() takes distorted points as input and yields true points.
+
+        So we make a matrix of points, each of which is its own location.
+
+        When we give undistortPoints() each location, it treats it as if it were from the
+        distorted image, and so yields a location corresponding to the true image.
+        This is, therefore, a "forward" map.
+
+        remap() takes each point in the *destination* matrix, and applies the map to find
+        the point in the *source* matrix that should be used. This is an "inverse" map.
+
+        So using the "undistort" map with "remap" will invert it, becoming "distort."
+
+        Instead, we could apply the analytic distortion model to the input image, but
+        that would require interpolation in the destination (to fill the holes),
+        and that seems harder.
+        """
+
+        # Each value is its location.
+        grid: NDArray[np.float32] = np.indices((self.h, self.w), dtype=np.float32)
+        grid_y: NDArray[np.float32] = grid[0]
+        grid_x: NDArray[np.float32] = grid[1]
+
+        # Flatten row-major.
+        x_flat: NDArray[np.float32] = grid_x.ravel()
+        y_flat: NDArray[np.float32] = grid_y.ravel()
+
+        # Statck to make a 2d array where each row is a pair, like MatofPoint2f.
+        points: MatLike = np.stack([x_flat, y_flat], axis=-1).reshape(-1, 1, 2)
+
+        # Make the undistortion map.
+        distort_map: MatLike = cv2.undistortPoints(
+            points, self.get_intrinsic(), self.get_dist(), P=self.get_intrinsic()
         )
         distort_map = distort_map.reshape(self.h, self.w, 2)
 
+        # Separate the x and y because that's what remap wants.
         map_x = distort_map[:, :, 0]
         map_y = distort_map[:, :, 1]
 
-        # Sample from your clean image to generate a synthetically distorted one
+        # Apply the map.
         return cv2.remap(undistorted_img, map_x, map_y, interpolation=cv2.INTER_LINEAR)
 
     @override

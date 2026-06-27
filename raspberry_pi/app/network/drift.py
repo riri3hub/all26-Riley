@@ -15,6 +15,7 @@ class Drift:
         self._queue: Queue[int] = queue
         self._first_estimate: int = 0
         self._offset: int = 0
+        """Offset in microseconds."""
         self._offset_pub: ntcore.IntegerPublisher = self._inst.getIntegerTopic(
             "sync/" + identity.value + "/offset (us)"
         ).publish()
@@ -22,8 +23,8 @@ class Drift:
             "sync/" + identity.value + "/drift (us)"
         ).publish()
 
-    def get(self) -> int:
-        """Get the current offset, updating if possible."""
+    def _get(self) -> int:
+        """Get the current offset, in microseconds, updating if possible."""
         try:
             self._offset = self._queue.get_nowait()
 
@@ -43,3 +44,8 @@ class Drift:
             # nothing to do
 
         return self._offset
+
+    def server_time(self, localtime: int) -> int:
+        """Apply the drift to the supplied localtime to obtain
+        the equivalent servertime, in microseconds."""
+        return localtime + self._get()

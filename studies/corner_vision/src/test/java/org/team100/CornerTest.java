@@ -285,16 +285,34 @@ public class CornerTest {
         return correctedCorners;
     }
 
+    /**
+     * Use "remap" to invert the undistortion function.
+     * 
+     * undistortPoints() takes distorted points as input and yields true points.
+     * 
+     * So we make a matrix of points, each of which is its own location.
+     * 
+     * When we give undistortPoints() each location, it treats it as if it were from
+     * the distorted image, and so yields a location corresponding to the true
+     * image. This is, therefore, a "forward" map.
+     * 
+     * remap() takes each point in the *destination* matrix, and applies the map to
+     * find the point in the *source* matrix that should be used. This is an
+     * "inverse" map.
+     * 
+     * So using the "undistort" map with "remap" will invert it, becoming "distort."
+     * 
+     * Instead, we could apply the analytic distortion model to the input image, but
+     * that would require interpolation in the destination (to fill the holes),
+     * and that seems harder.
+     * 
+     * TODO: pull this into lib, make it more like the python one.
+     */
     private Mat distort(Mat undistorted_img, double k1) {
         Size size = undistorted_img.size();
 
         // Compute the map.
-        //
-        // Each point is a pointer to its undistorted location, so the
-        // map really describes distortion: to get the value for a pixel,
-        // use the pointer to the undistorted pixel.
         MatOfPoint2f dstPoints = new MatOfPoint2f();
-
         Calib3d.undistortPoints(
                 getSrcPoints(size),
                 dstPoints,
@@ -317,11 +335,8 @@ public class CornerTest {
                 mapY.put(row, col, p.y);
             }
         }
+
         // Apply the map.
-        //
-        // The map describes the position in the src image that
-        // each position in the dst image should use.
-        // dst(x,y) = src(h(x,y))
         Mat dst = new Mat();
         Imgproc.remap(undistorted_img, dst, mapX, mapY, Imgproc.INTER_LINEAR);
         return dst;

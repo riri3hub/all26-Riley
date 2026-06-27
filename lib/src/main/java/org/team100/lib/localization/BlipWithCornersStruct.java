@@ -19,12 +19,22 @@ public class BlipWithCornersStruct implements Struct<BlipWithCorners> {
 
     @Override
     public int getSize() {
-        return kSizeInt64 + kSizeInt32 + kSizeDouble * 8 + Transform3d.struct.getSize();
+        return kSizeInt64 + kSizeInt32
+                + kSizeFloat + kSizeFloat
+                + kSizeFloat + kSizeFloat
+                + kSizeFloat + kSizeFloat
+                + kSizeFloat + kSizeFloat
+                + Transform3d.struct.getSize();
     }
 
     @Override
     public String getSchema() {
-        return "int64 timestamp; int32 id; double corners[8]; Transform3d pose";
+        return "int64 timestamp; int32 id; "
+                + "float x0; float y0; "
+                + "float x1; float y1; "
+                + "float x2; float y2; "
+                + "float x3; float y3; "
+                + "Transform3d pose";
     }
 
     @Override
@@ -36,16 +46,31 @@ public class BlipWithCornersStruct implements Struct<BlipWithCorners> {
     public BlipWithCorners unpack(ByteBuffer bb) {
         long timestamp = bb.getLong();
         int id = bb.getInt();
-        double[] corners = Struct.unpackDoubleArray(bb, 8);
+        float x0 = bb.getFloat();
+        float y0 = bb.getFloat();
+        float x1 = bb.getFloat();
+        float y1 = bb.getFloat();
+        float x2 = bb.getFloat();
+        float y2 = bb.getFloat();
+        float x3 = bb.getFloat();
+        float y3 = bb.getFloat();
         Transform3d pose = Transform3d.struct.unpack(bb);
-        return new BlipWithCorners(timestamp, id, corners, pose);
+        return new BlipWithCorners(
+                timestamp, id, x0, y0, x1, y1, x2, y2, x3, y3, pose);
     }
 
     @Override
     public void pack(ByteBuffer bb, BlipWithCorners value) {
         bb.putLong(value.getTimestamp());
         bb.putInt(value.getId());
-        Struct.packArray(bb, value.getCorners());
+        bb.putFloat(value.getX0());
+        bb.putFloat(value.getY0());
+        bb.putFloat(value.getX1());
+        bb.putFloat(value.getY1());
+        bb.putFloat(value.getX2());
+        bb.putFloat(value.getY2());
+        bb.putFloat(value.getX3());
+        bb.putFloat(value.getY3());
         Transform3d.struct.pack(bb, value.getRawPose());
     }
 

@@ -5,6 +5,7 @@ from typing_extensions import Buffer, override
 from cv2.typing import MatLike
 from app.camera.request_protocol import Request
 from app.decoder.mat_decoder import MatDecoder
+from app.util.timer import Timer
 
 
 class FakeRequest(Request):
@@ -24,8 +25,8 @@ class FakeRequest(Request):
         return self._fps
 
     @override
-    def delay_us(self) -> int:
-        return 500
+    def timestamp_boottime_us(self) -> int:
+        return (Timer.time_ns() // 1000) - 500
 
     @override
     def buffer(self) -> AbstractContextManager[Buffer]:

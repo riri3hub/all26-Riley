@@ -1,3 +1,4 @@
+# pylint: disable=R0903
 from typing_extensions import override
 from app.network.structs import Blip, BlipWithCorners, Target
 from app.network.network_protocol import (

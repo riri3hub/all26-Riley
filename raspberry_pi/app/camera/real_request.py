@@ -1,12 +1,12 @@
 # pylint: disable=E0401,R0913,R0917
-
+from typing import Any
 from contextlib import AbstractContextManager
 from typing_extensions import Buffer, override
 from picamera2 import CompletedRequest  # type: ignore
 from picamera2.request import _MappedBuffer  # type: ignore
+from app.camera.capture_timestamp import CaptureTimestamp
 from app.camera.request_protocol import Request
 from app.decoder.decoder_protocol import Decoder
-from app.camera.delay import Delay
 
 # Extra constant delay.
 EXTRA_DELAY_MS: float = 2.5
@@ -18,7 +18,7 @@ class RealRequest(Request):
         req: CompletedRequest,  # type: ignore
         fps: float,
         decoder: Decoder,
-        delay: Delay,
+        timestamp: CaptureTimestamp,
     ):
         # Before we get a CompletedRequest, its constructor has used the
         # camera allocator sync property to:
@@ -28,7 +28,7 @@ class RealRequest(Request):
         self._req: CompletedRequest = req
         self._fps = fps
         self._decoder = decoder
-        self._delay = delay
+        self._timestamp = timestamp
 
     @override
     def decoder(self) -> Decoder:
@@ -40,8 +40,9 @@ class RealRequest(Request):
         return self._fps
 
     @override
-    def delay_us(self) -> int:
-        return self._delay.delay_us(self._req.get_metadata())  # type: ignore
+    def timestamp_boottime_us(self) -> int:
+        metadata: dict[str, Any] = self._req.get_metadata()  # type: ignore
+        return self._timestamp.timestamp_boottime_us(metadata)  # type: ignore
 
     @override
     def buffer(self) -> AbstractContextManager[Buffer]:

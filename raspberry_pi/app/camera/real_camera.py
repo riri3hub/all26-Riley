@@ -10,6 +10,7 @@ from picamera2 import CompletedRequest, Picamera2  # type: ignore
 from typing_extensions import override
 
 from app.camera.camera_protocol import Camera, Request
+from app.camera.capture_timestamp import CaptureTimestamp
 from app.camera.config.config_factory import ConfigFactory
 from app.camera.config.config_protocol import Config
 from app.camera.distortion import Distortion
@@ -17,7 +18,6 @@ from app.camera.intrinsic import Intrinsic
 from app.camera.model import Model
 from app.camera.real_request import RealRequest
 from app.camera.size import Size
-from app.camera.delay import Delay
 from app.config.identity import Identity
 from app.decoder.decoder_protocol import Decoder
 from app.util.timer import Timer
@@ -67,7 +67,7 @@ class RealCamera(Camera):
             config, identity, self._cam  # type: ignore
         )
         self._decoder: Decoder = config.decoder()
-        self._delay: Delay = Delay(config)
+        self._timestamp: CaptureTimestamp = CaptureTimestamp(config)
 
         print("\n*** REQUESTED CONFIG")
         pprint(self._camera_config)
@@ -93,7 +93,7 @@ class RealCamera(Camera):
         total_time_ms = (capture_start - self._frame_time) / 1000000
         self._frame_time = capture_start
         fps = 1000 / total_time_ms
-        return RealRequest(req, fps, self._decoder, self._delay)  # type: ignore
+        return RealRequest(req, fps, self._decoder, self._timestamp)  # type: ignore
 
     @override
     def stop(self) -> None:

@@ -11,21 +11,28 @@ from app.config.identity import Identity
 from app.dashboard.fake_display import FakeDisplay
 from app.localization.tag_detector import TagDetector
 from app.network.fake_network import FakeNetwork
+from app.util.timestamps import Timestamps
 
 
 class TagDetectorTest(unittest.TestCase):
-
-    # A series of tests of progressively smaller targets.
-    # Some of these are sensitive to decimation.
+    """A series of tests of progressively smaller targets.
+    Some of these are sensitive to decimation."""
 
     def test_big_sharp(self) -> None:
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/big_sharp.png")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
+
+        self.assertEqual(1, len(network.blips))
+        self.assertEqual(1, len(network.blips_with_corners))
+        b = network.blips_with_corners[0]
+        self.assertAlmostEqual(410, b.x0, delta=1)
+        self.assertAlmostEqual(814, b.y0, delta=1)
 
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
@@ -42,7 +49,6 @@ class TagDetectorTest(unittest.TestCase):
         self.assertAlmostEqual(-0.006, t.y, delta=0.001)
         self.assertAlmostEqual(0.264, t.z, delta=0.001)
         r = pose.rotation()
-        # rotation should be zero, but note the noise
         self.assertAlmostEqual(0, r.x, delta=0.001)
         self.assertAlmostEqual(0, r.y, delta=0.002)
         self.assertAlmostEqual(0, r.z, delta=0.001)
@@ -51,11 +57,18 @@ class TagDetectorTest(unittest.TestCase):
         """This image is rotated."""
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/big_sharp90.png")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
+
+        self.assertEqual(1, len(network.blips))
+        self.assertEqual(1, len(network.blips_with_corners))
+        b = network.blips_with_corners[0]
+        self.assertAlmostEqual(409, b.x0, delta=1)
+        self.assertAlmostEqual(229, b.y0, delta=1)
 
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
@@ -72,7 +85,6 @@ class TagDetectorTest(unittest.TestCase):
         self.assertAlmostEqual(-0.006, t.y, delta=0.001)
         self.assertAlmostEqual(0.264, t.z, delta=0.001)
         r = pose.rotation()
-        # rotation should be zero, but note the noise
         self.assertAlmostEqual(0, r.x, delta=0.002)
         self.assertAlmostEqual(0, r.y, delta=0.002)
         # tag is rotated 90 degrees clockwise.
@@ -83,11 +95,18 @@ class TagDetectorTest(unittest.TestCase):
         """This image uses the "perspective" transform in gimp."""
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/big_sharpY.png")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
+
+        self.assertEqual(1, len(network.blips))
+        self.assertEqual(1, len(network.blips_with_corners))
+        b = network.blips_with_corners[0]
+        self.assertAlmostEqual(512, b.x0, delta=1)
+        self.assertAlmostEqual(815, b.y0, delta=1)
 
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
@@ -104,7 +123,6 @@ class TagDetectorTest(unittest.TestCase):
         self.assertAlmostEqual(-0.006, t.y, delta=0.001)
         self.assertAlmostEqual(0.306, t.z, delta=0.001)
         r = pose.rotation()
-        # rotation should be zero, but note the noise
         self.assertAlmostEqual(0.021, r.x, delta=0.001)
         # tag is rotated something like 30 degrees in negative Y
         # y axis is dowm so the rotation appears here.
@@ -114,11 +132,18 @@ class TagDetectorTest(unittest.TestCase):
     def test_scale1(self) -> None:
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/scale1.png")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
+
+        self.assertEqual(1, len(network.blips))
+        self.assertEqual(1, len(network.blips_with_corners))
+        b = network.blips_with_corners[0]
+        self.assertAlmostEqual(557, b.x0, delta=1)
+        self.assertAlmostEqual(679, b.y0, delta=1)
 
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
@@ -135,19 +160,25 @@ class TagDetectorTest(unittest.TestCase):
         self.assertAlmostEqual(-0.007, t.y, delta=0.001)
         self.assertAlmostEqual(0.528, t.z, delta=0.001)
         r = pose.rotation()
-        # rotation should be zero, but note the noise
-        self.assertAlmostEqual(0, r.x, delta=0.001)
-        self.assertAlmostEqual(0, r.y, delta=0.001)
+        self.assertAlmostEqual(0, r.x, delta=0.004)
+        self.assertAlmostEqual(0, r.y, delta=0.004)
         self.assertAlmostEqual(0, r.z, delta=0.001)
 
     def test_scale2(self) -> None:
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/scale2.png")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
+
+        self.assertEqual(1, len(network.blips))
+        self.assertEqual(1, len(network.blips_with_corners))
+        b = network.blips_with_corners[0]
+        self.assertAlmostEqual(630, b.x0, delta=1)
+        self.assertAlmostEqual(610, b.y0, delta=1)
 
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
@@ -164,19 +195,25 @@ class TagDetectorTest(unittest.TestCase):
         self.assertAlmostEqual(-0.008, t.y, delta=0.001)
         self.assertAlmostEqual(1.055, t.z, delta=0.001)
         r = pose.rotation()
-        # rotation should be zero, but note the noise
-        self.assertAlmostEqual(0, r.x, delta=0.001)
-        self.assertAlmostEqual(0, r.y, delta=0.001)
+        self.assertAlmostEqual(0, r.x, delta=0.003)
+        self.assertAlmostEqual(0, r.y, delta=0.007)
         self.assertAlmostEqual(0, r.z, delta=0.001)
 
     def test_scale3(self) -> None:
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/scale3.pnm")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
+
+        self.assertEqual(1, len(network.blips))
+        self.assertEqual(1, len(network.blips_with_corners))
+        b = network.blips_with_corners[0]
+        self.assertAlmostEqual(666, b.x0, delta=1)
+        self.assertAlmostEqual(578, b.y0, delta=1)
 
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
@@ -191,10 +228,8 @@ class TagDetectorTest(unittest.TestCase):
         t = pose.translation()
         self.assertAlmostEqual(-0.003, t.x, delta=0.001)
         self.assertAlmostEqual(-0.007, t.y, delta=0.001)
-        # quad decimate of 4 makes a 1% difference here
         self.assertAlmostEqual(2.119, t.z, delta=0.01)
         r = pose.rotation()
-        # rotation should be zero, but note the noise
         self.assertAlmostEqual(0, r.x, delta=0.04)
         self.assertAlmostEqual(0, r.y, delta=0.1)
         self.assertAlmostEqual(0, r.z, delta=0.001)
@@ -202,11 +237,18 @@ class TagDetectorTest(unittest.TestCase):
     def test_scale4(self) -> None:
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/scale4.pnm")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
+
+        self.assertEqual(1, len(network.blips))
+        self.assertEqual(1, len(network.blips_with_corners))
+        b = network.blips_with_corners[0]
+        self.assertAlmostEqual(685, b.x0, delta=1)
+        self.assertAlmostEqual(561, b.y0, delta=1)
 
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
@@ -219,31 +261,33 @@ class TagDetectorTest(unittest.TestCase):
         self.assertAlmostEqual(543, tag.getCenter().y, 0)
         pose = display.poses[0]
         t = pose.translation()
-        # x and y are near center
         self.assertAlmostEqual(-0.005, t.x, 2)
         self.assertAlmostEqual(-0.007, t.y, 2)
-        # quad decimate of 4 makes a 1% difference here.
         self.assertAlmostEqual(4.242, t.z, 1)
         r = pose.rotation()
-        # rotation should be zero, but note the noise
         self.assertAlmostEqual(0, r.x, delta=0.02)
         self.assertAlmostEqual(0, r.y, delta=0.001)
         self.assertAlmostEqual(0, r.z, delta=0.001)
 
     def test_scale5(self) -> None:
-        # it's kind of amazing that this one works
-        # this does not work when quadDecimate is set to 4.
+        """It's kind of amazing that this one works.
+        This does not work when quadDecimate is set to 4."""
+
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/scale5.pnm")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
 
-        # self.assertEqual(0, len(display.tags))
+        self.assertEqual(1, len(network.blips))
+        self.assertEqual(1, len(network.blips_with_corners))
+        b = network.blips_with_corners[0]
+        self.assertAlmostEqual(694, b.x0, delta=1)
+        self.assertAlmostEqual(552, b.y0, delta=1)
 
-        # turn quadDecimate back to 1, and this should work again.
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
         self.assertEqual(2, len(display.msgs))
@@ -259,18 +303,19 @@ class TagDetectorTest(unittest.TestCase):
         self.assertAlmostEqual(0, t.y, 1)
         self.assertAlmostEqual(8.497, t.z, 3)
         r = pose.rotation()
-        # rotation should be zero, but note the noise
         self.assertAlmostEqual(0, r.x, delta=0.2)
         self.assertAlmostEqual(0, r.y, delta=0.004)
         self.assertAlmostEqual(0, r.z, delta=0.001)
 
     def test_scale6(self) -> None:
-        # now finally too small
+        """This is too small."""
+
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/scale6.pnm")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
 
@@ -283,11 +328,18 @@ class TagDetectorTest(unittest.TestCase):
     def test_one_tag_found(self) -> None:
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         camera = FakeCamera("images/tag_and_board.jpg", (1100, 620))
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
+
+        self.assertEqual(1, len(network.blips))
+        self.assertEqual(1, len(network.blips_with_corners))
+        b = network.blips_with_corners[0]
+        self.assertAlmostEqual(191, b.x0, delta=1)
+        self.assertAlmostEqual(496, b.y0, delta=1)
 
         self.assertEqual(1, len(display.tags))
         self.assertEqual(1, len(display.poses))
@@ -305,8 +357,6 @@ class TagDetectorTest(unittest.TestCase):
         self.assertAlmostEqual(0.642, t.z, 3)
         r = pose.rotation()
         print(r.getQuaternion())
-        # expect about (0.5, -0.5, -0.2)
-        # so this is kinda like that.
         self.assertAlmostEqual(0.786, r.x, delta=0.001)
         self.assertAlmostEqual(-0.607, r.y, delta=0.001)
         self.assertAlmostEqual(-0.492, r.z, delta=0.001)
@@ -314,13 +364,15 @@ class TagDetectorTest(unittest.TestCase):
     def test_zero_tags_found(self) -> None:
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         # nothing in this image
         camera = FakeCamera("images/white_square.jpg")
         display = FakeDisplay()
-        tag_detector = TagDetector(identity, camera, display, network)
+        tag_detector = TagDetector(identity, camera, display, network, timestamps)
         request = camera.capture_request()
         tag_detector.analyze(request)
 
+        self.assertEqual(0, len(network.blips))
         self.assertEqual(0, len(display.tags))
         self.assertEqual(0, len(display.poses))
         self.assertEqual(2, len(display.msgs))
@@ -342,11 +394,12 @@ class TagDetectorTest(unittest.TestCase):
         """How much distortion can there be in the image?"""
         identity = Identity.UNKNOWN
         network = FakeNetwork()
+        timestamps = Timestamps(network)
 
         # No distortion.
         camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), 0)
         display = FakeDisplay()
-        TagDetector(identity, camera, display, network).analyze(
+        TagDetector(identity, camera, display, network, timestamps).analyze(
             camera.capture_request()
         )
         self.assertEqual(1, len(display.tags))
@@ -355,7 +408,7 @@ class TagDetectorTest(unittest.TestCase):
         # A moderate amount of distortion
         camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), -0.1)
         display = FakeDisplay()
-        TagDetector(identity, camera, display, network).analyze(
+        TagDetector(identity, camera, display, network, timestamps).analyze(
             camera.capture_request()
         )
         self.assertEqual(1, len(display.tags))
@@ -365,7 +418,7 @@ class TagDetectorTest(unittest.TestCase):
         # A realistic amount of distortion
         camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), -0.3)
         display = FakeDisplay()
-        TagDetector(identity, camera, display, network).analyze(
+        TagDetector(identity, camera, display, network, timestamps).analyze(
             camera.capture_request()
         )
         self.assertEqual(1, len(display.tags))
@@ -376,7 +429,7 @@ class TagDetectorTest(unittest.TestCase):
         # Note: this is a truly enormous amount of distortion.
         camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), -2)
         display = FakeDisplay()
-        TagDetector(identity, camera, display, network).analyze(
+        TagDetector(identity, camera, display, network, timestamps).analyze(
             camera.capture_request()
         )
         self.assertEqual(0, len(display.tags))

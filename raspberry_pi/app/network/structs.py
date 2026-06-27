@@ -22,17 +22,43 @@ class Blip:
 @wpistruct.make_wpistruct  # type:ignore
 @dataclasses.dataclass
 class BlipWithCorners:
-    """AprilTag pose with pixel corners"""
+    """AprilTag pose with corner pixels (x,y)"""
 
     timestamp: wpistruct.int64
-    """server microseconds"""
+    """Server time in microseconds."""
     id: wpistruct.int32
-    """tag id"""
-    corners: list[float]
-    """pixel corners"""
+    """Apriltag id number."""
+    # The corners are laid out as primitives because python can't do an array.
+    # https://github.com/robotpy/mostrobotpy/issues/272
+    x0: float
+    """Lower-left x."""
+    y0: float
+    """Lower-left y."""
+    x1: float
+    """Lower-right x."""
+    y1: float
+    """Lower-right y."""
+    x2: float
+    """Upper-right x."""
+    y2: float
+    """Upper-right y."""
+    x3: float
+    """Upper-left x."""
+    y3: float
+    """Upper-left y."""
     pose: Transform3d
-    """camera-relative"""
+    """Camera-relative pose."""
 
+    @classmethod
+    def make(
+        cls,
+        m_timestamp: wpistruct.int64,
+        m_id: wpistruct.int32,
+        corners: tuple[float, float, float, float, float, float, float, float],
+        m_pose: Transform3d,
+    ) -> "BlipWithCorners":
+        """Make a BlipWithCorners using the corners tuple."""
+        return cls(m_timestamp, m_id, *corners, m_pose)
 
 
 @wpistruct.make_wpistruct  # type:ignore

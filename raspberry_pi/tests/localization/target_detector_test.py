@@ -11,6 +11,7 @@ from app.dashboard.fake_display import FakeDisplay
 from app.localization.target_detector import TargetDetector
 from app.network.structs import Target
 from app.network.fake_network import FakeNetwork
+from app.util.timestamps import Timestamps
 
 
 class TargetDetectorTest(unittest.TestCase):
@@ -19,6 +20,7 @@ class TargetDetectorTest(unittest.TestCase):
     def test_one_note_found(self) -> None:
 
         network = FakeNetwork()
+        timestamps = Timestamps(network)
         # this has a blob that matches the
         # HSV range in the note detector
         # the blob is in the lower right quadrant, so the result
@@ -34,7 +36,7 @@ class TargetDetectorTest(unittest.TestCase):
         object_lower = np.array((40, 50, 100))
         object_higher = np.array((70, 255, 255))
         note_detector = TargetDetector(
-            camera, display, network, object_lower, object_higher
+            camera, display, network, timestamps, object_lower, object_higher
         )
         request = camera.capture_request()
         note_detector.analyze(request)
@@ -99,11 +101,12 @@ class TargetDetectorTest(unittest.TestCase):
         camera = FakeCamera("images/green_blob.jpg", None, -0.1)
         display = FakeDisplay()
         network = FakeNetwork()
+        timestamps = Timestamps(network)
 
         object_lower = np.array((40, 50, 100))
         object_higher = np.array((70, 255, 255))
         note_detector = TargetDetector(
-            camera, display, network, object_lower, object_higher
+            camera, display, network, timestamps, object_lower, object_higher
         )
         request = camera.capture_request()
         note_detector.analyze(request)
@@ -139,6 +142,7 @@ class TargetDetectorTest(unittest.TestCase):
 
     def test_zero_notes_found(self) -> None:
         network = FakeNetwork()
+        timestamps = Timestamps(network)
 
         # nothing in this image
         camera = FakeCamera("images/white_square.jpg")
@@ -148,7 +152,7 @@ class TargetDetectorTest(unittest.TestCase):
         object_lower = np.array((40, 50, 100))
         object_higher = np.array((70, 255, 255))
         note_detector = TargetDetector(
-            camera, display, network, object_lower, object_higher
+            camera, display, network, timestamps, object_lower, object_higher
         )
         request = camera.capture_request()
         note_detector.analyze(request)

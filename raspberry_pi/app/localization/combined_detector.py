@@ -1,20 +1,20 @@
 # pylint: disable=C0103,E0611,E1101,E1121,R0902,R0903,R0913,R0914,R0917,W0212,W0612
-
 import cv2
 import numpy as np
 from numpy.typing import NDArray
-import ntcore
 from robotpy_apriltag import AprilTagDetection, AprilTagDetector, AprilTagPoseEstimator
 from typing_extensions import override
-from wpimath.geometry import Rotation3d
+from wpimath.geometry import Rotation3d, Transform3d
 from cv2.typing import MatLike, Moments
 from app.camera.camera_protocol import Camera, Request, Size
 from app.interpreter.interpreter_protocol import Interpreter
 from app.config.identity import Identity
 from app.dashboard.display import Display
 from app.decoder.decoder_protocol import Decoder
-from app.network.structs import Blip, Target
+from app.localization.detector_util import DetectorUtil
+from app.network.structs import Blip, BlipWithCorners, Target
 from app.network.network_protocol import Network
+from app.util.timestamps import Timestamps
 
 
 class CombinedDetector(Interpreter):
@@ -26,8 +26,9 @@ class CombinedDetector(Interpreter):
         cam: Camera,
         display: Display,
         network: Network,
+        timestamps: Timestamps,
         object_lower: NDArray[np.int32],
-        object_higher: NDArray[np.int32],
+        object_higher: NDArray[np.int32],  # type: ignore
     ) -> None:
         """
         Parameters:
@@ -38,6 +39,7 @@ class CombinedDetector(Interpreter):
         self._cam = cam
         self._display = display
         self._network = network
+        self._timestamps = timestamps
 
         print("\n*** Interpreter: CombinedDetector")
 
@@ -76,9 +78,46 @@ class CombinedDetector(Interpreter):
 
         # network output for tag sightings
         self._blips = network.get_blip_sender()
+        self._blips_with_corners = network.get_blip_with_corners_sender()
 
         # network output for target sightings
         self._targets = network.get_target_sender()
+
+    @override
+    def analyze(self, req: Request) -> None:
+        """Process both tags and objects from the BGR image."""
+        with req.buffer() as buffer:
+            decoder: Decoder = req.decoder()
+            img_bgr: MatLike | None = decoder.color(buffer)
+            if img_bgr is None:
+                return
+
+            img_display = img_bgr.copy()
+
+            # Capture timestamp in boottime.
+            timestamp_boottime_us = req.timestamp_boottime_us()
+
+            # Microsecond age of frame.
+            delay_us = Timestamps.delta_us(timestamp_boottime_us)
+
+            # Capture timestamp in servertime.
+            servertime: int = self._timestamps.boot_time_to_server_time(
+                timestamp_boottime_us
+            )
+
+            # Run both detectors on the BGR image
+            self.detect_tags(img_bgr, img_display, servertime)
+            self.detect_objects(img_bgr, img_display, servertime)
+
+            # Network flush and display
+            self._network.flush()
+
+            fps = req.fps()
+            self._display.text(img_display, f"FPS {fps:2.0f}", (5, 65))
+            self._display.text(
+                img_display, f"delay (ms) {delay_us/1000:2.0f}", (5, 105)
+            )
+            self._display.put(img_display)
 
     def undistort_points(self, pointlist: list[list[int]]) -> MatLike:
         """Undistort image points using camera matrix and distortion coefficients."""
@@ -99,37 +138,39 @@ class CombinedDetector(Interpreter):
         img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
         img_gray = np.ascontiguousarray(img_gray)
         result: list[AprilTagDetection] = self._at_detector.detect(img_gray.data)
-        blips: list[Blip] = []
 
-        for result_item in result:
-            if result_item.getHamming() > 0:
+        blips: list[Blip] = []
+        blips_with_corners: list[BlipWithCorners] = []
+
+        for tag in result:
+            if tag.getHamming() > 0:
                 continue
 
-            # Undistort tag corners
-            corners: tuple[float, float, float, float, float, float, float, float] = (
-                result_item.getCorners((0, 0, 0, 0, 0, 0, 0, 0))
-            )
-            pairs = np.reshape(corners, [4, 2])
-            pairs = cv2.undistortImagePoints(pairs, self._mtx, self._dist)
+            # Extract raw (x,y) corners from the tag.
+            raw_corners: tuple[
+                float, float, float, float, float, float, float, float
+            ] = DetectorUtil.raw_corners(tag)
 
-            # Reformat corners for pose estimation
-            corners = (
-                pairs[0][0][0],
-                pairs[0][0][1],
-                pairs[1][0][0],
-                pairs[1][0][1],
-                pairs[2][0][0],
-                pairs[2][0][1],
-                pairs[3][0][0],
-                pairs[3][0][1],
-            )
+            # Undistort the corners.
+            undistorted_corners: tuple[
+                float, float, float, float, float, float, float, float
+            ] = DetectorUtil.undistorted_corners(self._mtx, self._dist, raw_corners)
 
-            homography = result_item.getHomography()
-            pose = self._estimator.estimate(homography, corners)
-            blips.append(Blip(servertime, result_item.getId(), pose))
-            self._display.tag(img_display, result_item, pose)  # Display on BGR image
+            # Redo the homography using the undistorted corners.
+            homography = DetectorUtil.homography(undistorted_corners)
+
+            # Estimate the pose.
+            pose: Transform3d = self._estimator.estimate(
+                homography, undistorted_corners
+            )
+            blips.append(Blip(servertime, tag.getId(), pose))
+            blips_with_corners.append(
+                BlipWithCorners.make(servertime, tag.getId(), raw_corners, pose)
+            )
+            self._display.tag(img_display, tag, pose)  # Display on BGR image
 
         self._blips.send(blips)
+        self._blips_with_corners.send(blips_with_corners)
 
     def detect_objects(
         self,
@@ -202,35 +243,3 @@ class CombinedDetector(Interpreter):
             self._targets.send(targets)
 
         # self.display.put(img_range)
-
-    @override
-    def analyze(self, req: Request) -> None:
-        """Process both tags and objects from the BGR image."""
-        with req.buffer() as buffer:
-            decoder: Decoder = req.decoder()
-            img_bgr: MatLike | None = decoder.color(buffer)
-            if img_bgr is None:
-                return
-
-            img_display = img_bgr.copy()
-
-            # microsecond age of frame
-            delay_us = req.delay_us()
-
-            # localtime in microseconds
-            localtime: int = int(ntcore._now() - delay_us)
-            servertime: int = self._network.server_time(localtime)
-
-            # Run both detectors on the BGR image
-            self.detect_tags(img_bgr, img_display, servertime)
-            self.detect_objects(img_bgr, img_display, servertime)
-
-            # Network flush and display
-            self._network.flush()
-
-            fps = req.fps()
-            self._display.text(img_display, f"FPS {fps:2.0f}", (5, 65))
-            self._display.text(
-                img_display, f"delay (ms) {delay_us/1000:2.0f}", (5, 105)
-            )
-            self._display.put(img_display)

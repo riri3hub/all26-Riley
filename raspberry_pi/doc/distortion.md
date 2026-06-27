@@ -31,3 +31,11 @@ For more about the detection algorithm, see
 * the [original AprilTag paper](https://april.eecs.umich.edu/media/pdfs/olson2011tags.pdf)
 * the [AprilTag 2 paper](https://april.eecs.umich.edu/media/pdfs/wang2016iros.pdf)
 * the [AprilTag 3 paper](https://april.eecs.umich.edu/media/pdfs/krogius2019iros.pdf)
+
+# Distortion models
+
+The distortion topic is very confusing, because both "forward" and "inverse" models exist, which use the very same names for analogous (but not identical) parameters.
+
+OpenCV distortion is a "forward" model, i.e. it models distortion analytically.
+
+OpenCV [implements undistortion iteratively](https://github.com/opencv/opencv/blob/dd541965e9fc406f03cd6b56f1d62ecfc6cac4ab/modules/calib3d/src/undistort.dispatch.cpp#L330).

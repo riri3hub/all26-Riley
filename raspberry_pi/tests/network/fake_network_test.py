@@ -14,5 +14,8 @@ class FakeNetworkTest(unittest.TestCase):
     def test_blip_with_corners(self) -> None:
         network = FakeNetwork()
         sender = network.get_blip_with_corners_sender()
-        sender.send(BlipWithCorners(0, 0, [0, 0, 1, 1, 2, 2, 3, 3], Transform3d()))
-        self.assertEqual(None, network.blips_with_corners[0])
+        sender.send(
+            [BlipWithCorners.make(0, 0, [0, 0, 1, 1, 2, 2, 3, 3], Transform3d())]
+        )
+        b: BlipWithCorners = network.blips_with_corners[0]
+        self.assertEqual(1, b.x1)

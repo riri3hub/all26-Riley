@@ -22,9 +22,8 @@ class Request(Protocol):
         """FPS calculated from the previous capture."""
         ...
 
-    def delay_us(self) -> int:
-        """Duration between the capture instant of the center of the frame
-        and the current instant, microseconds."""
+    def timestamp_boottime_us(self) -> int:
+        """Timestamp of the capture instant, relative to "boot time", in microseconds."""
         ...
 
     def buffer(self) -> AbstractContextManager[Buffer]:

@@ -1,40 +1,39 @@
 # pylint: disable=R0903
-
 from typing import Any, cast
 from app.camera.config.config_protocol import Config
-from app.util.timer import Timer
 
 # For when the camera doesn't report the exposure time,
 # and there's no configured exposure time either.
 DEFAULT_EXPOSURE_US: int = 1000
 
 
-class Delay:
+class CaptureTimestamp:
     """Estimate the age of a frame based on config and metadata."""
 
     def __init__(self, config: Config) -> None:
+
         self._extra_us = cast(int, config.extra_delay_ms() * 1000)
         """Calibrated extra delay in microseconds, using "camera_delay" app."""
+
         self._fallback_exposure_us = self._get_fallback_exposure_us(config)
         """Fallback exposure duration in microseconds."""
 
-    def delay_us(self, metadata: dict[str, Any]) -> int:
-        """Delay from capture to the current instant,
-        in microseconds."""
+    def timestamp_boottime_us(self, metadata: dict[str, Any]) -> int:
+        """Timestamp of the capture instant of the center of the frame,
+        using CLOCK_BOOTTIME, in microseconds."""
 
-        # Time of first row received, in microseconds in the Timer timebase.
+        # Time of first row received, in microseconds.
+        # Uses the *boot-time* clock.
         # This is roughly the "readout timestamp".
+        # It's a pleasant surprise that the libcamera UVC implementation
+        # works correctly, with the timestamp from the real sensor metadata.
         sensor_timestamp_us = cast(int, metadata["SensorTimestamp"]) // 1000
 
         # Delay due to exposure duration.
         half_exposure_us = self._get_half_exposure_us(metadata)
 
-        # The actual capture is a little bit earlier
-        exposure_timestamp_us = sensor_timestamp_us - self._extra_us - half_exposure_us
-
-        # The delay is the difference between the exposure time and the current instant.
-        now_us: int = Timer.time_ns() // 1000
-        return now_us - exposure_timestamp_us
+        # The actual capture is a little bit earlier; subtract a little extra.
+        return sensor_timestamp_us - half_exposure_us - self._extra_us
 
     def _get_half_exposure_us(self, metadata: dict[str, Any]) -> int:
         """The exposure itself takes time, producing a blur on the sensor.
