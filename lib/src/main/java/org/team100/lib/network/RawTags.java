@@ -2,8 +2,8 @@ package org.team100.lib.network;
 
 import java.util.function.ObjDoubleConsumer;
 
+import org.team100.lib.camera.Camera;
 import org.team100.lib.coherence.Takt;
-import org.team100.lib.config.Camera;
 import org.team100.lib.localization.Blip;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;

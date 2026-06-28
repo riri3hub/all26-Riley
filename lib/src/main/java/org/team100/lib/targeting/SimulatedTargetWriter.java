@@ -6,8 +6,9 @@ import java.util.Map;
 import java.util.function.DoubleFunction;
 
 import org.team100.frc2025.field.FieldConstants2025;
+import org.team100.lib.camera.Camera;
+import org.team100.lib.camera.Offset;
 import org.team100.lib.coherence.Takt;
-import org.team100.lib.config.Camera;
 import org.team100.lib.localization.SwerveHistory;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -101,7 +102,7 @@ public class SimulatedTargetWriter {
             Camera camera = entry.getKey();
             StructArrayPublisher<Target> publisher = entry.getValue();
             List<Rotation3d> rot = SimulatedObjectDetector.getRotations(
-                    pose, camera.getOffset(), m_targets);
+                    pose, Offset.get(camera).offset(), m_targets);
             if (DEBUG) {
                 System.out.printf("rot size %d\n", rot.size());
             }

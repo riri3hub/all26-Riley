@@ -1,9 +1,9 @@
-package org.team100.lib.localization;
+package org.team100.lib.camera;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Camera;
+import org.team100.lib.localization.Blip;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -35,7 +35,6 @@ class CameraTest {
         assertEquals(0, or.getY(), DELTA);
         assertEquals(0, or.getZ(), DELTA);
     }
-    
 
     @Test
     void testNoRotation() {

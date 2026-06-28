@@ -9,7 +9,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Camera;
+import org.team100.lib.camera.Camera;
+import org.team100.lib.camera.Offset;
 import org.team100.lib.state.ModelSE2;
 
 import edu.wpi.first.hal.AllianceStationID;
@@ -178,7 +179,7 @@ public class SimulatedTagDetectorTest {
         Pose2d robotPose = new Pose2d(2.6576, 4.0259, Rotation2d.kZero);
         Pose3d robotPose3d = new Pose3d(robotPose);
 
-        Transform3d cameraOffset = camera.getOffset();
+        Transform3d cameraOffset = Offset.get(camera).offset();
         Pose3d cameraPose3d = robotPose3d.plus(cameraOffset);
         // camera is in the front
         assertEquals(2.855, cameraPose3d.getTranslation().getX(), DELTA);

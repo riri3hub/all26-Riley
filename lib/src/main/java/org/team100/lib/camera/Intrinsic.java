@@ -1,4 +1,4 @@
-package org.team100.lib.config;
+package org.team100.lib.camera;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -12,7 +12,10 @@ import org.opencv.core.Mat;
  * Should mirror intrinsic.py.
  */
 public class Intrinsic {
-
+    private static final Intrinsic DEFAULT = new Intrinsic(new double[][] { //
+            { 1.0, 0.0, 0.0 }, //
+            { 0.0, 1.0, 0.0 }, //
+            { 0.0, 0.0, 1.0 } });
     private static final Map<Camera, Intrinsic> intrinsics;
 
     static {
@@ -26,8 +29,12 @@ public class Intrinsic {
     }
 
     public static Intrinsic get(Camera camera) {
-        // TODO: default
-        return intrinsics.get(camera);
+        Intrinsic i = intrinsics.get(camera);
+        if (i == null) {
+            System.out.printf("Unknown intrinsic for camera %s\n", camera);
+            return DEFAULT;
+        }
+        return i;
     }
 
     private final double[][] K;

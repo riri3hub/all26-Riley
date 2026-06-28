@@ -1,4 +1,4 @@
-package org.team100.lib.config;
+package org.team100.lib.camera;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -10,7 +10,7 @@ import org.opencv.core.Mat;
  * Camera distortion parameters.
  */
 public class Distortion {
-
+    private static final Distortion DEFAULT = new Distortion(new double[] { 0.0, 0.0, 0.0, 0.0 });
     private static final Map<Camera, Distortion> distortions;
 
     static {
@@ -21,8 +21,12 @@ public class Distortion {
     }
 
     public static Distortion get(Camera camera) {
-        // TODO: default
-        return distortions.get(camera);
+        Distortion d = distortions.get(camera);
+        if (d == null) {
+            System.out.printf("Unknown distortion for camera %s\n", camera);
+            return DEFAULT;
+        }
+        return d;
     }
 
     private final double[] dist;

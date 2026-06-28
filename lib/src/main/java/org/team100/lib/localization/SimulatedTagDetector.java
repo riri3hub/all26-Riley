@@ -9,8 +9,9 @@ import java.util.Random;
 import java.util.function.DoubleFunction;
 import java.util.function.DoubleSupplier;
 
+import org.team100.lib.camera.Camera;
+import org.team100.lib.camera.Offset;
 import org.team100.lib.coherence.Takt;
-import org.team100.lib.config.Camera;
 import org.team100.lib.geometry.Metrics;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.uncertainty.IsotropicNoiseSE2;
@@ -153,7 +154,7 @@ public class SimulatedTagDetector {
             StructArrayPublisher<Blip> publisher = entry.getValue();
 
             List<Blip> blips = new ArrayList<>();
-            Transform3d cameraOffset = camera.getOffset();
+            Transform3d cameraOffset = Offset.get(camera).offset();
             Pose3d cameraPose3d = robotPose3d.plus(cameraOffset);
             Alliance alliance = opt.get();
 

@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
  * add.
  */
 public class TrailingHistory<T> {
+    private static final boolean DEBUG = false;
+
     public record ValueRecord<T>(double time, T value) {
     };
 
@@ -23,6 +25,8 @@ public class TrailingHistory<T> {
 
     /** Add the new value. */
     public void add(double time, T value) {
+        if (DEBUG)
+            System.out.printf("add %f %s\n", time, value);
         m_entries.add(new ValueRecord<>(time, value));
     }
 

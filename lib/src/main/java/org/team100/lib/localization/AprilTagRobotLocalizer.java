@@ -8,7 +8,8 @@ import java.util.function.Supplier;
 import java.util.stream.DoubleStream;
 
 import org.team100.lib.coherence.Takt;
-import org.team100.lib.config.Camera;
+import org.team100.lib.camera.Camera;
+import org.team100.lib.camera.Offset;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.geometry.Metrics;
@@ -161,68 +162,30 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
         setHeedRadiusM(3.5);
     }
 
-    @Override
-    protected void perValue(
-            Camera camera,
-            Blip[] blips) {
-        estimateRobotPose(
-                camera,
-                blips,
-                m_alliance.get());
-    }
-
-    @Override
-    protected void finishUpdate() {
-        m_pub_tags.set(m_allTags.getAll().toArray(new Pose3d[0]));
-        m_pub_used_tags.set(m_usedTags.getAll().toArray(new Pose3d[0]));
-        m_log_allTags.log(
-                () -> m_allTags.getAll().stream().flatMapToDouble(
-                        x -> DoubleStream.of(x.getX(), x.getY(), x.toPose2d().getRotation().getDegrees())).toArray());
-        m_log_usedTags.log(
-                () -> m_usedTags.getAll().stream().flatMapToDouble(
-                        x -> DoubleStream.of(x.getX(), x.getY(), x.toPose2d().getRotation().getDegrees())).toArray());
-    }
-
     /**
-     * Tags outside this radius are ignored.
+     * Clean the history, relative to the current moment.
+     * 
+     * Previously, eviction only occurred when the robot could see something.
      */
-    public void setHeedRadiusM(double heedRadiusM) {
-        m_heedRadiusM = heedRadiusM;
-        m_log_heedRadius.log(() -> m_heedRadiusM);
-    }
-
-    void logCalibration(Camera camera, Transform3d cameraToTag) {
-        Transform3dLogger logCameraToTag = m_log_cameraToTag.computeIfAbsent(
-                camera.name(),
-                (x) -> m_log_cameraToTag_factory.transform3dLogger(Level.TRACE, x));
-        logCameraToTag.log(() -> cameraToTag);
-        // when correctly calibreated, this should match the actual robot-to-tag
-        Transform3dLogger logRobotToTag = m_log_tagInRobot.computeIfAbsent(
-                camera.name(),
-                (x) -> m_log_robotToTag_factory.transform3dLogger(Level.TRACE, x));
-        Transform3d robotToTag = camera.getOffset().plus(cameraToTag);
-        logRobotToTag.log(() -> robotToTag);
+    @Override
+    protected void beginUpdate() {
+        double deadline = Takt.get() - HISTORY_DURATION;
+        m_usedTags.evict(deadline);
+        m_allTags.evict(deadline);
     }
 
     /**
      * Compute the robot pose and put it in the pose estimator.
-     * 
-     * @param cameraOffset Camera pose in robot coordinates. This is not an
-     *                     estimate, it's configured in the Camera class.
-     * @param blips        The targets in the current camera frame
-     * @param optAlliance  From the driver station, it's here to make testing
-     *                     easier.
      */
-    void estimateRobotPose(
+    @Override
+    protected void perValue(
             Camera camera,
-            Blip[] blips,
-            Optional<Alliance> optAlliance) {
-        // Clean the history, relative to the current moment.
-        m_usedTags.evict(Takt.get() - HISTORY_DURATION);
+            Blip[] blips) {
 
-        Transform3d cameraOffset = camera.getOffset();
+        Transform3d cameraOffset = Offset.get(camera).offset();
 
         // Fetch the alliance (not available immediately after startup).
+        Optional<Alliance> optAlliance = m_alliance.get();
         if (!optAlliance.isPresent()) {
             if (DEBUG)
                 System.out.println("no alliance!");
@@ -271,7 +234,6 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
 
             // Estimate the tag pose in the field frame.
             Pose3d estimatedTagInField = estimatedTagInField(cameraOffset, samplePose, cameraToTag);
-            m_allTags.evict(timeSec - HISTORY_DURATION);
             m_allTags.add(timeSec, estimatedTagInField);
             logTagError(tagInField, estimatedTagInField);
 
@@ -316,7 +278,6 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
             ///
             //////////////////////////////////////////////////////////////////
 
-            m_usedTags.evict(timeSec - HISTORY_DURATION);
             m_usedTags.add(timeSec, estimatedTagInField);
 
             NoisyPose2d noisyMeasurement = new NoisyPose2d(
@@ -328,6 +289,40 @@ public class AprilTagRobotLocalizer extends CameraReader<Blip> {
             m_visionUpdater.put(timeSec, noisyMeasurement);
             m_prevPose = robotPose2d;
         }
+
+    }
+
+    @Override
+    protected void finishUpdate() {
+        m_pub_tags.set(m_allTags.getAll().toArray(new Pose3d[0]));
+        m_pub_used_tags.set(m_usedTags.getAll().toArray(new Pose3d[0]));
+        m_log_allTags.log(
+                () -> m_allTags.getAll().stream().flatMapToDouble(
+                        x -> DoubleStream.of(x.getX(), x.getY(), x.toPose2d().getRotation().getDegrees())).toArray());
+        m_log_usedTags.log(
+                () -> m_usedTags.getAll().stream().flatMapToDouble(
+                        x -> DoubleStream.of(x.getX(), x.getY(), x.toPose2d().getRotation().getDegrees())).toArray());
+    }
+
+    /**
+     * Tags outside this radius are ignored.
+     */
+    public void setHeedRadiusM(double heedRadiusM) {
+        m_heedRadiusM = heedRadiusM;
+        m_log_heedRadius.log(() -> m_heedRadiusM);
+    }
+
+    void logCalibration(Camera camera, Transform3d cameraToTag) {
+        Transform3dLogger logCameraToTag = m_log_cameraToTag.computeIfAbsent(
+                camera.name(),
+                (x) -> m_log_cameraToTag_factory.transform3dLogger(Level.TRACE, x));
+        logCameraToTag.log(() -> cameraToTag);
+        // when correctly calibreated, this should match the actual robot-to-tag
+        Transform3dLogger logRobotToTag = m_log_tagInRobot.computeIfAbsent(
+                camera.name(),
+                (x) -> m_log_robotToTag_factory.transform3dLogger(Level.TRACE, x));
+        Transform3d robotToTag = Offset.get(camera).offset().plus(cameraToTag);
+        logRobotToTag.log(() -> robotToTag);
     }
 
     /**

@@ -29,6 +29,7 @@ public class Robot extends TimedRobot {
     private final Runnable m_robotViz;
     private final Sync sync;
     private final AprilTagCornerRobotLocalizer m_localizer;
+    @SuppressWarnings("unused")
     private final FreshSwerveEstimate estimate;
 
     private Pose2d pose = new Pose2d();

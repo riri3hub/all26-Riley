@@ -1,4 +1,4 @@
-package frc.robot;
+package org.team100.lib.localization;
 
 import java.io.IOException;
 import java.util.EnumMap;
@@ -9,16 +9,16 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.TermCriteria;
-import org.team100.lib.config.Camera;
-import org.team100.lib.config.Distortion;
-import org.team100.lib.config.Intrinsic;
+import org.team100.lib.camera.Camera;
+import org.team100.lib.camera.Distortion;
+import org.team100.lib.camera.Intrinsic;
 
 import edu.wpi.first.apriltag.AprilTagPoseEstimator;
 import edu.wpi.first.cscore.OpenCvLoader;
 import edu.wpi.first.math.geometry.Transform3d;
 
 /**
- * Use the apriltag corners to derive a pose estimate.
+ * Use the AprilTag corners to derive a pose estimate.
  * 
  * This is a half-step to GTSAM; it's not better than
  * doing the pose estimation on the Raspberry Pi.
@@ -46,14 +46,13 @@ public class PoseFromCorners {
     }
 
     /**
-     * Compute the pose based on the corners.
-     * 
-     * This is currently ignoring distortion.
+     * Compute the pose based on the corners, with distortion correction.
      */
     public Transform3d pose(Camera camera, double[] detectedCorners) {
         double[] corners = correctedCorners(camera, detectedCorners);
         double[] homography = getOpenCvHomographyArray(corners);
-        AprilTagPoseEstimator estimator = estimators.computeIfAbsent(camera, this::makeEstimator);
+        AprilTagPoseEstimator estimator = estimators.computeIfAbsent(
+                camera, this::makeEstimator);
         return estimator.estimate(homography, corners);
     }
 
@@ -70,7 +69,8 @@ public class PoseFromCorners {
                 new Point(corners[2], corners[3]),
                 new Point(corners[4], corners[5]),
                 new Point(corners[6], corners[7]));
-        Mat openCvHomographyMat = Calib3d.findHomography(CORNERS_FOR_HOMOGRAPHY, dstPoints);
+        Mat openCvHomographyMat = Calib3d.findHomography(
+                CORNERS_FOR_HOMOGRAPHY, dstPoints);
         double[] openCvHomographyArray = new double[9];
         openCvHomographyMat.get(0, 0, openCvHomographyArray);
         return openCvHomographyArray;

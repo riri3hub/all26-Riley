@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.function.DoubleFunction;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.config.Camera;
+import org.team100.lib.camera.Camera;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
@@ -23,7 +23,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 class AprilTagRobotLocalizerPerformanceTest {
@@ -49,7 +48,7 @@ class AprilTagRobotLocalizerPerformanceTest {
         };
 
         AprilTagRobotLocalizer localizer = new AprilTagRobotLocalizer(
-                logger, fieldLogger, layout, history, visionUpdater, DriverStation::getAlliance);
+                logger, fieldLogger, layout, history, visionUpdater, () -> Optional.of(Alliance.Red));
 
         // camera sees the tag straight ahead in the center of the frame,
         // but rotated pi/4 to the left. this is ignored anyway.
@@ -72,8 +71,8 @@ class AprilTagRobotLocalizerPerformanceTest {
         Camera camera = Camera.UNKNOWN;
         // run forever so i can use the profiler
         while (true)
-            localizer.estimateRobotPose(
-                    camera, blips, Optional.of(Alliance.Red));
+            localizer.perValue(
+                    camera, blips);
     }
 
     @Test

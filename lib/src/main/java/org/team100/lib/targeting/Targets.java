@@ -5,10 +5,11 @@ import java.util.Optional;
 import java.util.function.DoubleFunction;
 import java.util.stream.DoubleStream;
 
+import org.team100.lib.camera.Camera;
+import org.team100.lib.camera.Offset;
 import org.team100.lib.coherence.Cache;
 import org.team100.lib.coherence.SideEffect;
 import org.team100.lib.coherence.Takt;
-import org.team100.lib.config.Camera;
 import org.team100.lib.geometry.CentroidR2;
 import org.team100.lib.geometry.NearR2;
 import org.team100.lib.logging.Level;
@@ -101,7 +102,7 @@ public class Targets extends CameraReader<Target> {
 
             m_log_poseTimestamp.log(() -> timeSec);
             Pose2d robotPose = m_history.apply(timeSec).pose();
-            Transform3d cameraOffset = camera.getOffset();
+            Transform3d cameraOffset = Offset.get(camera).offset();
             TargetLocalizer.cameraRotToFieldRelative(
                     robotPose,
                     cameraOffset,

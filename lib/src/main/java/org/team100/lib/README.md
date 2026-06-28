@@ -6,6 +6,8 @@ If you're trying to learn about the library, you should start with the README in
 
 __Packages__
 
+* [camera](camera/README.md)
+  * Configuration for cameras used for localization and targeting.
 * [coherence](coherence/README.md)
   * A discrete clock and cache intended to manage observations (so they all represent the same instant) and anything else that depends on time (e.g. steps along a profile).
 * [commands](commands/README.md)
