@@ -228,6 +228,7 @@ public class OutboardLinearVelocityServo implements LinearVelocityServo {
      */
     private double accel(double setpoint) {
         double t = Takt.get();
+        // TODO: experiment with fixed DT here, to reduce noise.
         double dt = t - m_prevT;
         m_prevT = t;
         double accel = (setpoint - m_prevGoal) / dt;

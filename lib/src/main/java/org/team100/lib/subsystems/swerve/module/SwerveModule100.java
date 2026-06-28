@@ -7,6 +7,7 @@ import org.team100.lib.coherence.Takt;
 import org.team100.lib.config.Identity;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
@@ -32,6 +33,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
  * 
  * There is some discussion of this topic here:
  * https://www.chiefdelphi.com/t/kcoupleratio-in-ctre-swerve/483380
+ * 
+ * In the past, we tried to reduce "cross track error" by moderating
+ * module speed when the wheels were pointing in the wrong direction,
+ * as some other teams do. This was found to be unhelpful, because it
+ * happened on a per-module basis, disturbing the rotation of the whole
+ * robot.
  */
 public abstract class SwerveModule100 implements Player {
     private static final boolean DEBUG = false;
@@ -182,40 +189,54 @@ public abstract class SwerveModule100 implements Player {
     void actuate(SwerveModuleState100 nextWrapped) {
         if (nextWrapped.angle().isEmpty())
             throw new IllegalArgumentException("actuation needs a real angle");
-
         Rotation2d nextWrappedAngle = nextWrapped.angle().get();
+        // TODO: Experiment with fixed DT here.
         double dt = dt();
-        // is there noise in dt?
         m_log_dt.log(() -> dt);
+
+        // Deduce the desired omega using backward finite difference.
         double nextOmega = omega(nextWrappedAngle, dt);
-        // is there noise in omega?
         m_log_omega.log(() -> nextOmega);
 
-        // help drive motors overcome steering.
-
+        // Adjust the drive speed to compensate for steering movement.
         double nextSpeed = correctSpeedForSteering(
                 nextWrapped.speedMetersPerSecond(),
                 nextOmega,
                 dt);
-        // is there noise in speed?
         m_log_speed.log(() -> nextSpeed);
+
+        // Acceleration may be a source of noise, so optionally ignore it.
         if (Experiments.instance.enabled(Experiment.DriveWithoutAccel)) {
+            // Zero acceleration.
             m_driveServo.setVelocityDirect(nextSpeed, 0);
         } else {
-            // The old way.
+            // Deduces acceleration.
             m_driveServo.setVelocityDirect(nextSpeed);
+        }
+
+        // Steering omega may be a source of noise, so optionally ignore it.
+        double omega = nextOmega;
+        if (Experiments.instance.enabled(Experiment.SteerWithoutVelocity)) {
+            omega = 0;
         }
 
         // Direct actuation uses more current than a profile, but only briefly,
         // and it's much faster, and avoids the oscillation that the profile can produce
         // around the goal.
-        if (Experiments.instance.enabled(Experiment.SteerWithoutVelocity)) {
-            m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), 0, 0);
-        } else {
-            m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), nextOmega, 0);
-        }
-        // TODO: maybe use a profile to reduce current required?
-        // m_turningServo.setPositionProfiled(nextWrappedAngle.getRadians(), nextOmega);
+        //
+        // Note that, if the steering controller "P" value and current limits are
+        // set quite high, then direct mode can consume a whole lot of current, which
+        // is generally not worth the small benefit in steering quickness.
+        //
+        // So be careful! Use a reasonable "P" value. Use supply limits to
+        // regulate the impact on the battery. This will induce some delay,
+        // and controller error, but it's not bad: it's using the actual
+        // constraint (current) instead of a proxy (profile acceleration).
+        m_turningServo.setPositionDirect(nextWrappedAngle.getRadians(), omega, 0);
+
+        // This is the alternative profiled steering used in 2025.
+        // m_turningServo.setPositionProfiled(nextWrappedAngle.getRadians(), omega);
+
         m_previousDesiredWrappedAngle = nextWrappedAngle;
     }
 
