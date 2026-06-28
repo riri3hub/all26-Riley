@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -349,6 +350,15 @@ public class GeometryUtil {
         Quaternion q = zforward.getQuaternion();
         Quaternion q2 = new Quaternion(q.getW(), q.getZ(), -q.getX(), -q.getY());
         return new Rotation3d(q2);
+    }
+
+    /**
+     * Transform the camera-coordinate z-forward transform to NWU x-forward.
+     */
+    public static Transform3d zForwardToXForward(Transform3d zForward) {
+        return new Transform3d(
+                zForwardToXForward(zForward.getTranslation()),
+                zForwardToXForward(zForward.getRotation()));
     }
 
     public static Vector<N3> toVec(Twist2d twist) {

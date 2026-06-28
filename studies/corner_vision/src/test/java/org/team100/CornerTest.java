@@ -174,9 +174,10 @@ public class CornerTest {
     }
 
     /**
-     * The OpenCV "Solve PNP" method seems to produce perfectly fine estimates for
-     * translation, but the estimates for rotation are off by almost 20 degrees (!).
-     * Don't do it this way.
+     * The OpenCV "Solve PNP" method.
+     * 
+     * I think the differences between this and the Apriltag method
+     * are caused by the incorrect focal length.
      */
     @Test
     void testOpenCvPose() {

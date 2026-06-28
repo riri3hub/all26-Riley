@@ -5,8 +5,8 @@ import java.util.function.DoubleFunction;
 
 import org.team100.lib.coherence.Cache;
 import org.team100.lib.coherence.Takt;
+import org.team100.lib.localization.AprilTagCornerRobotLocalizer;
 import org.team100.lib.localization.AprilTagFieldLayoutWithCorrectOrientation;
-import org.team100.lib.localization.AprilTagRobotLocalizer;
 import org.team100.lib.localization.FreshSwerveEstimate;
 import org.team100.lib.localization.VisionUpdater;
 import org.team100.lib.logging.LoggerFactory;
@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
 
     private final Runnable m_robotViz;
     private final Sync sync;
-    private final AprilTagRobotLocalizer m_localizer;
+    private final AprilTagCornerRobotLocalizer m_localizer;
     private final FreshSwerveEstimate estimate;
 
     private Pose2d pose = new Pose2d();
@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
         LoggerFactory driveLog = logger.name("Drive");
         AprilTagFieldLayoutWithCorrectOrientation layout = AprilTagFieldLayoutWithCorrectOrientation.getLayout();
         DoubleFunction<ModelSE2> history = (x) -> new ModelSE2();
-        m_localizer = new AprilTagRobotLocalizer(
+        m_localizer = new AprilTagCornerRobotLocalizer(
                 driveLog,
                 fieldLogger,
                 layout,
@@ -60,7 +60,6 @@ public class Robot extends TimedRobot {
                 }, history);
         m_robotViz = new RobotPoseVisualization(
                 fieldLogger, () -> pose, "robot");
-
     }
 
     @Override
