@@ -17,7 +17,7 @@ from app.util.timestamps import Timestamps
 
 class SemiRealTest(unittest.TestCase):
     # don't run this all the time, it takes too long.
-    # @unittest.skip
+    @unittest.skip
     def test_end_to_end(self) -> None:
         """Use a fake image with a real network, and run
         for awhile, to test the listener part (in Java).

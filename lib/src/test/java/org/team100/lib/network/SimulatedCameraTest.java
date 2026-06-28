@@ -10,6 +10,7 @@ import org.team100.lib.testing.Timeless;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class SimulatedCameraTest implements Timeless {
     private static final LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
@@ -23,6 +24,10 @@ public class SimulatedCameraTest implements Timeless {
 
     @Test
     void test0() throws InterruptedException {
+        NetworkTableInstance.getDefault().startServer();
+        Thread.sleep(200);
+        stepTime();
+        
         // Use a real camera.
         RawTags camera = new RawTags(log, this::acceptTag);
 
