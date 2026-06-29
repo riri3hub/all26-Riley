@@ -1,6 +1,12 @@
 package org.team100.lib.subsystems.five_bar.commands;
 
+import java.util.Optional;
+
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.logging.Level;
+import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.LoggerFactory.DoubleLogger;
+import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
 import org.team100.lib.profile.r1.ProfileR1;
 import org.team100.lib.profile.r1.WPITrapezoidProfileR1;
 import org.team100.lib.state.ControlR1;
@@ -8,7 +14,6 @@ import org.team100.lib.state.ModelR1;
 import org.team100.lib.subsystems.five_bar.FiveBarCartesian;
 
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
@@ -23,7 +28,9 @@ public class Move extends Command {
     private final FiveBarCartesian m_fiveBar;
     private final Translation2d m_goal;
     private final ProfileR1 m_profile;
-    private final Timer m_timer;
+    private final Translation2dLogger m_log_start;
+    private final Translation2dLogger m_log_goal;
+    private final DoubleLogger m_log_s;
 
     private ControlR1 m_setpoint;
     private ModelR1 m_profileGoal;
@@ -32,30 +39,46 @@ public class Move extends Command {
     private double m_distance;
     private boolean m_done;
 
-    public Move(FiveBarCartesian fiveBar, Translation2d goal, double velocity) {
+    public Move(
+            LoggerFactory parent,
+            FiveBarCartesian fiveBar,
+            Translation2d goal,
+            double velocity) {
+        LoggerFactory log = parent.type(this);
         m_fiveBar = fiveBar;
         m_goal = goal;
         m_profile = new WPITrapezoidProfileR1(velocity, 1);
-
-        m_timer = new Timer();
+        m_log_start = log.translation2dLogger(Level.COMP, "start");
+        m_log_goal = log.translation2dLogger(Level.COMP, "goal");
+        m_log_s = log.doubleLogger(Level.COMP, "s");
         addRequirements(fiveBar);
     }
 
     @Override
     public void initialize() {
-        m_start = m_fiveBar.getPosition();
+        Optional<Translation2d> optStart = m_fiveBar.getPosition();
+        if (optStart.isEmpty()) {
+            m_done = true;
+            System.out.println("Move: infeasible start");
+            return;
+        }
+        m_start = optStart.get();
+        m_log_start.log(() -> m_start);
+        m_log_goal.log(() -> m_goal);
         m_distance = m_start.getDistance(m_goal);
         m_setpoint = new ControlR1();
         m_profileGoal = new ModelR1(m_distance, 0);
-        m_timer.restart();
         m_done = false;
     }
 
     @Override
     public void execute() {
+        if (m_done)
+            return;
         m_setpoint = m_profile.calculate(TimedRobot100.LOOP_PERIOD_S, m_setpoint, m_profileGoal);
         ControlR1 c = m_setpoint;
         double s = c.x() / m_distance;
+        m_log_s.log(() -> s);
         Translation2d setpoint = m_start.interpolate(m_goal, s);
         double togo = setpoint.getDistance(m_goal);
         if (togo < 0.001) {

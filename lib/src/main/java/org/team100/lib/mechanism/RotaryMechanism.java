@@ -27,6 +27,7 @@ public class RotaryMechanism implements Player {
     private final double m_maxPositionRad;
     private final DoubleLogger m_log_velocity;
     private final DoubleLogger m_log_position;
+    private final DoubleLogger m_log_desired_position;
 
     /**
      * The provided sensor encapsulates the motor sensor and/or the external
@@ -48,6 +49,7 @@ public class RotaryMechanism implements Player {
         m_maxPositionRad = maxPositionRad;
         m_log_velocity = log.doubleLogger(Level.DEBUG, "velocity (rad_s)");
         m_log_position = log.doubleLogger(Level.DEBUG, "position (rad)");
+        m_log_desired_position = log.doubleLogger(Level.DEBUG, "desired position (rad)");
     }
 
     /** There is no absolute position sensor in this case. */
@@ -133,6 +135,7 @@ public class RotaryMechanism implements Player {
             double velocityRad_S,
             double accelRad_S2,
             double torqueNm) {
+        m_log_desired_position.log(() -> positionRad);
         if (positionRad < m_minPositionRad) {
             System.out.printf("WARNING: requested position %8.3f less than min %8.3f\n",
                     positionRad, m_minPositionRad);

@@ -1,5 +1,6 @@
 package org.team100.lib.subsystems.five_bar;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.config.CurrentLimit;
@@ -39,19 +40,9 @@ public class FiveBarMech extends SubsystemBase {
     private static final double Q1_MAX = 2 * Math.PI / 3 - 0.1;
     private static final double Q5_MIN = Math.PI / 3 + 0.1;
     private static final double Q5_MAX = Math.PI;
-    private static final Scenario SCENARIO;
-    static {
-        // origin is P1
-        SCENARIO = new Scenario();
-        // These are fake link lengths.
-        SCENARIO.a1 = 0.1;
-        SCENARIO.a2 = 0.1;
-        SCENARIO.a3 = 0.1;
-        SCENARIO.a4 = 0.1;
-        SCENARIO.a5 = 0.1;
-        SCENARIO.xcenter = 0.5;
-        SCENARIO.ycenter = 0.15;
-    }
+
+    private final Scenario m_scenario;
+    private final FiveBarKinematics m_kinematics;
 
     /** Left motor, "P1" in the diagram. */
     private final RotaryMechanism m_mechP1;
@@ -67,9 +58,14 @@ public class FiveBarMech extends SubsystemBase {
     private final HomingRotaryPositionSensor m_sensorP1;
     private final HomingRotaryPositionSensor m_sensorP5;
 
-    public FiveBarMech(LoggerFactory logger, TotalCurrentLog currentLog) {
+    public FiveBarMech(LoggerFactory parent, TotalCurrentLog currentLog, Scenario scenario) {
+        LoggerFactory logger = parent.type(this);
         LoggerFactory loggerP1 = logger.name("p1");
         LoggerFactory loggerP5 = logger.name("p5");
+        m_scenario = scenario;
+
+        m_kinematics = new FiveBarKinematics(logger);
+
         switch (Identity.instance) {
             case SWERVE_TWO -> {
                 Falcon500Motor motorP1 = makeMotor(loggerP1, currentLog, new CanId(1));
@@ -150,12 +146,12 @@ public class FiveBarMech extends SubsystemBase {
         m_mechP5.setUnwrappedPosition(p5, 0, 0, 0);
     }
 
-    public JointPositions getJointPositions() {
+    public Optional<JointPositions> getJointPositions() {
         double q1 = m_mechP1.getWrappedPositionRad();
         double q5 = m_mechP5.getWrappedPositionRad();
         if (DEBUG)
             System.out.printf("joint positions %f %f\n", q1, q5);
-        return FiveBarKinematics.forward(SCENARIO, q1, q5);
+        return m_kinematics.forward(m_scenario, q1, q5);
     }
 
     @Override
@@ -170,12 +166,13 @@ public class FiveBarMech extends SubsystemBase {
      * pointing towards each other, that's also not allowed. Each arm also has
      * physical limits enforced here.
      */
-    static boolean feasible(double q1, double q5) {
-        JointPositions q = FiveBarKinematics.forward(SCENARIO, q1, q5);
-        if (!q.P3().valid()) {
+    boolean feasible(double q1, double q5) {
+        Optional<JointPositions> optQ = m_kinematics.forward(m_scenario, q1, q5);
+        if (optQ.isEmpty()) {
             // too wide
             return false;
         }
+        JointPositions q = optQ.get();
         if (q.P2().x() < q.P4().x()) {
             // inverted
             return false;

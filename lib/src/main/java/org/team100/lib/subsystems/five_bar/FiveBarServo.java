@@ -1,23 +1,26 @@
 package org.team100.lib.subsystems.five_bar;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
+import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
 import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.RotaryMechanism;
+import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.Falcon500Motor;
+import org.team100.lib.motor.sim.SimulatedBareMotor;
 import org.team100.lib.profile.r1.ProfileR1;
 import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.reference.r1.ProfileReferenceR1;
 import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.sensor.position.absolute.ProxyRotaryPositionSensor;
-import org.team100.lib.sensor.position.incremental.IncrementalBareEncoder;
 import org.team100.lib.servo.AngularPositionServo;
 import org.team100.lib.servo.OutboardAngularPositionServo;
 import org.team100.lib.subsystems.five_bar.kinematics.FiveBarKinematics;
@@ -41,19 +44,9 @@ public class FiveBarServo extends SubsystemBase {
     private static final double STATOR_LIMIT = 5;
     private static final double MAX_VELOCITY = 190;
     private static final double MAX_ACCEL = 210;
-    private static final Scenario SCENARIO;
-    static {
-        // origin is P1
-        SCENARIO = new Scenario();
-        // These are fake link lengths.
-        SCENARIO.a1 = 0.1;
-        SCENARIO.a2 = 0.1;
-        SCENARIO.a3 = 0.1;
-        SCENARIO.a4 = 0.1;
-        SCENARIO.a5 = 0.1;
-        SCENARIO.xcenter = 0.5;
-        SCENARIO.ycenter = 0.15;
-    }
+
+    private final Scenario m_scenario;
+    private final FiveBarKinematics m_kinematics;
 
     /** Left motor, "P1" in the diagram. */
     /**
@@ -67,27 +60,59 @@ public class FiveBarServo extends SubsystemBase {
     private final ProxyRotaryPositionSensor m_sensorP5;
     private final AngularPositionServo m_servoP5;
 
-    public FiveBarServo(LoggerFactory logger, TotalCurrentLog currentLog) {
+    public FiveBarServo(LoggerFactory parent, TotalCurrentLog currentLog, Scenario scenario) {
+        LoggerFactory logger = parent.type(this);
+        LoggerFactory loggerP1 = logger.name("p1");
+        LoggerFactory loggerP5 = logger.name("p5");
+
+        m_scenario = scenario;
+        m_kinematics = new FiveBarKinematics(logger);
+
         // zeros
         PIDConstants pid = PIDConstants.zero(logger);
         SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
         Friction friction = new Friction(logger, 0, 0, 0, 0);
         ProfileR1 profile = new TrapezoidProfileR1(
                 logger, MAX_VELOCITY, MAX_ACCEL, POSITION_TOLERANCE);
+        ReferenceR1 refP1 = new ProfileReferenceR1(
+                loggerP1, () -> profile, POSITION_TOLERANCE, VELOCITY_TOLERANCE);
+        ReferenceR1 refP5 = new ProfileReferenceR1(
+                loggerP5, () -> profile, POSITION_TOLERANCE, VELOCITY_TOLERANCE);
 
-        LoggerFactory loggerP1 = logger.name("p1");
-        Falcon500Motor motorP1 = new Falcon500Motor(
-                loggerP1,
-                currentLog,
-                new CanId(1),
-                NeutralMode100.COAST,
-                MotorPhase.FORWARD,
-                new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
-                ff,
-                friction,
-                pid);
-        IncrementalBareEncoder encoderP1 = motorP1.encoder();
-        m_sensorP1 = new ProxyRotaryPositionSensor(encoderP1, 1.0);
+        BareMotor motorP1;
+        BareMotor motorP5;
+        switch (Identity.instance) {
+            case SWERVE_TWO -> {
+                motorP1 = new Falcon500Motor(
+                        loggerP1,
+                        currentLog,
+                        new CanId(1),
+                        NeutralMode100.COAST,
+                        MotorPhase.FORWARD,
+                        new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
+                        ff,
+                        friction,
+                        pid);
+                motorP5 = new Falcon500Motor(
+                        loggerP5,
+                        currentLog,
+                        new CanId(5),
+                        NeutralMode100.COAST,
+                        MotorPhase.FORWARD,
+                        new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
+                        ff,
+                        friction,
+                        pid);
+            }
+            default -> {
+                motorP1 = new SimulatedBareMotor(loggerP1, 600);
+                motorP5 = new SimulatedBareMotor(loggerP5, 600);
+
+            }
+        }
+        m_sensorP1 = new ProxyRotaryPositionSensor(motorP1.encoder(), 1.0);
+        m_sensorP5 = new ProxyRotaryPositionSensor(motorP5.encoder(), 1.0);
+
         RotaryMechanism mechP1 = new RotaryMechanism(
                 loggerP1,
                 motorP1,
@@ -95,27 +120,6 @@ public class FiveBarServo extends SubsystemBase {
                 1.0,
                 -100.0,
                 100.0);
-
-        ReferenceR1 refP1 = new ProfileReferenceR1(
-                loggerP1, () -> profile, POSITION_TOLERANCE, VELOCITY_TOLERANCE);
-        m_servoP1 = new OutboardAngularPositionServo(
-                loggerP1,
-                mechP1,
-                refP1);
-
-        LoggerFactory loggerP5 = logger.name("p5");
-        Falcon500Motor motorP5 = new Falcon500Motor(
-                loggerP5,
-                currentLog,
-                new CanId(5),
-                NeutralMode100.COAST,
-                MotorPhase.FORWARD,
-                new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
-                ff,
-                friction,
-                pid);
-        IncrementalBareEncoder encoderP5 = motorP5.encoder();
-        m_sensorP5 = new ProxyRotaryPositionSensor(encoderP5, 1.0);
         RotaryMechanism m_mechP5 = new RotaryMechanism(
                 loggerP5,
                 motorP5,
@@ -123,8 +127,11 @@ public class FiveBarServo extends SubsystemBase {
                 1.0,
                 -100.0,
                 100.0);
-        ReferenceR1 refP5 = new ProfileReferenceR1(
-                loggerP5, () -> profile, POSITION_TOLERANCE, VELOCITY_TOLERANCE);
+
+        m_servoP1 = new OutboardAngularPositionServo(
+                loggerP1,
+                mechP1,
+                refP1);
         m_servoP5 = new OutboardAngularPositionServo(
                 loggerP5,
                 m_mechP5,
@@ -136,10 +143,10 @@ public class FiveBarServo extends SubsystemBase {
         m_servoP5.setPositionProfiled(p5, 0);
     }
 
-    public JointPositions getJointPositions() {
+    public Optional<JointPositions> getJointPositions() {
         double q1 = m_servoP1.getWrappedPositionRad();
         double q5 = m_servoP5.getWrappedPositionRad();
-        return FiveBarKinematics.forward(SCENARIO, q1, q5);
+        return m_kinematics.forward(m_scenario, q1, q5);
     }
 
     @Override

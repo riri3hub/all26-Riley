@@ -5,6 +5,7 @@ import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.subsystems.five_bar.FiveBarMech;
 import org.team100.lib.subsystems.five_bar.Pen;
+import org.team100.lib.subsystems.five_bar.kinematics.Scenario;
 import org.team100.lib.visualization.FiveBarVisualization;
 
 import edu.wpi.first.wpilibj.XboxController;
@@ -16,15 +17,15 @@ public class SetupMech implements Runnable {
     private final Pen m_pen;
     private final FiveBarVisualization m_viz;
 
-    public SetupMech() {
+    public SetupMech(Scenario scenario) {
         final Logging logging = Logging.instance();
         final LoggerFactory logger = logging.rootLogger;
         TotalCurrentLog currentLog = new TotalCurrentLog(logger);
         XboxController controller = new XboxController(0);
 
-        m_fiveBar = new FiveBarMech(logger, currentLog);
+        m_fiveBar = new FiveBarMech(logger, currentLog, scenario);
         m_pen = new Pen();
-        m_viz = new FiveBarVisualization(m_fiveBar::getJointPositions);
+        m_viz = new FiveBarVisualization(scenario, m_fiveBar::getJointPositions);
         m_fiveBar.setDefaultCommand(m_fiveBar.position(
                 () -> CONTROL_SCALE * controller.getLeftX(), // axis 0, "a" and "d" in the sim
                 () -> CONTROL_SCALE * controller.getRightX()));

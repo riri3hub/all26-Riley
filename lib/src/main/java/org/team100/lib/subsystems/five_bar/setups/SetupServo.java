@@ -4,25 +4,29 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
 import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.subsystems.five_bar.FiveBarServo;
+import org.team100.lib.subsystems.five_bar.kinematics.Scenario;
 import org.team100.lib.visualization.FiveBarVisualization;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class SetupServo implements Runnable {
+    private static final double OFFSET = Math.PI / 2;
+    private static final double SCALE = 1;
     private final FiveBarServo m_fiveBar;
     private final FiveBarVisualization m_viz;
 
-    public SetupServo() {
+    public SetupServo(Scenario scenario) {
         final Logging logging = Logging.instance();
         final LoggerFactory logger = logging.rootLogger;
         TotalCurrentLog currentLog = new TotalCurrentLog(logger);
         XboxController controller = new XboxController(0);
 
-        m_fiveBar = new FiveBarServo(logger, currentLog);
-        m_viz = new FiveBarVisualization(m_fiveBar::getJointPositions);
+        m_fiveBar = new FiveBarServo(logger, currentLog, scenario);
+        m_viz = new FiveBarVisualization(scenario, m_fiveBar::getJointPositions);
         m_fiveBar.setDefaultCommand(m_fiveBar.position(
-                controller::getLeftX, controller::getRightX));
+                () -> OFFSET + SCALE * controller.getLeftX(),
+                () -> OFFSET + SCALE * controller.getRightX()));
 
         // These bindings are remembered by the trigger event loop, so we don't need to
         // retain them.

@@ -1,10 +1,12 @@
 package org.team100.lib.visualization;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.team100.lib.subsystems.five_bar.kinematics.JointPositions;
 import org.team100.lib.subsystems.five_bar.kinematics.Point;
+import org.team100.lib.subsystems.five_bar.kinematics.Scenario;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -28,13 +30,17 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
  * wherein the "y" axis is pointing towards the user, so "down" in the viz, and
  * the "x" axis is therefore pointing to the left. The working area is entirely
  * "below" the origin (i.e. positive y).
+ * 
+ * Important! Fivebar kinematics are indeterminate: for any feasible root
+ * angles (except one), there are two possible end-effector positions.
  */
 public class FiveBarVisualization {
     private static final boolean DEBUG = false;
-    /** links are like 0.1 m long, pic is like 100 wide. */
-    private static final double SCALE = 300;
+
+    private static final double WIDTH = 10;
     private static final Color8Bit ORANGE = new Color8Bit(Color.kOrangeRed);
-    private final Supplier<JointPositions> m_q;
+    private final double SCALE;
+    private final Supplier<Optional<JointPositions>> m_q;
     private final Mechanism2d m_view;
     private final MechanismRoot2d m_p1;
     private final MechanismLigament2d m_a1;
@@ -42,27 +48,34 @@ public class FiveBarVisualization {
     private final MechanismLigament2d m_a3;
     private final MechanismLigament2d m_a4;
 
-    public FiveBarVisualization(Supplier<JointPositions> q) {
+    public FiveBarVisualization(
+            Scenario scenario,
+            Supplier<Optional<JointPositions>> q) {
         m_q = q;
+        // scale to link length
+        SCALE = 75 / (scenario.a1 + scenario.a2);
         m_view = new Mechanism2d(100, 100);
-        Point p1 = m_q.get().P1();
-        Point p5 = m_q.get().P5();
+        Point p1 = scenario.P1();
+        Point p5 = scenario.P5();
         // the midpoint of a5
         Point a5Mid = p1.plus(p5.minus(p1).times(0.5));
         m_p1 = m_view.getRoot("root", 50 + SCALE * a5Mid.x(), 75 + SCALE * a5Mid.y());
-        m_a1 = new MechanismLigament2d("a1", 0, 0, 0, ORANGE);
+        m_a1 = new MechanismLigament2d("a1", 0, 0, WIDTH, ORANGE);
         m_p1.append(m_a1);
-        m_a2 = new MechanismLigament2d("a2", 0, 0, 0, ORANGE);
+        m_a2 = new MechanismLigament2d("a2", 0, 0, WIDTH, ORANGE);
         m_a1.append(m_a2);
-        m_a3 = new MechanismLigament2d("a3", 0, 0, 0, ORANGE);
+        m_a3 = new MechanismLigament2d("a3", 0, 0, WIDTH, ORANGE);
         m_a2.append(m_a3);
-        m_a4 = new MechanismLigament2d("a4", 0, 0, 0, ORANGE);
+        m_a4 = new MechanismLigament2d("a4", 0, 0, WIDTH, ORANGE);
         m_a3.append(m_a4);
         SmartDashboard.putData("View", m_view);
     }
 
     public void periodic() {
-        JointPositions q = m_q.get();
+        Optional<JointPositions> optQ = m_q.get();
+        if (optQ.isEmpty())
+            return;
+        JointPositions q = optQ.get();
         List<Point> p = links(q);
         if (DEBUG) {
             System.out.printf("FiveBarVisualization q %s %s %s %s %s\n",

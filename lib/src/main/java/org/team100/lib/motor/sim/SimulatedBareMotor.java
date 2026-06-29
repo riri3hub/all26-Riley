@@ -16,7 +16,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.RobotState;
 
 /**
- * Relies on Cache and Takt, so you must put Cache.refresh() and Takt.update() in
+ * Relies on Cache and Takt, so you must put Cache.refresh() and Takt.update()
+ * in
  * Robot.robotPeriodic().
  */
 public class SimulatedBareMotor implements BareMotor {
@@ -130,7 +131,7 @@ public class SimulatedBareMotor implements BareMotor {
         if (DEBUG) {
             System.out.printf("motor %s set position %6.3f\n", m_log.getRoot(), position);
         }
-        m_positionInput = position;
+        m_positionInput = Math100.notNaN(position);
         // you can't use velocity and position control at the same time
         m_velocityInput = null;
         m_accelInput = null;

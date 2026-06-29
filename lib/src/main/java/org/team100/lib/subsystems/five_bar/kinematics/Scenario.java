@@ -23,24 +23,36 @@ public class Scenario {
     // double h;
     public double xcenter;
     public double ycenter;
+
+    /** Position of P1 */
+    public Point P1() {
+        return new Point(x1, y1);
+    }
+
+    /** Position of P5 */
+    public Point P5() {
+        double x5 = x1 - a5;
+        double y5 = y1;
+        return new Point(x5, y5);
+    }
     // double xmin;
     // double xmax;
     // double ymin;
     // double ymax;
 
     // public double right() {
-    //     return xcenter + w / 2;
+    // return xcenter + w / 2;
     // }
 
     // public double left() {
-    //     return xcenter - w / 2;
+    // return xcenter - w / 2;
     // }
 
     // public double top() {
-    //     return ycenter + h / 2;
+    // return ycenter + h / 2;
     // }
 
     // public double bottom() {
-    //     return ycenter - h / 2;
+    // return ycenter - h / 2;
     // }
 }
