@@ -81,13 +81,13 @@ public class FiveBarBare extends SubsystemBase {
     private BareMotor makeMotor(LoggerFactory logger, TotalCurrentLog currentLog, CanId canId) {
         SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
         Friction friction = new Friction(logger, 0, 0, 0, 0);
-        PIDConstants pid = PIDConstants.zero(logger);
+        PIDConstants pid = PIDConstants.makePositionPID(logger, 2.0);
         return new Falcon500Motor(
                 logger,
                 currentLog,
                 canId,
                 NeutralMode100.COAST,
-                MotorPhase.FORWARD,
+                MotorPhase.REVERSE,
                 new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
                 ff,
                 friction,

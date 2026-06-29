@@ -13,14 +13,14 @@ public class Robot extends TimedRobot {
     static {
         // origin is P1
         SCENARIO = new Scenario();
-        // These are fake link lengths.
-        SCENARIO.a1 = 0.2;
-        SCENARIO.a2 = 0.2;
-        SCENARIO.a3 = 0.2;
-        SCENARIO.a4 = 0.2;
-        SCENARIO.a5 = 0.1;
-        SCENARIO.xcenter = -0.05;
-        SCENARIO.ycenter = 0.24;
+        // This matches the real apparatus
+        SCENARIO.a1 = 0.19; // 7.5 inches
+        SCENARIO.a2 = 0.254; // 10 inches
+        SCENARIO.a3 = 0.254;
+        SCENARIO.a4 = 0.19;
+        SCENARIO.a5 = 0.0635;
+        SCENARIO.xcenter = -0.0317;
+        SCENARIO.ycenter = 0.3;
     }
 
     private final Runnable m_setup;

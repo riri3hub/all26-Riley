@@ -30,8 +30,10 @@ public class SetupCartesian implements Runnable {
         m_viz = new FiveBarVisualization(scenario, m_fiveBar::getJointPositions);
         m_fiveBar.setDefaultCommand(m_fiveBar.position(
                 () -> new Translation2d(
+                        // x-right is positive, but here we want x-left to be positive.
                         -1.0 * XMAX * controller.getRightX(), // axis 4
-                        -1.0 * YMAX * controller.getRightY()))); // axis 5
+                        // y-down is positive, which is correct
+                        YMAX * controller.getRightY()))); // axis 5
 
         // These bindings are remembered by the trigger event loop, so we don't need to
         // retain them.
@@ -41,6 +43,9 @@ public class SetupCartesian implements Runnable {
         // Make a little square. Also illustrates "print" commands for
         // debugging.
         double delay = 0.5;
+        // a little square.
+        double XX = 0.05;
+        double YY = 0.05;
         new Trigger(controller::getXButton).whileTrue(
                 Commands.sequence(
                         print("move to origin"),
@@ -48,19 +53,23 @@ public class SetupCartesian implements Runnable {
                         print("wait"),
                         Commands.waitSeconds(delay),
                         print("move to lower left"),
-                        m_fiveBar.move(new Translation2d(XMAX, YMAX)),
+                        m_fiveBar.move(new Translation2d(XX, YY)),
                         print("wait"),
                         Commands.waitSeconds(delay),
                         print("move to lower right"),
-                        m_fiveBar.move(new Translation2d(-XMAX, YMAX)),
+                        m_fiveBar.move(new Translation2d(-XX, YY)),
                         print("wait"),
                         Commands.waitSeconds(delay),
                         print("move to upper right"),
-                        m_fiveBar.move(new Translation2d(-XMAX, -YMAX)),
+                        m_fiveBar.move(new Translation2d(-XX, -YY)),
                         print("wait"),
                         Commands.waitSeconds(delay),
                         print("move to upper left"),
-                        m_fiveBar.move(new Translation2d(+XMAX, -YMAX)),
+                        m_fiveBar.move(new Translation2d(XX, -YY)),
+                        print("wait"),
+                        Commands.waitSeconds(delay),
+                        print("move to lower left"),
+                        m_fiveBar.move(new Translation2d(XX, YY)),
                         print("wait"),
                         Commands.waitSeconds(delay),
                         print("move back home"),

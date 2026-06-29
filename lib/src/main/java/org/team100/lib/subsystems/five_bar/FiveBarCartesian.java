@@ -36,8 +36,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class FiveBarCartesian extends SubsystemBase {
     /** Low current limits */
-    private static final double SUPPLY_LIMIT = 5;
-    private static final double STATOR_LIMIT = 5;
+    private static final double SUPPLY_LIMIT = 20;
+    private static final double STATOR_LIMIT = 20;
 
     LoggerFactory m_logger;
     private final Scenario m_scenario;
@@ -72,7 +72,7 @@ public class FiveBarCartesian extends SubsystemBase {
         m_log_feasible = m_logger.booleanLogger(Level.COMP, "feasible");
 
         // zeros
-        PIDConstants pid = PIDConstants.zero(m_logger);
+        PIDConstants pid = PIDConstants.makePositionPID(m_logger, 2.0);
         SimpleDynamics ff = new SimpleDynamics(m_logger, 0, 0);
         Friction friction = new Friction(m_logger, 0, 0, 0, 0);
 
@@ -85,7 +85,7 @@ public class FiveBarCartesian extends SubsystemBase {
                         currentLog,
                         new CanId(1),
                         NeutralMode100.COAST,
-                        MotorPhase.FORWARD,
+                        MotorPhase.REVERSE,
                         new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
                         ff,
                         friction,
@@ -95,7 +95,7 @@ public class FiveBarCartesian extends SubsystemBase {
                         currentLog,
                         new CanId(5),
                         NeutralMode100.COAST,
-                        MotorPhase.FORWARD,
+                        MotorPhase.REVERSE,
                         new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
                         ff,
                         friction,
@@ -188,17 +188,24 @@ public class FiveBarCartesian extends SubsystemBase {
         m_mechP5.setDutyCycle(p5);
     }
 
+    /**
+     * Sets the encoders to the position yielded by the "zero" command, i.e. running
+     * all the way to the hard stop.
+     */
     private void resetEncoderPosition() {
-        m_sensorP1.setEncoderPosition(0);
-        m_sensorP5.setEncoderPosition(0);
+        // these match the real apparatus, more or less.
+        m_sensorP1.setEncoderPosition(-0.35);
+        m_sensorP5.setEncoderPosition(1.22);
     }
 
     ///////////////////////
     //
     // Commands
 
+    /** Run in the negative direction as far as possible. */
     public Command home() {
-        return run(() -> setDutyCycle(0.05, 0.05));
+        final double homingDutyCycle = -0.05;
+        return run(() -> setDutyCycle(homingDutyCycle, homingDutyCycle));
     }
 
     public Command zero() {

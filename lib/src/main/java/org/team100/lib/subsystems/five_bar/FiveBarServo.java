@@ -69,7 +69,7 @@ public class FiveBarServo extends SubsystemBase {
         m_kinematics = new FiveBarKinematics(logger);
 
         // zeros
-        PIDConstants pid = PIDConstants.zero(logger);
+        PIDConstants pid = PIDConstants.makePositionPID(logger, 2.0);
         SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
         Friction friction = new Friction(logger, 0, 0, 0, 0);
         ProfileR1 profile = new TrapezoidProfileR1(
@@ -88,7 +88,7 @@ public class FiveBarServo extends SubsystemBase {
                         currentLog,
                         new CanId(1),
                         NeutralMode100.COAST,
-                        MotorPhase.FORWARD,
+                        MotorPhase.REVERSE,
                         new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
                         ff,
                         friction,
@@ -98,7 +98,7 @@ public class FiveBarServo extends SubsystemBase {
                         currentLog,
                         new CanId(5),
                         NeutralMode100.COAST,
-                        MotorPhase.FORWARD,
+                        MotorPhase.REVERSE,
                         new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
                         ff,
                         friction,

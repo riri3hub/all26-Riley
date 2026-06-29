@@ -202,7 +202,7 @@ public class FiveBarMech extends SubsystemBase {
                 currentLog,
                 canId,
                 NeutralMode100.COAST,
-                MotorPhase.FORWARD,
+                MotorPhase.REVERSE,
                 new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
                 ff,
                 friction,
