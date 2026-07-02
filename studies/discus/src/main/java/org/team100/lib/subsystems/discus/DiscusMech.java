@@ -48,11 +48,11 @@ public class DiscusMech extends SubsystemBase {
         Friction friction = new Friction(logger, 0, 0, 0, 0);
 
         switch (Identity.instance) {
-            case SWERVE_TWO -> {
+            case TEAM100_2018 -> {
                 Falcon500Motor motorP1 = new Falcon500Motor(
                         logger,
                         currentLog,
-                        new CanId(1),
+                        new CanId(36),
                         NeutralMode100.COAST,
                         MotorPhase.REVERSE,
                         new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),

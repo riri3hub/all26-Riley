@@ -27,13 +27,14 @@ import org.team100.lib.tuning.Mutable;
 public class PIDConstants {
     private final List<Runnable> m_listeners = new ArrayList<>();
 
-    // private final double m_positionP;
     /** volt/rad */
+    // private final double m_positionP;
     private final Mutable m_positionP;
     /** volt/rad-sec */
     private final double m_positionI;
     /** volt-sec/rad */
-    private final double m_positionD;
+    // private final double m_positionD;
+    private final Mutable m_positionD;
 
     // private final double m_velocityP;
     /** volt-sec/rad */
@@ -41,7 +42,8 @@ public class PIDConstants {
     /** volt/rad */
     private final double m_velocityI;
     /** volt-sec^2/rad */
-    private final double m_velocityD;
+    // private final double m_velocityD;
+    private final Mutable m_velocityD;
 
     /**
      * @param p Volt/rad
@@ -49,6 +51,11 @@ public class PIDConstants {
     public static PIDConstants makePositionPID(
             LoggerFactory log, double p) {
         return new PIDConstants(log, p, 0, 0, 0, 0, 0);
+    }
+
+    public static PIDConstants makePositionPID(
+            LoggerFactory log, double p, double i, double d) {
+        return new PIDConstants(log, p, i, d, 0, 0, 0);
     }
 
     /**
@@ -64,6 +71,11 @@ public class PIDConstants {
     public static PIDConstants makeVelocityPID(
             LoggerFactory log, double p) {
         return new PIDConstants(log, 0, 0, 0, p, 0, 0);
+    }
+
+    public static PIDConstants makeVelocityPID(
+            LoggerFactory log, double p, double i, double d) {
+        return new PIDConstants(log, 0, 0, 0, p, i, d);
     }
 
     /** Zero is for when you're not using the motor's PID controller */
@@ -83,7 +95,7 @@ public class PIDConstants {
 
     /** volt-sec/rad */
     public double getPositionDVS_Rad() {
-        return m_positionD;
+        return m_positionD.getAsDouble();
     }
 
     /** volt-sec/rad */
@@ -98,7 +110,7 @@ public class PIDConstants {
 
     /** volt-sec^2/rad */
     public double getVelocityDVS2_Rad() {
-        return m_velocityD;
+        return m_velocityD.getAsDouble();
     }
 
     public void register(Runnable listener) {
@@ -114,12 +126,12 @@ public class PIDConstants {
         // m_positionP = positionP;
         m_positionP = new Mutable(log, "position P", positionP, this::onChange);
         m_positionI = positionI;
-        m_positionD = positionD;
+        m_positionD = new Mutable(log, "position D", positionD, this::onChange);
 
         // m_velocityP = velocityP;
         m_velocityP = new Mutable(log, "velocity P", velocityP, this::onChange);
         m_velocityI = velocityI;
-        m_velocityD = velocityD;
+        m_velocityD = new Mutable(log, "velocity D", velocityD, this::onChange);
     }
 
     private void onChange(double ignored) {

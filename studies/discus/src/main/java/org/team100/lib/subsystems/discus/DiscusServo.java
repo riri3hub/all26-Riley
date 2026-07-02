@@ -35,10 +35,10 @@ public class DiscusServo extends SubsystemBase {
     private static final double POSITION_TOLERANCE = 0.05;
     private static final double VELOCITY_TOLERANCE = 0.05;
     /** Low current limits */
-    private static final double SUPPLY_LIMIT = 5;
-    private static final double STATOR_LIMIT = 5;
-    private static final double MAX_VELOCITY = 190;
-    private static final double MAX_ACCEL = 210;
+    private static final double SUPPLY_LIMIT = 20;
+    private static final double STATOR_LIMIT = 20;
+    private static final double MAX_VELOCITY = 5;
+    private static final double MAX_ACCEL = 5;
 
     private final ProxyRotaryPositionSensor m_sensorP1;
     private final AngularPositionServo m_servoP1;
@@ -48,7 +48,7 @@ public class DiscusServo extends SubsystemBase {
         LoggerFactory loggerP1 = logger.name("p1");
 
         // zeros
-        PIDConstants pid = PIDConstants.makePositionPID(logger, 2.0);
+        PIDConstants pid = PIDConstants.makePositionPID(logger, 5.0);
         SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
         Friction friction = new Friction(logger, 0, 0, 0, 0);
         ProfileR1 profile = new TrapezoidProfileR1(
@@ -58,11 +58,11 @@ public class DiscusServo extends SubsystemBase {
 
         BareMotor motorP1;
         switch (Identity.instance) {
-            case SWERVE_TWO -> {
+            case TEAM100_2018 -> {
                 motorP1 = new Falcon500Motor(
                         loggerP1,
                         currentLog,
-                        new CanId(1),
+                        new CanId(36),
                         NeutralMode100.COAST,
                         MotorPhase.REVERSE,
                         new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),

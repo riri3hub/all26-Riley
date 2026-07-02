@@ -35,14 +35,14 @@ public class DiscusBare extends SubsystemBase {
     public DiscusBare(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory logger = parent.type(this);
         switch (Identity.instance) {
-            case SWERVE_TWO -> {
+            case TEAM100_2018 -> {
                 SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
                 Friction friction = new Friction(logger, 0, 0, 0, 0);
                 PIDConstants pid = PIDConstants.makePositionPID(logger, 2.0);
                 m_motor = new Falcon500Motor(
                         logger,
                         currentLog,
-                        new CanId(1),
+                        new CanId(36),
                         NeutralMode100.COAST,
                         MotorPhase.REVERSE,
                         new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
