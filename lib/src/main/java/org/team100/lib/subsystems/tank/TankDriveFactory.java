@@ -4,6 +4,7 @@ import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
+import org.team100.lib.dynamics.se2.SE2Dynamics;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.LinearMechanism;
@@ -17,6 +18,8 @@ import org.team100.lib.util.CanId;
 
 public class TankDriveFactory {
 
+    // a good value of dynamics might be SE2Dynamics(15, 0.5)
+    // 15kg mass, 0.5 kg m^2 inertia?
     public static TankDrive make(
             LoggerFactory fieldLogger,
             LoggerFactory parent,
@@ -27,7 +30,8 @@ public class TankDriveFactory {
             double trackWidthM,
             double maxSpeedM_S,
             double gearRatio,
-            double wheelDiaM) {
+            double wheelDiaM,
+            SE2Dynamics dynamics) {
         LoggerFactory log = parent.name("Tank Drive");
         LoggerFactory logL = log.name("left");
         LoggerFactory logR = log.name("right");
@@ -57,7 +61,7 @@ public class TankDriveFactory {
                 Double.POSITIVE_INFINITY);
 
         return new TankDrive(
-                log, fieldLogger, trackWidthM, maxSpeedM_S, mechL, mechR);
+                log, fieldLogger, dynamics, trackWidthM, maxSpeedM_S, mechL, mechR);
     }
 
     /**

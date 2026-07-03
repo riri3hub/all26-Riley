@@ -1,5 +1,10 @@
 package org.team100.lib.subsystems.tank;
 
+import org.team100.lib.dynamics.p.PTorque;
+import org.team100.lib.dynamics.se2.SE2Dynamics;
+import org.team100.lib.dynamics.se2.SE2Torque;
+import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.geometry.AccelerationSE2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.ChassisSpeedsLogger;
@@ -8,6 +13,7 @@ import org.team100.lib.logging.LoggerFactory.DoubleLogger;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.visualization.VizUtil;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -25,6 +31,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class TankDrive extends SubsystemBase {
     private final DoubleArrayLogger m_log_field_robot;
+    private final SE2Dynamics m_dynamics;
     private final double m_trackWidthM;
     private final double m_maxSpeedM_S;
     private final LinearMechanism m_left;
@@ -35,17 +42,20 @@ public class TankDrive extends SubsystemBase {
     private final DoubleLogger m_logLeft;
     private final DoubleLogger m_logRight;
 
+    private ChassisSpeeds m_speed;
     private DifferentialDriveWheelPositions m_positions;
     private Pose2d m_pose;
 
     public TankDrive(
             LoggerFactory parent,
             LoggerFactory fieldLogger,
+            SE2Dynamics dynamics,
             double trackWidthM,
             double maxSpeedM_S,
             LinearMechanism left,
             LinearMechanism right) {
         LoggerFactory log = parent.type(this);
+        m_dynamics = dynamics;
         m_logChassisSpeeds = log.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_logLeft = log.doubleLogger(Level.TRACE, "left");
         m_logRight = log.doubleLogger(Level.TRACE, "right");
@@ -67,19 +77,28 @@ public class TankDrive extends SubsystemBase {
         m_right.setDutyCycle(s.right);
     }
 
-    /** Use inverse kinematics to set wheel speeds. */
+    /**
+     * Use inverse kinematics to set wheel speeds.
+     * 
+     * New! Uses dynamics to compute motor forces.
+     */
     public void setVelocity(double translationM_S, double rotationRad_S) {
         ChassisSpeeds speed = new ChassisSpeeds(translationM_S, 0, rotationRad_S);
         m_logChassisSpeeds.log(() -> speed);
         DifferentialDriveWheelSpeeds wheelSpeeds = m_kinematics.toWheelSpeeds(speed);
         wheelSpeeds.desaturate(m_maxSpeedM_S);
+
+        ChassisSpeeds actual = m_kinematics.toChassisSpeeds(wheelSpeeds);
+        AccelerationSE2 accel = accel(actual);
+        SE2Torque t = m_dynamics.torque(accel);
+        Pair<PTorque, PTorque> wheelForces = wheelForces(t);
+
         double left = wheelSpeeds.leftMetersPerSecond;
         double right = wheelSpeeds.rightMetersPerSecond;
         m_logLeft.log(() -> left);
         m_logRight.log(() -> right);
-        // TODO: dynamics
-        m_left.setVelocity(left, 0);
-        m_right.setVelocity(right, 0);
+        m_left.setVelocity(left, wheelForces.getFirst().f());
+        m_right.setVelocity(right, wheelForces.getSecond().f());
     }
 
     public void stop() {
@@ -128,6 +147,36 @@ public class TankDrive extends SubsystemBase {
 
     private double[] poseArray() {
         return VizUtil.poseToArray(m_pose);
+    }
+
+    /**
+     * Compute acceleration using backwards finite difference
+     * on chassis speed, using a constant DT.
+     */
+    private AccelerationSE2 accel(ChassisSpeeds speed) {
+        ChassisSpeeds dv = speed.minus(m_speed);
+        m_speed = speed;
+        ChassisSpeeds a = dv.div(TimedRobot100.LOOP_PERIOD_S);
+        return new AccelerationSE2(
+                a.vxMetersPerSecond, a.vyMetersPerSecond, a.omegaRadiansPerSecond);
+    }
+
+    /**
+     * Produce wheel forces equivalent to the SE2 forces.
+     * Note in reality the dynamic weight distribution and tire grip
+     * plays a role here, which we will ignore.
+     */
+    private Pair<PTorque, PTorque> wheelForces(SE2Torque t) {
+        // each side contributes the same to linear force in x
+        double halfX = t.fx() / 2;
+        double radius = m_trackWidthM / 2;
+        // t = F * r
+        double tangentialForce = t.t() / radius;
+        // each side contributes the same to torque
+        double halfTangential = tangentialForce / 2;
+        PTorque left = new PTorque(halfX - halfTangential);
+        PTorque right = new PTorque(halfX + halfTangential);
+        return new Pair<>(left, right);
     }
 
 }
