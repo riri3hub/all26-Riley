@@ -53,7 +53,7 @@ class SwerveKinodynamicsTest implements Timeless {
         double wheelbase = 0.5;
         double driveV = 1;
         SwerveKinodynamics k = new SwerveKinodynamics(logger,
-                driveV, 1, 1, 1, 1, 20 * Math.PI, track, track, wheelbase, wheelbase / 2, 1);
+                driveV, 1, 1, 1, track, track, wheelbase, wheelbase / 2, 1);
         assertEquals(1, k.getMaxDriveVelocityM_S(), DELTA);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -70,7 +70,7 @@ class SwerveKinodynamicsTest implements Timeless {
         double wheelbase = 0.5;
         double driveV = 4;
         SwerveKinodynamics k = new SwerveKinodynamics(logger,
-                driveV, 1, 1, 1, 1, 20 * Math.PI, track, track, wheelbase, wheelbase / 2, 1);
+                driveV, 1, 1, 1, track, track, wheelbase, wheelbase / 2, 1);
         assertEquals(4, k.getMaxDriveVelocityM_S(), DELTA);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -88,7 +88,7 @@ class SwerveKinodynamicsTest implements Timeless {
         double driveV = 4;
         SwerveKinodynamics k = new SwerveKinodynamics(
                 logger,
-                driveV, 1, 1, 1, 1, 20 * Math.PI, track, track, wheelbase,
+                driveV, 1, 1, 1, track, track, wheelbase,
                 wheelbase / 2, 1);
         assertEquals(4, k.getMaxDriveVelocityM_S(), DELTA);
 
@@ -106,7 +106,7 @@ class SwerveKinodynamicsTest implements Timeless {
         double wheelbase = 0.5;
         double driveA = 1;
         SwerveKinodynamics k = new SwerveKinodynamics(logger,
-                1, 1, driveA, 1, 1, 20 * Math.PI, track, track, wheelbase, wheelbase / 2, 1);
+                1, 1, driveA, 1, track, track, wheelbase, wheelbase / 2, 1);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), DELTA);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -124,7 +124,7 @@ class SwerveKinodynamicsTest implements Timeless {
         double wheelbase = 1;
         double driveA = 1;
         SwerveKinodynamics k = new SwerveKinodynamics(logger,
-                1, 1, driveA, 1, 1, 20 * Math.PI, track, track, wheelbase, wheelbase / 2, 1);
+                1, 1, driveA, 1, track, track, wheelbase, wheelbase / 2, 1);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), DELTA);
 
         double r = Math.hypot(track / 2, wheelbase / 2);
@@ -143,7 +143,7 @@ class SwerveKinodynamicsTest implements Timeless {
         double wheelbase = 1;
         double vcg = 0.3;
         SwerveKinodynamics k = new SwerveKinodynamics(logger,
-                1, 1, 1, 1, 1, 20 * Math.PI, track, track, wheelbase, wheelbase / 2, vcg);
+                1, 1, 1, 1, track, track, wheelbase, wheelbase / 2, vcg);
         assertEquals(1, k.getMaxDriveAccelerationM_S2(), DELTA);
 
         double fulcrum = Math.min(track / 2, wheelbase / 2);

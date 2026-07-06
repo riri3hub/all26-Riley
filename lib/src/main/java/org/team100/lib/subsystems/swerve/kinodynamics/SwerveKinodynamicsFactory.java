@@ -43,8 +43,6 @@ public class SwerveKinodynamicsFactory {
                         20, // stall m/s/s
                         20, // max accel m/s/s
                         50, // max decel m/s/s
-                        40, // max module steering rate rad/s
-                        120, // max module steering accel rad/s/s
                         0.565, // front track m
                         0.565, // back track m
                         0.565, // wheelbase m
@@ -57,8 +55,6 @@ public class SwerveKinodynamicsFactory {
                         10, // stall m/s/s
                         2, // accel m/s/s
                         2, // decel m/s/s
-                        13, // steering rate rad/s
-                        20 * Math.PI, // steering accel rad/s/s
                         0.380, // track m
                         0.380, // track m
                         0.445, // wheelbase m
@@ -71,8 +67,6 @@ public class SwerveKinodynamicsFactory {
                         10, // stall m/s/s
                         10, // max accel m/s/s
                         40, // max decel m/s/s
-                        40, // steering rate rad/s
-                        120, // steering accel rad/s/s
                         0.49, // front track m
                         0.44, // back track m
                         0.462, // wheelbase m
@@ -90,8 +84,6 @@ public class SwerveKinodynamicsFactory {
                         20, // stall m/s/s
                         20, // accel m/s/s
                         50, // decel m/s/s
-                        40, // steering rate rad/s
-                        120, // steering accel rad/s/s
                         0.565, // track m
                         0.565, // track m
                         0.565, // wheelbase m
@@ -116,8 +108,6 @@ public class SwerveKinodynamicsFactory {
                         10, // stall m/s/s
                         20, // max accel m/s/s
                         50, // max decel m/s/s
-                        20, // max module steering rate rad/s
-                        60, // max module steering accel rad/s/s
                         0.491, // front track m
                         0.44, // back track m
                         0.491, // wheelbase m
@@ -133,8 +123,6 @@ public class SwerveKinodynamicsFactory {
                         20, // stall m/s/s
                         5, // accel m/s/s
                         5, // decel m/s/s
-                        13, // steering rate rad/s
-                        20 * Math.PI, // steering accel rad/s/s
                         0.5, // track m
                         0.5, // track m
                         0.5, // wheelbase m
@@ -151,8 +139,6 @@ public class SwerveKinodynamicsFactory {
                 10, // stall m/s/s
                 10, // accel m/s/s
                 20, // decel m/s/s
-                20 * Math.PI,
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -168,8 +154,6 @@ public class SwerveKinodynamicsFactory {
                 10, // stall m/s/s
                 10, // accel m/s/s
                 20, // decel m/s/s
-                20 * Math.PI,
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -190,8 +174,6 @@ public class SwerveKinodynamicsFactory {
                 10, // stall m/s/s
                 1, // accel m/s/s
                 1, // decel m/s/s
-                20 * Math.PI,
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -206,8 +188,6 @@ public class SwerveKinodynamicsFactory {
                 10, // stall m/s/s
                 10, // accel m/s/s
                 20, // decel m/s/s
-                20 * Math.PI,
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -222,8 +202,6 @@ public class SwerveKinodynamicsFactory {
                 20, // stall m/s/s
                 10, // accel m/s/s
                 10, // decel m/s/s
-                20 * Math.PI,
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -238,8 +216,6 @@ public class SwerveKinodynamicsFactory {
                 10, // stall m/s/s
                 5, // max accel m/s/s
                 25, // max decel m/s/s
-                40, // max module steering rate rad/s
-                120, // max module steering accel rad/s/s
                 0.590, // front track m
                 0.590, // back track m
                 0.590, // wheelbase m
@@ -254,8 +230,6 @@ public class SwerveKinodynamicsFactory {
                 5, // stall m/s/s
                 1, // accel m/s/s
                 1, // decel m/s/s
-                1, // steering rate rad/s
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -270,8 +244,6 @@ public class SwerveKinodynamicsFactory {
                 5, // stall m/s/s
                 2, // accel m/s/s
                 2, // decel m/s/s
-                1, // steering rate rad/s
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -286,8 +258,6 @@ public class SwerveKinodynamicsFactory {
                 5, // stall m/s/s
                 1, // accel m/s/s
                 1, // decel m/s/s
-                1, // steering rate rad/s
-                1, // steering accel rad/s/s
                 2, // track m
                 2, // track m
                 2, // wheelbase m
@@ -305,8 +275,6 @@ public class SwerveKinodynamicsFactory {
                 10, // stall m/s/s
                 2, // accel m/s/s
                 300, // decel m/s/s
-                5, // steering rate rad/s
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -321,8 +289,6 @@ public class SwerveKinodynamicsFactory {
                 10, // stall m/s/s
                 1, // accel m/s/s
                 10, // decel m/s/s
-                5, // steering rate rad/s
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -337,8 +303,6 @@ public class SwerveKinodynamicsFactory {
                 20, // stall m/s/s
                 10, // accel m/s/s
                 10, // decel m/s/s
-                5, // steering rate rad/s
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -353,8 +317,6 @@ public class SwerveKinodynamicsFactory {
                 20, // stall m/s/s
                 10, // accel m/s/s
                 10, // decel m/s/s
-                5, // steering rate rad/s
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -369,8 +331,6 @@ public class SwerveKinodynamicsFactory {
                 30, // stall m/s/s
                 10, // accel m/s/s
                 10, // decel m/s/s
-                5, // steering rate rad/s
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -386,8 +346,6 @@ public class SwerveKinodynamicsFactory {
                 10, // stall m/s/s
                 1, // accel m/s/s
                 10, // decel m/s/s
-                5, // steering rate rad/s
-                20 * Math.PI, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m
@@ -409,8 +367,6 @@ public class SwerveKinodynamicsFactory {
                 10000, // stall m/s/s
                 10000, // accel m/s/s
                 10000, // decel m/s/s
-                10000, // steering rate rad/s
-                10000, // steering accel rad/s/s
                 0.5, // track m
                 0.5, // track m
                 0.5, // wheelbase m

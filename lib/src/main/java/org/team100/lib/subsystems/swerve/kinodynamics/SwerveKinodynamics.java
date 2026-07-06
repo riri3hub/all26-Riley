@@ -1,13 +1,9 @@
 package org.team100.lib.subsystems.swerve.kinodynamics;
 
-import java.util.function.Supplier;
-
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.profile.r1.ProfileR1;
-import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.subsystems.swerve.VeeringCorrection;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleStates;
 import org.team100.lib.tuning.Mutable;
@@ -30,6 +26,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
  * 
  * In particular, the maximum spin rate is likely to seem quite high. Do not
  * lower it here.
+ * 
+ * This used to include the steering rate, in order to provide
+ * a suitable profile for profiled steering, but we don't do
+ * profiled steering anymore, so it's gone.
  */
 public class SwerveKinodynamics {
     private final LoggerFactory m_log;
@@ -50,11 +50,6 @@ public class SwerveKinodynamics {
     private final Mutable m_stallAccelerationM_S2;
     private final Mutable m_maxDriveAccelerationM_S2;
     private final Mutable m_maxDriveDecelerationM_S2;
-    private final Mutable m_maxSteeringVelocityRad_S;
-    private final Mutable m_maxSteeringAccelerationRad_S2;
-
-    // Updated when input Mutables change.
-    private ProfileR1 m_steeringProfile;
 
     /**
      * @param maxDriveVelocity        module drive speed m/s
@@ -84,8 +79,6 @@ public class SwerveKinodynamics {
             double stallAcceleration,
             double maxDriveAcceleration,
             double maxDriveDeceleration,
-            double maxSteeringVelocity,
-            double maxSteeringAcceleration,
             double fronttrack,
             double backtrack,
             double wheelbase,
@@ -111,21 +104,6 @@ public class SwerveKinodynamics {
         m_stallAccelerationM_S2 = new Mutable(m_log, "stallAcceleration", stallAcceleration);
         m_maxDriveAccelerationM_S2 = new Mutable(m_log, "maxDriveAcceleration", maxDriveAcceleration);
         m_maxDriveDecelerationM_S2 = new Mutable(m_log, "maxDriveDeceleration", maxDriveDeceleration);
-        m_maxSteeringVelocityRad_S = new Mutable(m_log, "maxSteeringVelocity", maxSteeringVelocity, this::update);
-        m_maxSteeringAccelerationRad_S2 = new Mutable(m_log, "maxSteeringAccel", maxSteeringAcceleration, this::update);
-        update(0);
-    }
-
-    private void update(double x) {
-        m_steeringProfile = new TrapezoidProfileR1(
-                m_log.name("steering"),
-                m_maxSteeringVelocityRad_S.getAsDouble(),
-                m_maxSteeringAccelerationRad_S2.getAsDouble(),
-                0.02); // one degree
-    }
-
-    public Supplier<ProfileR1> getSteeringProfile() {
-        return () -> m_steeringProfile;
     }
 
     /** Cruise speed, m/s. */
@@ -160,11 +138,6 @@ public class SwerveKinodynamics {
      */
     public double getMaxDriveDecelerationM_S2() {
         return m_maxDriveDecelerationM_S2.getAsDouble();
-    }
-
-    /** Cruise speed of the swerve steering axes, rad/s. */
-    public double getMaxSteeringVelocityRad_S() {
-        return m_maxSteeringVelocityRad_S.getAsDouble();
     }
 
     /** Spin cruise speed, rad/s. Computed from drive and frame size. */
