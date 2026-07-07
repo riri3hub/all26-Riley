@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.config.CurrentLimit;
+import org.team100.lib.dynamics.swerve.SwerveEffort;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.TotalCurrentLog;
@@ -51,7 +52,7 @@ class SimulatedHeadingTest implements Timeless {
         stepTime();
         // go for 0.4s
         for (int i = 0; i < 20; ++i) {
-            c.setDesiredStates(states);
+            c.setDesiredStates(states, SwerveEffort.ZERO);
             stepTime();
         }
         assertEquals(0, h.getYawNWU().getRadians(), DELTA);
@@ -77,7 +78,7 @@ class SimulatedHeadingTest implements Timeless {
         // steering velocity is 13 rad/s, we need to go about 2 rad? so wait 0.2 sec?
         for (int i = 0; i < 20; ++i) {
             // get the modules pointing the right way (wait for the steering profiles)
-            c.setDesiredStates(states);
+            c.setDesiredStates(states, SwerveEffort.ZERO);
             if (DEBUG)
                 System.out.printf("rotation %6.3f yaw %6.3f\n",
                         c.positions().frontLeft().unwrappedAngle().get().getRadians(),
@@ -118,7 +119,7 @@ class SimulatedHeadingTest implements Timeless {
         // steering velocity is 13 rad/s, we need to go about 2 rad? so wait 0.2 sec?
         for (int i = 0; i < 20; ++i) {
             // get the modules pointing the right way (wait for the steering profiles)
-            c.setDesiredStates(states);
+            c.setDesiredStates(states, SwerveEffort.ZERO);
             stepTime();
             h.getYawNWU();
         }

@@ -2,6 +2,7 @@ package org.team100.lib.subsystems.mecanum;
 
 import org.team100.lib.dynamics.mecanum.MecanumDynamics;
 import org.team100.lib.dynamics.mecanum.MecanumEffort;
+import org.team100.lib.geometry.ChassisAcceleration;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -105,7 +106,9 @@ public class MecanumDrive100 extends SubsystemBase implements VelocitySubsystemS
         ChassisSpeeds speed = SwerveKinodynamics.toInstantaneousChassisSpeeds(
                 nextV.velocity(), yaw);
         MecanumDriveWheelSpeeds mSpeed = m_kinematics.toWheelSpeeds(speed);
-        MecanumEffort effort = m_dynamics.effort(nextV.acceleration());
+        ChassisAcceleration accel = ChassisAcceleration.fromFieldRelative(
+                nextV.acceleration(), yaw);
+        MecanumEffort effort = m_dynamics.effort(accel);
         m_frontLeft.setVelocity(mSpeed.frontLeftMetersPerSecond, effort.fl());
         m_frontRight.setVelocity(mSpeed.frontRightMetersPerSecond, effort.fr());
         m_rearLeft.setVelocity(mSpeed.rearLeftMetersPerSecond, effort.rl());

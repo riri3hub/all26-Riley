@@ -8,7 +8,10 @@ import org.team100.lib.config.DriverSkill;
 import org.team100.lib.controller.r1.AzimuthController;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.geometry.AccelerationSE2;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.hid.Velocity;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -50,6 +53,8 @@ public class DriveMovingTargetLock extends Command {
     private final AzimuthController m_aim;
     private final BooleanLogger m_log_aiming;
 
+    private VelocitySE2 m_v;
+
     public DriveMovingTargetLock(
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
@@ -69,6 +74,7 @@ public class DriveMovingTargetLock extends Command {
         m_solver = solver;
         m_drive = drive;
         m_aim = aim;
+        m_v = VelocitySE2.ZERO;
         addRequirements(m_drive);
     }
 
@@ -101,27 +107,34 @@ public class DriveMovingTargetLock extends Command {
     /** Null to skip override */
     private void actuate(Double omega) {
         // Clip and scale user input.
-        VelocityControlSE2 nextV = VelocityControlSE2.scale(
+        VelocityControlSE2 scaled = VelocityControlSE2.scale(
                 m_twistSupplier.get().clip(1.0),
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         // Scale for driver skill.
-        nextV = GeometryUtil.scale(nextV, DriverSkill.level().scale());
+        scaled = GeometryUtil.scale(scaled, DriverSkill.level().scale());
 
         // Apply field-relative limits.
         if (Experiments.instance.enabled(Experiment.UseSwerveLimiter)) {
-            nextV = m_limiter.apply(nextV);
+            scaled = m_limiter.apply(scaled);
         }
 
         // Override omega.
         m_log_aiming.log(() -> omega != null);
         if (omega != null) {
-            nextV = new VelocityControlSE2(nextV.x().v(), nextV.y().v(), omega);
+            scaled = new VelocityControlSE2(scaled.x().v(), scaled.y().v(), omega);
         }
 
+        // Compute field-relative accel from backwards finite difference.
+        VelocitySE2 v = scaled.velocity();
+        // Because this is field-relative, there is no centrifugal force.
+        AccelerationSE2 a = v.accel(m_v, TimedRobot100.LOOP_PERIOD_S);
+        m_v = v;
+
         // Actuate the drivetrain.
-        m_drive.set(nextV);
+        m_drive.set(new VelocityControlSE2(v, a));
+
     }
 
 }

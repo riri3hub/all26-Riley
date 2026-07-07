@@ -8,14 +8,11 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
 
 /**
- * Acceleration in SE2 in the moving reference frame,
+ * Acceleration in SE2 in the robot reference frame,
  * analogous to ChassisSpeeds.
- * 
- * Note this is always a non-inertial reference frame,
- * so centrifugal force exists.
  */
 public record ChassisAcceleration(double x, double y, double theta) {
-
+    public static ChassisAcceleration ZERO = new ChassisAcceleration(0, 0, 0);
     /**
      * Acceleration from starting and ending speeds.
      * Correctly includes centrifugal acceleration.

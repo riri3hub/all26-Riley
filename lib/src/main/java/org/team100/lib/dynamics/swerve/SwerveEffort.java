@@ -17,6 +17,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public record SwerveEffort(
         ModuleEffort fl, ModuleEffort fr, ModuleEffort rl, ModuleEffort rr) {
+    public static SwerveEffort ZERO = new SwerveEffort(
+            ModuleEffort.ZERO, ModuleEffort.ZERO,
+            ModuleEffort.ZERO, ModuleEffort.ZERO);
 
     /**
      * Analogous to SwerveModuleState, but for force, and the adjusted angle.
@@ -30,5 +33,8 @@ public record SwerveEffort(
      *              acceleration.
      */
     public record ModuleEffort(double f, Optional<Rotation2d> angle) {
+        static ModuleEffort ZERO = new ModuleEffort(
+                0, Optional.of(Rotation2d.kZero));
+
     }
 }

@@ -4,7 +4,7 @@ import static org.team100.lib.geometry.GeometryUtil.det;
 
 import org.team100.lib.dynamics.se2.SE2Dynamics;
 import org.team100.lib.dynamics.se2.SE2Effort;
-import org.team100.lib.geometry.AccelerationSE2;
+import org.team100.lib.geometry.ChassisAcceleration;
 
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Matrix;
@@ -59,9 +59,9 @@ public class MecanumDynamics {
      * sqrt(2) times the roller force, to account for
      * the angle of the rollers.
      * 
-     * Acceleration here is extrinsic/inertial: no centrifugal force.
+     * @param a acceleration in robot frame.
      */
-    public MecanumEffort effort(AccelerationSE2 a) {
+    public MecanumEffort effort(ChassisAcceleration a) {
         // Compute rigid body wrench.
         SE2Effort se2Effort = m_dyn.effort(a);
         Vector<N3> w = se2Effort.vector();

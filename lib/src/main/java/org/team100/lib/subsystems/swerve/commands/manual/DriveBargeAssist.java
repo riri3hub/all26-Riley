@@ -6,7 +6,10 @@ import java.util.function.Supplier;
 import org.team100.lib.config.DriverSkill;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.geometry.AccelerationSE2;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.hid.Velocity;
 import org.team100.lib.state.VelocityControlSE2;
 import org.team100.lib.subsystems.swerve.SwerveDriveSubsystem;
@@ -47,6 +50,7 @@ public class DriveBargeAssist extends Command {
     private final SwerveKinodynamics m_swerveKinodynamics;
 
     private final Supplier<Pose2d> m_pose;
+    private VelocitySE2 m_v;
 
     public DriveBargeAssist(
             SwerveKinodynamics swerveKinodynamics,
@@ -61,6 +65,7 @@ public class DriveBargeAssist extends Command {
         m_limiter = limiter;
         m_swerveKinodynamics = swerveKinodynamics;
         m_pose = pose;
+        m_v = VelocitySE2.ZERO;
         addRequirements(m_drive);
     }
 
@@ -93,19 +98,26 @@ public class DriveBargeAssist extends Command {
 
         Velocity avoidBarge = avoidBarge(clipped);
 
-        VelocityControlSE2 v = VelocityControlSE2.scale(
+        VelocityControlSE2 scaled = VelocityControlSE2.scale(
                 avoidBarge,
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxAngleSpeedRad_S());
 
         // scale for driver skill.
-        v = GeometryUtil.scale(v, DriverSkill.level().scale());
+        scaled = GeometryUtil.scale(scaled, DriverSkill.level().scale());
 
         // Apply field-relative limits.
         if (Experiments.instance.enabled(Experiment.UseSwerveLimiter)) {
-            v = m_limiter.apply(v);
+            scaled = m_limiter.apply(scaled);
         }
-        m_drive.set(v);
+
+        // Compute field-relative accel from backwards finite difference.
+        VelocitySE2 v = scaled.velocity();
+        // Because this is field-relative, there is no centrifugal force.
+        AccelerationSE2 a = v.accel(m_v, TimedRobot100.LOOP_PERIOD_S);
+        m_v = v;
+
+        m_drive.set(new VelocityControlSE2(v, a));
 
     }
 

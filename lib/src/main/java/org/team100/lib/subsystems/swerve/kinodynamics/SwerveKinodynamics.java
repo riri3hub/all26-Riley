@@ -1,6 +1,10 @@
 package org.team100.lib.subsystems.swerve.kinodynamics;
 
+import org.team100.lib.dynamics.swerve.SwerveDynamics;
+import org.team100.lib.dynamics.swerve.SwerveEffort;
+import org.team100.lib.dynamics.swerve.Tire;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.geometry.ChassisAcceleration;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.logging.LoggerFactory;
@@ -38,12 +42,17 @@ public class SwerveKinodynamics {
     private final double m_backtrack;
     private final double m_wheelbase;
     private final double m_frontoffset;
+    private final Translation2d m_fl;
+    private final Translation2d m_fr;
+    private final Translation2d m_rl;
+    private final Translation2d m_rr;
     private final double m_vcg;
     /** Diagonal distance from center to wheel. */
     private final double m_radius;
     /** Distance from the center to the nearest edge. */
     private final double m_fulcrum;
     private final SwerveDriveKinematics100 m_kinematics;
+    private final SwerveDynamics m_dynamics;
 
     // Configured (mutable) inputs.
     private final Mutable m_maxDriveVelocityM_S;
@@ -72,6 +81,9 @@ public class SwerveKinodynamics {
      * @param frontoffset             distance from the center of mass to the front
      *                                wheels, meters
      * @param vcg                     vertical center of gravity, meters
+     * @param m                       mass, kg
+     * @param I                       inertia, kg m^2
+     * @param tire                    tire model for lateral force
      */
     SwerveKinodynamics(
             LoggerFactory parent,
@@ -83,7 +95,10 @@ public class SwerveKinodynamics {
             double backtrack,
             double wheelbase,
             double frontoffset,
-            double vcg) {
+            double vcg,
+            double m,
+            double I,
+            Tire tire) {
         m_log = parent.type(this);
 
         // Measured quantities...
@@ -94,11 +109,12 @@ public class SwerveKinodynamics {
         m_vcg = vcg;
         m_fulcrum = Math.min(Math.min(m_fronttrack, m_backtrack) / 2, m_wheelbase / 2);
         m_radius = Math.hypot((fronttrack + backtrack) / 4, m_wheelbase / 2);
-        m_kinematics = new SwerveDriveKinematics100(
-                new Translation2d(m_frontoffset, m_fronttrack / 2),
-                new Translation2d(m_frontoffset, -m_fronttrack / 2),
-                new Translation2d(m_frontoffset - m_wheelbase, m_backtrack / 2),
-                new Translation2d(m_frontoffset - m_wheelbase, -m_backtrack / 2));
+        m_fl = new Translation2d(m_frontoffset, m_fronttrack / 2);
+        m_fr = new Translation2d(m_frontoffset, -m_fronttrack / 2);
+        m_rl = new Translation2d(m_frontoffset - m_wheelbase, m_backtrack / 2);
+        m_rr = new Translation2d(m_frontoffset - m_wheelbase, -m_backtrack / 2);
+        m_kinematics = new SwerveDriveKinematics100(m_fl, m_fr, m_rl, m_rr);
+        m_dynamics = new SwerveDynamics(m, I, tire, m_fl, m_fr, m_rl, m_rr);
 
         m_maxDriveVelocityM_S = new Mutable(m_log, "maxDriveVelocity", maxDriveVelocity);
         m_stallAccelerationM_S2 = new Mutable(m_log, "stallAcceleration", stallAcceleration);
@@ -181,6 +197,15 @@ public class SwerveKinodynamics {
      */
     public SwerveModuleStates toSwerveModuleStates(ChassisSpeeds nextSpeed) {
         return toSwerveModuleStates(nextSpeed, TimedRobot100.LOOP_PERIOD_S);
+    }
+
+    /**
+     * Effort to achieve the required acceleration, given the states. Includes both
+     * longitudinal (provided by the motor) and lateral (provided by slip angle)
+     * forces.
+     */
+    public SwerveEffort effort(SwerveModuleStates states, ChassisAcceleration a) {
+        return m_dynamics.effort(states, a);
     }
 
     /**

@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.team100.lib.dynamics.se2.SE2Dynamics;
 import org.team100.lib.dynamics.se2.SE2Effort;
 import org.team100.lib.dynamics.swerve.SwerveEffort.ModuleEffort;
-import org.team100.lib.geometry.AccelerationSE2;
+import org.team100.lib.geometry.ChassisAcceleration;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleState100;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleStates;
@@ -27,7 +27,7 @@ import edu.wpi.first.math.numbers.N8;
  * implement it that way?
  */
 public class SwerveDynamics {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     // This is unconstrained actuation so there are no
     // normal vectors here.
     /** Robot dynamics, to obtain the whole-robot wrench. */
@@ -63,11 +63,13 @@ public class SwerveDynamics {
     /**
      * Returns corner efforts for the given rigid body acceleration.
      * 
-     * Acceleration here is extrinsic/inertial: no centrifugal force.
+     * @param states swerve module states from inverse kinematics (not measurement)
+     * @param a      acceleration in robot frame.
      */
     public SwerveEffort effort(
-            SwerveModuleStates states, AccelerationSE2 accel) {
-        CornerForces cornerForces = cornerForces(accel);
+            SwerveModuleStates states,
+            ChassisAcceleration a) {
+        CornerForces cornerForces = cornerForces(a);
         return new SwerveEffort(
                 cornerEffort(states.frontLeft(), cornerForces.fl()),
                 cornerEffort(states.frontRight(), cornerForces.fr()),
@@ -125,11 +127,11 @@ public class SwerveDynamics {
     /**
      * Corner forces for the given rigid body acceleration.
      * 
-     * Acceleration here is extrinsic/inertial: no centrifugal force.
+     * @param a acceleration in robot frame.
      */
-    public CornerForces cornerForces(AccelerationSE2 accel) {
+    public CornerForces cornerForces(ChassisAcceleration a) {
         // Compute rigid body wrench.
-        SE2Effort se2Effort = m_dyn.effort(accel);
+        SE2Effort se2Effort = m_dyn.effort(a);
         Vector<N3> w = se2Effort.vector();
         // Find contact forces.
         Vector<N8> f = new Vector<>(m_inv.times(w));

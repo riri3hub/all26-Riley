@@ -6,7 +6,10 @@ import java.util.function.Supplier;
 import org.team100.lib.config.DriverSkill;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
+import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.geometry.AccelerationSE2;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.hid.Velocity;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -38,6 +41,8 @@ public class DriveFieldRelative extends Command {
     // LOGGERS
     private final VelocityControlSE2Logger m_log_scaled;
 
+    private VelocitySE2 m_v;
+
     public DriveFieldRelative(
             LoggerFactory parent,
             SwerveKinodynamics swerveKinodynamics,
@@ -52,7 +57,7 @@ public class DriveFieldRelative extends Command {
         m_limiter = limiter;
         m_log_scaled = log.velocityControlSE2Logger(Level.TRACE, "scaled");
         m_swerveKinodynamics = swerveKinodynamics;
-
+        m_v = VelocitySE2.ZERO;
         addRequirements(m_drive);
     }
 
@@ -79,7 +84,12 @@ public class DriveFieldRelative extends Command {
         if (Experiments.instance.enabled(Experiment.UseSwerveLimiter)) {
             scaled = m_limiter.apply(scaled);
         }
-        m_drive.set(scaled);
+        // Compute field-relative accel from backwards finite difference.
+        VelocitySE2 v = scaled.velocity();
+        // Because this is field-relative, there is no centrifugal force.
+        AccelerationSE2 a = v.accel(m_v, TimedRobot100.LOOP_PERIOD_S);
+        m_v = v;
+        m_drive.set(new VelocityControlSE2(v, a));
     }
 
 }

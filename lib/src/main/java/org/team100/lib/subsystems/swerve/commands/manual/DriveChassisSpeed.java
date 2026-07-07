@@ -3,6 +3,8 @@ package org.team100.lib.subsystems.swerve.commands.manual;
 
 import java.util.function.Supplier;
 
+import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.geometry.ChassisAcceleration;
 import org.team100.lib.hid.Velocity;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -24,6 +26,7 @@ public class DriveChassisSpeed extends Command {
     private final SwerveDriveSubsystem m_drive;
     private final SwerveKinodynamics m_swerveKinodynamics;
     private final ChassisSpeedsLogger m_log_chassis_speeds;
+    private ChassisSpeeds m_speed;
 
     public DriveChassisSpeed(
             LoggerFactory parent,
@@ -35,6 +38,7 @@ public class DriveChassisSpeed extends Command {
         m_drive = drive;
         m_log_chassis_speeds = log.chassisSpeedsLogger(Level.TRACE, "chassis speeds");
         m_swerveKinodynamics = swerveKinodynamics;
+        m_speed = new ChassisSpeeds();
         addRequirements(m_drive);
     }
 
@@ -48,6 +52,9 @@ public class DriveChassisSpeed extends Command {
                 maxSpeed * MathUtil.clamp(clipped.y(), -1, 1),
                 maxOmega * MathUtil.clamp(clipped.theta(), -1, 1));
         m_log_chassis_speeds.log(() -> scaled);
-        m_drive.setChassisSpeeds(scaled);
+        ChassisAcceleration accel = ChassisAcceleration.diff(
+                scaled, m_speed, TimedRobot100.LOOP_PERIOD_S);
+        m_speed = scaled;
+        m_drive.setChassisSpeeds(scaled, accel);
     }
 }

@@ -1,5 +1,6 @@
 package org.team100.lib.subsystems.swerve.commands.test;
 
+import org.team100.lib.geometry.ChassisAcceleration;
 import org.team100.lib.subsystems.swerve.SwerveDriveSubsystem;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,7 +34,7 @@ public class DriveBackwards extends Command {
 
     @Override
     public void execute() {
-        m_drive.setChassisSpeeds(SPEED);
+        m_drive.setChassisSpeeds(SPEED, ChassisAcceleration.ZERO);
     }
 
     public boolean isDone() {

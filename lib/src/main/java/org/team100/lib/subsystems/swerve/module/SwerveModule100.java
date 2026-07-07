@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.team100.lib.coherence.Takt;
 import org.team100.lib.config.Identity;
+import org.team100.lib.dynamics.swerve.SwerveEffort.ModuleEffort;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.logging.Level;
@@ -109,10 +110,10 @@ public abstract class SwerveModule100 implements Player {
      * 
      * @param desiredWrapped for now+dt
      */
-    void setDesiredState(SwerveModuleState100 desiredWrapped) {
+    void setDesiredState(SwerveModuleState100 desiredWrapped, ModuleEffort effort) {
         desiredWrapped = usePreviousAngleIfEmpty(desiredWrapped);
         desiredWrapped = optimize(desiredWrapped);
-        actuate(desiredWrapped);
+        actuate(desiredWrapped, effort);
     }
 
     /**
@@ -120,9 +121,9 @@ public abstract class SwerveModule100 implements Player {
      * 
      * Given an empty angle, it uses the previous one.
      */
-    void setRawDesiredState(SwerveModuleState100 desired) {
+    void setRawDesiredState(SwerveModuleState100 desired, ModuleEffort effort) {
         desired = usePreviousAngleIfEmpty(desired);
-        actuate(desired);
+        actuate(desired, effort);
     }
 
     /**
@@ -183,11 +184,21 @@ public abstract class SwerveModule100 implements Player {
      * TODO: implement force
      * 
      * @param nextWrapped for now+dt, i.e. "next"
+     * @param effort      force and slip angle from dynamics
      */
-    void actuate(SwerveModuleState100 nextWrapped) {
+    void actuate(SwerveModuleState100 nextWrapped, ModuleEffort effort) {
         if (nextWrapped.angle().isEmpty())
             throw new IllegalArgumentException("actuation needs a real angle");
-        Rotation2d nextWrappedAngle = nextWrapped.angle().get();
+        final Rotation2d nextWrappedAngle;
+        if (effort.angle().isPresent()
+                && Experiments.instance.enabled(
+                        Experiment.SwerveDynamicsLateral)) {
+            // use the slip angle from dynamics.
+            nextWrappedAngle = effort.angle().get();
+        } else {
+            // use the kinematics (zero slip) angle.
+            nextWrappedAngle = nextWrapped.angle().get();
+        }
         // TODO: Experiment with fixed DT here.
         double dt = dt();
         m_log_dt.log(() -> dt);
@@ -203,11 +214,13 @@ public abstract class SwerveModule100 implements Player {
                 nextOmega,
                 dt);
         m_log_speed.log(() -> nextSpeed);
-        //
-        // TODO: implement force
-        //
-        m_drive.setVelocity(nextSpeed, 0);
-
+        if (Experiments.instance.enabled(Experiment.SwerveDynamicsLongitudinal)) {
+            // add the force from dynamics.
+            m_drive.setVelocity(nextSpeed, effort.f());
+        } else {
+            // use zero extra force.
+            m_drive.setVelocity(nextSpeed, 0);
+        }
         // Steering omega may be a source of noise, so optionally ignore it.
         double omega = nextOmega;
         if (Experiments.instance.enabled(Experiment.SteerWithoutVelocity)) {

@@ -1,5 +1,6 @@
 package org.team100.frc2025.Swerve;
 
+import org.team100.lib.geometry.ChassisAcceleration;
 import org.team100.lib.subsystems.swerve.SwerveDriveSubsystem;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -15,6 +16,7 @@ public class DriveForwardSlowly extends Command {
 
     @Override
     public void execute() {
-        m_drive.setChassisSpeeds(new ChassisSpeeds(0, 0.1, 0));
+        m_drive.setChassisSpeeds(
+                new ChassisSpeeds(0, 0.1, 0), ChassisAcceleration.ZERO);
     }
 }

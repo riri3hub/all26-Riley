@@ -21,5 +21,13 @@ public enum Experiment {
     /**
      * Skip velocity feedforward in steering, to reduce noise.
      */
-    SteerWithoutVelocity
+    SteerWithoutVelocity,
+    /**
+     * Use longitudinal dynamics, i.e. motor torque.
+     */
+    SwerveDynamicsLongitudinal,
+    /**
+     * Use lateral dynamics, i.e. slip angle.
+     */
+    SwerveDynamicsLateral
 }

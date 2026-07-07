@@ -1,6 +1,7 @@
 package org.team100.lib.dynamics.se2;
 
 import org.team100.lib.geometry.AccelerationSE2;
+import org.team100.lib.geometry.ChassisAcceleration;
 
 public class SE2Dynamics {
     /** Mass. */
@@ -24,4 +25,11 @@ public class SE2Dynamics {
         return new SE2Effort(m * a.x(), m * a.y(), I * a.theta());
     }
 
+    /**
+     * Generalized force (torque or force) to achieve the required
+     * acceleration: F=ma and t=Ialpha.
+     */
+    public SE2Effort effort(ChassisAcceleration a) {
+        return new SE2Effort(m * a.x(), m * a.y(), I * a.theta());
+    }
 }

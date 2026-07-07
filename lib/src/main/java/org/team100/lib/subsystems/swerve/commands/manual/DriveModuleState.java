@@ -3,6 +3,7 @@ package org.team100.lib.subsystems.swerve.commands.manual;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.team100.lib.dynamics.swerve.SwerveEffort;
 import org.team100.lib.hid.Velocity;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -57,6 +58,8 @@ public class DriveModuleState extends Command {
         m_log_speed.log(() -> speedM_S);
         m_log_angle.log(angle::get);
         SwerveModuleState100 s = new SwerveModuleState100(speedM_S, angle);
-        m_drive.setRawModuleStates(new SwerveModuleStates(s, s, s, s));
+        // zero effort for now.
+        m_drive.setRawModuleStates(
+                new SwerveModuleStates(s, s, s, s), SwerveEffort.ZERO);
     }
 }

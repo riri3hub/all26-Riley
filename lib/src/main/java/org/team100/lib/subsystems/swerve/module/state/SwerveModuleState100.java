@@ -17,6 +17,7 @@ import edu.wpi.first.util.struct.StructSerializable;
  * TODO: add force
  */
 public class SwerveModuleState100 implements Comparable<SwerveModuleState100>, StructSerializable {
+    public static SwerveModuleState100 ZERO = new SwerveModuleState100();
     private final double m_speedM_S;
     private final Optional<Rotation2d> m_angle;
 

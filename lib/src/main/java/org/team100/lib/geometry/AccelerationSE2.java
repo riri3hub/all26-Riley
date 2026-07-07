@@ -3,6 +3,8 @@ package org.team100.lib.geometry;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N3;
 
 /**
@@ -40,6 +42,12 @@ public record AccelerationSE2(double x, double y, double theta) {
 
     public double norm() {
         return Math.hypot(x, y);
+    }
+
+    /** Beware, the returned accel is robot-relative but not intrinsic */
+    public AccelerationSE2 toRobotRelative(Rotation2d yaw) {
+        Translation2d rotated = new Translation2d(x(), y()).rotateBy(yaw.unaryMinus());
+        return new AccelerationSE2(rotated.getX(), rotated.getY(), theta());
     }
 
     /**

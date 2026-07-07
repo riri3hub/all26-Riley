@@ -6,7 +6,9 @@ import org.team100.lib.coherence.Cache;
 import org.team100.lib.coherence.ObjectCache;
 import org.team100.lib.coherence.Takt;
 import org.team100.lib.config.DriverSkill;
+import org.team100.lib.dynamics.swerve.SwerveEffort;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.geometry.ChassisAcceleration;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.localization.FreshSwerveEstimate;
 import org.team100.lib.localization.OdometryUpdater;
@@ -96,22 +98,24 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
                 () -> nextTheta.minus(currentState.rotation()).getRadians());
         ChassisSpeeds nextSpeed = SwerveKinodynamics.toInstantaneousChassisSpeeds(
                 nextV.velocity(), nextTheta);
-        m_swerveLocal.setChassisSpeeds(nextSpeed);
+        ChassisAcceleration nextAccel = ChassisAcceleration.fromFieldRelative(
+                nextV.acceleration(), nextTheta);
+        m_swerveLocal.setChassisSpeeds(nextSpeed, nextAccel);
         m_log_input.log(() -> nextV);
     }
 
     /**
      * Drive in robot-relative coordinates.
      */
-    public void setChassisSpeeds(ChassisSpeeds speeds) {
-        m_swerveLocal.setChassisSpeeds(speeds);
+    public void setChassisSpeeds(ChassisSpeeds speeds, ChassisAcceleration accel) {
+        m_swerveLocal.setChassisSpeeds(speeds, accel);
     }
 
     /**
      * For testing only.
      */
-    public void setRawModuleStates(SwerveModuleStates states) {
-        m_swerveLocal.setRawModuleStates(states);
+    public void setRawModuleStates(SwerveModuleStates states, SwerveEffort effort) {
+        m_swerveLocal.setRawModuleStates(states, effort);
     }
 
     @Override
@@ -210,7 +214,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
      * Never ends.
      */
     public Command aheadSlow() {
-        return run(() -> setRawModuleStates(SwerveModuleStates.aheadSlow))
+        return run(() -> setRawModuleStates(
+                SwerveModuleStates.aheadSlow, SwerveEffort.ZERO))
                 .withName("Drive Ahead");
 
     }
@@ -220,7 +225,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
      * Never ends.
      */
     public Command rightwardSlow() {
-        return run(() -> setChassisSpeeds(new ChassisSpeeds(0, -1.0, 0)))
+        return run(() -> setChassisSpeeds(
+                new ChassisSpeeds(0, -1.0, 0), ChassisAcceleration.ZERO))
                 .withName("Drive Right Slow");
     }
 
@@ -229,7 +235,8 @@ public class SwerveDriveSubsystem extends SubsystemBase implements VelocitySubsy
      * Never ends.
      */
     public Command spinLeft() {
-        return run(() -> setChassisSpeeds(new ChassisSpeeds(0, 0, 1.0)))
+        return run(() -> setChassisSpeeds(
+                new ChassisSpeeds(0, 0, 1.0), ChassisAcceleration.ZERO))
                 .withName("Drive Spin Left");
     }
 

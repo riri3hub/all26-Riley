@@ -9,6 +9,7 @@ import org.team100.lib.dynamics.swerve.SwerveDynamics.CornerForce;
 import org.team100.lib.dynamics.swerve.SwerveDynamics.CornerForces;
 import org.team100.lib.dynamics.swerve.SwerveEffort.ModuleEffort;
 import org.team100.lib.geometry.AccelerationSE2;
+import org.team100.lib.geometry.ChassisAcceleration;
 import org.team100.lib.subsystems.swerve.kinodynamics.DiscreteSpeed;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveDriveKinematics100;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleState100;
@@ -46,7 +47,7 @@ public class SwerveDynamicsTest {
     void test1() {
         SwerveDynamics d = new SwerveDynamics(
                 70, 6, new Tire(200, 0), fl, fr, rl, rr);
-        AccelerationSE2 a = new AccelerationSE2(1, 0, 0);
+        ChassisAcceleration a = new ChassisAcceleration(1, 0, 0);
         CornerForces e = d.cornerForces(a);
         assertEquals(17.5, e.fl().x(), 0.001);
         assertEquals(0, e.fl().y(), 0.001);
@@ -65,7 +66,7 @@ public class SwerveDynamicsTest {
     void test1a() {
         SwerveDynamics d = new SwerveDynamics(
                 70, 6, new Tire(200, 0), fl, fr, rl, rr);
-        AccelerationSE2 a = new AccelerationSE2(0, 1, 0);
+        ChassisAcceleration a = new ChassisAcceleration(0, 1, 0);
         CornerForces e = d.cornerForces(a);
         assertEquals(0, e.fl().x(), 0.001);
         assertEquals(17.5, e.fl().y(), 0.001);
@@ -94,7 +95,9 @@ public class SwerveDynamicsTest {
         assertEquals(0, s.frontLeft().angle().get().getRadians(), 0.001);
         // no accel
         AccelerationSE2 a = new AccelerationSE2(0, 0, 0);
-        SwerveEffort e = d.effort(s, a);
+        ChassisAcceleration accel = ChassisAcceleration.fromFieldRelative(
+                a, Rotation2d.kZero);
+        SwerveEffort e = d.effort(s, accel);
         assertEquals(0, e.fl().f(), 0.001);
         assertEquals(0, e.fl().angle().get().getRadians(), 0.001);
     }
@@ -113,10 +116,36 @@ public class SwerveDynamicsTest {
         assertEquals(0, s.frontLeft().angle().get().getRadians(), 0.001);
         // longitudinal accel
         AccelerationSE2 a = new AccelerationSE2(1, 0, 0);
-        SwerveEffort e = d.effort(s, a);
+        ChassisAcceleration accel = ChassisAcceleration.fromFieldRelative(
+                a, Rotation2d.kZero);
+        SwerveEffort e = d.effort(s, accel);
         // one-quarter of the required force in the longitudinal direction
         assertEquals(17.5, e.fl().f(), 0.001);
         assertEquals(0, e.fl().angle().get().getRadians(), 0.001);
+    }
+
+    /** rotated, so field-relative +x resolves as robot +y */
+    @Test
+    void test3a() {
+        SwerveDynamics d = new SwerveDynamics(
+                70, 6, new Tire(200, 0.05), fl, fr, rl, rr);
+        SwerveDriveKinematics100 k = new SwerveDriveKinematics100(
+                fl, fr, rl, rr);
+        // 1 m/s +x (really -y)
+        DiscreteSpeed v = new DiscreteSpeed(new Twist2d(0.02, 0, 0), 0.02);
+        SwerveModuleStates s = k.inverse(v);
+        assertEquals(1, s.frontLeft().speed(), 0.001);
+        assertEquals(0, s.frontLeft().angle().get().getRadians(), 0.001);
+        // x accel (+y robot-relative)
+        AccelerationSE2 a = new AccelerationSE2(1, 0, 0);
+        // -pi/2 rotation
+        ChassisAcceleration accel = ChassisAcceleration.fromFieldRelative(
+                a, Rotation2d.kCW_Pi_2);
+        SwerveEffort e = d.effort(s, accel);
+        // no longitudinal
+        assertEquals(0, e.fl().f(), 0.001);
+        // slip
+        assertEquals(0.004, e.fl().angle().get().getRadians(), 0.001);
     }
 
     /**
@@ -135,7 +164,9 @@ public class SwerveDynamicsTest {
         assertEquals(0, s.frontLeft().angle().get().getRadians(), 0.001);
         // lateral accel +y
         AccelerationSE2 a = new AccelerationSE2(0, 1, 0);
-        SwerveEffort e = d.effort(s, a);
+        ChassisAcceleration accel = ChassisAcceleration.fromFieldRelative(
+                a, Rotation2d.kZero);
+        SwerveEffort e = d.effort(s, accel);
         // the wheel headed in +x is incapable of providing
         // longitudinal force in the correct direction,
         // so the extra motor torque will be zero.

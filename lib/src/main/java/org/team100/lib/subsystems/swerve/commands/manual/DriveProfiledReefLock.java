@@ -9,7 +9,9 @@ import org.team100.lib.controller.r1.FeedbackR1;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
+import org.team100.lib.geometry.AccelerationSE2;
 import org.team100.lib.geometry.GeometryUtil;
+import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.hid.Velocity;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -85,6 +87,8 @@ public class DriveProfiledReefLock extends Command {
 
     // package private for testing
 
+    private VelocitySE2 m_v;
+
     ControlR1 m_thetaSetpoint = null;
 
     public DriveProfiledReefLock(
@@ -114,6 +118,7 @@ public class DriveProfiledReefLock extends Command {
         m_log_theta_FF = m_log.doubleLogger(Level.TRACE, "thetaFF");
         m_log_theta_FB = m_log.doubleLogger(Level.TRACE, "thetaFB");
         m_log_output_omega = m_log.doubleLogger(Level.TRACE, "output/omega");
+        m_v = VelocitySE2.ZERO;
         addRequirements(m_drive);
     }
 
@@ -137,15 +142,21 @@ public class DriveProfiledReefLock extends Command {
         Velocity t = m_twistSupplier.get();
         ModelSE2 s = m_drive.getState();
 
-        VelocityControlSE2 v = apply(s, t);
         // scale for driver skill.
-        VelocityControlSE2 scaled = GeometryUtil.scale(v, DriverSkill.level().scale());
+        VelocityControlSE2 scaled = GeometryUtil.scale(apply(s, t), DriverSkill.level().scale());
 
         // Apply field-relative limits.
         if (Experiments.instance.enabled(Experiment.UseSwerveLimiter)) {
             scaled = m_limiter.apply(scaled);
         }
-        m_drive.set(scaled);
+
+        // Compute field-relative accel from backwards finite difference.
+        VelocitySE2 v = scaled.velocity();
+        // Because this is field-relative, there is no centrifugal force.
+        AccelerationSE2 a = v.accel(m_v, TimedRobot100.LOOP_PERIOD_S);
+        m_v = v;
+
+        m_drive.set(new VelocityControlSE2(v, a));
 
     }
 
