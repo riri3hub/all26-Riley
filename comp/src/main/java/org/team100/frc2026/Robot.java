@@ -29,6 +29,8 @@ import edu.wpi.first.wpilibj.util.WPILibVersion;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+import com.reduxrobotics.canand.CanandEventLoop;
+
 /**
  * This is the main robot class, which wires up events from TimedRobot100.
  */
@@ -42,6 +44,8 @@ public class Robot extends TimedRobot100 {
 
     public Robot() {
         Banner.printBanner();
+
+        CanandEventLoop.getInstance();
 
         // We want the CommandScheduler, not LiveWindow.
         enableLiveWindowInTest(false);

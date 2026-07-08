@@ -18,6 +18,7 @@ public class GyroFactory {
         switch (Identity.instance) {
             case SWERVE_ONE:
             case COMP_BOT:
+            case BETA_BOT:
                 return new ReduxGyro(parent, new CanId(60));
             default:
                 // for simulation

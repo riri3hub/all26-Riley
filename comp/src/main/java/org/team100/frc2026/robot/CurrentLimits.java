@@ -20,5 +20,5 @@ public class CurrentLimits {
     public static final CurrentLimit SHOOTER = new CurrentLimit(60, 80);
     public static final CurrentLimit SHOOTER_HOOD = new CurrentLimit(50, 30);
     public static final CurrentLimit DRIVE = new CurrentLimit(90, 70);
-    public static final CurrentLimit STEERING = new CurrentLimit(20, 30);
+    public static final CurrentLimit STEERING = new CurrentLimit(60, 30);
 }

@@ -149,6 +149,48 @@ public class SwerveModuleCollection implements Player {
                                 kinodynamics,
                                 EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE));
             case BETA_BOT:
+                // case SWERVE_TWO:
+                System.out.println("************** WCP MODULES w/Duty-Cycle Encoders **************");
+                return new SwerveModuleCollection(
+                        WCPSwerveModule100.getKrakenDrive(
+                                frontLeftLogger, currentLog, driveLimit, steerLimit,
+                                new CanId(3), // drive
+                                DriveRatio.MEDIUM,
+                                new CanId(44), // steer
+                                new RoboRioChannel(3),
+                                0.228237,
+                                kinodynamics,
+                                EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
+                        WCPSwerveModule100.getKrakenDrive(
+                                frontRightLogger, currentLog, driveLimit, steerLimit,
+                                new CanId(8), // drive
+                                DriveRatio.MEDIUM,
+                                new CanId(7), // steer
+                                  new RoboRioChannel(2),
+                                0.817243,
+                                kinodynamics,
+                                EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
+                        WCPSwerveModule100.getKrakenDrive(
+                                rearLeftLogger, currentLog, driveLimit, steerLimit,
+                                new CanId(2), // drive
+                                DriveRatio.MEDIUM,
+                                new CanId(50), // steer
+                                new RoboRioChannel(1),
+                                0.147507,
+                                kinodynamics,
+                                EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE),
+                        WCPSwerveModule100.getKrakenDrive(
+                                rearRightLogger, currentLog, driveLimit, steerLimit,
+                                new CanId(4), // drive
+                                DriveRatio.MEDIUM,
+                                new CanId(62), // steer
+                                new RoboRioChannel(0),
+                                0.000000,
+                                kinodynamics,
+                                EncoderDrive.INVERSE, NeutralMode100.COAST, MotorPhase.REVERSE));
+            
+
+
             case BLANK:
             default:
                 if (DEBUG)
