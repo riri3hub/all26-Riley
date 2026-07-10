@@ -6,7 +6,6 @@ import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.RotaryMechanism;
@@ -43,10 +42,8 @@ public class DiscusMech extends SubsystemBase {
         /** Units of positional PID are volts per revolution. */
         PIDConstants pid = PIDConstants.makePositionPID(
                 logger, 0.0); // 2.0
-        /** We never use feedforward since all our goals are motionless. */
-        SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
         Friction friction = new Friction(logger, 0.16, 0.15, 0, 0);
- 
+
         switch (Identity.instance) {
             case TEAM100_2018 -> {
                 Falcon500Motor motorP1 = new Falcon500Motor(
@@ -56,7 +53,6 @@ public class DiscusMech extends SubsystemBase {
                         NeutralMode100.COAST,
                         MotorPhase.REVERSE,
                         new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
-                        ff,
                         friction,
                         pid);
 
@@ -102,11 +98,11 @@ public class DiscusMech extends SubsystemBase {
 
     /** Set position goal, motionless. */
     public void setPosition(double p1) {
-        m_mechP1.setUnwrappedPosition(p1, 0, 0, 0);
+        m_mechP1.setUnwrappedPosition(p1, 0, 0);
     }
 
     public void setVelocity(double v) {
-        m_mechP1.setVelocity(v  , 0, 0);
+        m_mechP1.setVelocity(v, 0);
     }
 
     @Override
@@ -153,6 +149,6 @@ public class DiscusMech extends SubsystemBase {
     }
 
     public Command velocity(DoubleSupplier v) {
-        return run(()-> setVelocity(v.getAsDouble()));
+        return run(() -> setVelocity(v.getAsDouble()));
     }
 }

@@ -6,7 +6,7 @@ import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SimpleDynamics;
+import org.team100.lib.dynamics.r.RDynamics;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.RotaryMechanism;
@@ -50,12 +50,12 @@ public class DiscusServo extends SubsystemBase {
         // zeros
         // PID = 1.0, 0.0, 0.05
         PIDConstants pid = PIDConstants.makePositionPID(logger, 1.0, 0, 0); // d = 0.12 was experimentally found
-        SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
-        Friction friction = new Friction(logger, 0.16, 0.15 , 0, 0);
+        Friction friction = new Friction(logger, 0.16, 0.15, 0, 0);
         ProfileR1 profile = new TrapezoidProfileR1(
                 logger, MAX_VELOCITY, MAX_ACCEL, POSITION_TOLERANCE);
         ReferenceR1 refP1 = new ProfileReferenceR1(
                 loggerP1, () -> profile, POSITION_TOLERANCE, VELOCITY_TOLERANCE);
+        RDynamics dynP1 = new RDynamics(0, 0, 0);
 
         BareMotor motorP1;
         switch (Identity.instance) {
@@ -67,7 +67,6 @@ public class DiscusServo extends SubsystemBase {
                         NeutralMode100.COAST,
                         MotorPhase.REVERSE,
                         new CurrentLimit(STATOR_LIMIT, SUPPLY_LIMIT),
-                        ff,
                         friction,
                         pid);
             }
@@ -88,13 +87,14 @@ public class DiscusServo extends SubsystemBase {
         m_servoP1 = new OutboardAngularPositionServo(
                 loggerP1,
                 mechP1,
+                dynP1,
                 refP1);
 
     }
 
     public void setPosition(double p1) {
         // m_servoP1.setPositionProfiled(p1, 0);
-        m_servoP1.actuateWithProfile(p1, 0);
+        m_servoP1.actuateWithProfile(p1);
     }
 
     public double getPosition() {
