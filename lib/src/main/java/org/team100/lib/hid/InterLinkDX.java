@@ -121,4 +121,40 @@ public class InterLinkDX {
     private boolean button(int button) {
         return m_hid.getRawButton(button);
     }
+
+    public boolean back() {
+        return cancel();
+    }
+
+    public boolean start() {
+        return reset();
+    }
+
+    public boolean povDown() {
+        return false;
+    }
+
+    public boolean rightTrigger() {
+        return false;
+    }
+
+    public boolean x() {
+        return false;
+    }
+
+    public boolean a() {
+        return false;
+    }
+
+    public boolean b() {
+        return false;
+    }
+
+    public boolean y() {
+        return false;
+    }
+
+    public boolean leftBumper() {
+        return false;
+    }
 }

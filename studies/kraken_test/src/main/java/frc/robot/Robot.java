@@ -1,5 +1,4 @@
 package frc.robot;
-
 import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
