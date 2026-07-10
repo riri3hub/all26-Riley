@@ -5,7 +5,6 @@ import org.team100.lib.coherence.Takt;
 import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SimpleDynamics;
 import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -195,7 +194,7 @@ public class Robot extends TimedRobot100 {
         double motorSpeedRadS = MOTOR_SPEED_RAD_S * (m_controller.getLeftTriggerAxis());
         // Use a fixed DT to avoid injecting noise into the motor command.
         m_positionRad += motorSpeedRadS * TimedRobot100.LOOP_PERIOD_S;
-        m_motor.setUnwrappedPosition(m_positionRad, motorSpeedRadS, 0, 0);
+        m_motor.setUnwrappedPosition(m_positionRad, motorSpeedRadS, 0);
     }
 
     @Override
@@ -216,7 +215,6 @@ public class Robot extends TimedRobot100 {
                     NeutralMode100.COAST,
                     MotorPhase.FORWARD,
                     new CurrentLimit(20, 20),
-                    new SimpleDynamics(log, 0, 0),
                     new Friction(log, 0.15, 0.06, 0.0, 0.5),
                     PIDConstants.makePositionPID(log, 0.5), 0, 0);
         } else {
