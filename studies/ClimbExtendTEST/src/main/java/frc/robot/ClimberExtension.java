@@ -1,10 +1,12 @@
 package frc.robot;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SimpleDynamics;
+import org.team100.lib.dynamics.p.PDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.LinearMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
@@ -28,31 +30,34 @@ public class ClimberExtension extends SubsystemBase {
     private final double m_maxExtensionM = 0.25;
     private final double m_minextension = 0.01;
 
-    public ClimberExtension(LoggerFactory parent) {
+    public ClimberExtension(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
         ProfileR1 profile = new TrapezoidProfileR1(log, 0.1, 2, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
         double wheelDiameterM = 0.001275;
         int gearRatio = 1;
+        PDynamics dyn = new PDynamics(0);
 
         switch (Identity.instance) {
             case COMP_BOT -> {
-                int statorLimit = 40;
+                CurrentLimit limit = new CurrentLimit(40, 40);
                 NeoVortexCANSparkMotor m_motor = new NeoVortexCANSparkMotor(
                         log,
+                        currentLog,
                         new CanId(2),
                         NeutralMode100.BRAKE,
                         MotorPhase.FORWARD,
-                        statorLimit,
-                        new SimpleDynamics(log, 0, 0),
+                        limit,
                         new Friction(log, 0, 0, 0, 0),
-                        new PIDConstants(log, 1, 0, 0, 0, 0, 0));
+                        new PIDConstants(log, 1, 0, 0, 0, 0, 0),
+                        0,
+                        0);
                 IncrementalBareEncoder encoder = m_motor.encoder();
                 LinearMechanism climberMech = new LinearMechanism(
                         log, m_motor, encoder, gearRatio, wheelDiameterM,
                         Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
                 m_servo = new OutboardLinearPositionServo(
-                        log, climberMech, ref, 0.01, 0.01);
+                        log, climberMech, dyn, ref, 0.01, 0.01);
             }
 
             default -> {
@@ -62,7 +67,7 @@ public class ClimberExtension extends SubsystemBase {
                         log, m_motor, encoder, gearRatio, wheelDiameterM,
                         Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
                 m_servo = new OutboardLinearPositionServo(
-                        log, climberMech, ref, 0.01, 0.01);
+                        log, climberMech, dyn, ref, 0.01, 0.01);
             }
         }
     }
@@ -76,12 +81,12 @@ public class ClimberExtension extends SubsystemBase {
     }
 
     public void setOutPosition() {
-        m_servo.setPositionProfiled(m_maxExtensionM, 0);
+        m_servo.setPositionProfiled(m_maxExtensionM);
 
     }
 
     public void setInPosition() {
-        m_servo.setPositionProfiled(m_minextension, 0.01);
+        m_servo.setPositionProfiled(m_minextension);
     }
 
     @Override
@@ -89,4 +94,3 @@ public class ClimberExtension extends SubsystemBase {
         m_servo.periodic();
     }
 }
-

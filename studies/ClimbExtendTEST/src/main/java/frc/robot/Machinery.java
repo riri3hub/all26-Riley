@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.function.UnaryOperator;
 
 import org.team100.lib.coherence.Takt;
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.controller.se2.ControllerFactorySE2;
 import org.team100.lib.controller.se2.ControllerSE2;
 import org.team100.lib.indicator.Beeper;
@@ -16,6 +17,7 @@ import org.team100.lib.localization.OdometryUpdater;
 import org.team100.lib.localization.SwerveHistory;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.Logging;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.sensor.gyro.Gyro;
 import org.team100.lib.sensor.gyro.GyroFactory;
 import org.team100.lib.subsystems.swerve.SwerveDriveFactory;
@@ -31,6 +33,7 @@ import org.team100.lib.visualization.TrajectoryVisualization;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Twist2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -49,8 +52,8 @@ public class Machinery {
     // 2/26/25: Joel updated the supply limit to 90A, see 1678 code above. This is
     // essentially unlimited, so you'll need to run some other kind of limiter (e.g.
     // acceleration) to keep from browning out.
-    private static final double DRIVE_SUPPLY_LIMIT = 90;
-    private static final double DRIVE_STATOR_LIMIT = 110;
+    private static final CurrentLimit DRIVE_LIMIT = new CurrentLimit(110, 90);
+    private static final CurrentLimit STEER_LIMIT = new CurrentLimit(40, 40);
 
     private static final LoggerFactory logger = Logging.instance().rootLogger;
     private static final LoggerFactory fieldLogger = Logging.instance().fieldLogger;
@@ -68,9 +71,9 @@ public class Machinery {
     public final Climber m_Climber;
 
     public final ClimberExtension m_ClimberExtension;
-   
+
     public final ControllerSE2 m_holonomicController;
-    
+
     public Machinery() {
 
         ////////////////////////////////////////////////////////////
@@ -84,12 +87,14 @@ public class Machinery {
         // POSE ESTIMATION
         //
         LoggerFactory driveLog = logger.name("Drive");
+        TotalCurrentLog currentLog = new TotalCurrentLog(logger);
         m_swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLog);
 
         m_modules = SwerveModuleCollection.get(
                 driveLog,
-                DRIVE_SUPPLY_LIMIT,
-                DRIVE_STATOR_LIMIT,
+                currentLog,
+                DRIVE_LIMIT,
+                STEER_LIMIT,
                 m_swerveKinodynamics);
         Gyro gyro = GyroFactory.get(
                 driveLog,
@@ -128,7 +133,8 @@ public class Machinery {
                 fieldLogger,
                 layout,
                 history,
-                visionUpdater);
+                visionUpdater,
+                DriverStation::getAlliance);
 
         ////////////////////////////////////////////////////////////
         //
@@ -152,10 +158,9 @@ public class Machinery {
         //
         // SUBSYSTEMS
         //
-        
-                
-        m_ClimberExtension = new ClimberExtension(logger);
-        m_Climber = new Climber(logger);
+
+        m_ClimberExtension = new ClimberExtension(logger, currentLog);
+        m_Climber = new Climber(logger, currentLog);
         ////////////////////////////////////////////////////////////
         ///
         /// GROUND TRUTH

@@ -1,10 +1,12 @@
 package frc.robot;
 
+import org.team100.lib.config.CurrentLimit;
 import org.team100.lib.config.Friction;
 import org.team100.lib.config.Identity;
 import org.team100.lib.config.PIDConstants;
-import org.team100.lib.config.SimpleDynamics;
+import org.team100.lib.dynamics.r.RDynamics;
 import org.team100.lib.logging.LoggerFactory;
+import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.BareMotor;
 import org.team100.lib.motor.MotorPhase;
@@ -33,52 +35,49 @@ public class Climber extends SubsystemBase {
     private static final double m_level1 = -Math.PI / 2;
     private static final double m_level3 = -Math.PI;
 
-    public Climber(LoggerFactory parent) {
+    public Climber(LoggerFactory parent, TotalCurrentLog currentLog) {
         LoggerFactory log = parent.type(this);
         LoggerFactory log1 = log.name("motor1");
         LoggerFactory log2 = log.name("motor2");
         ProfileR1 profile = new TrapezoidProfileR1(log, 3, 5, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
+        RDynamics dyn = new RDynamics(0, 0, 0);
         double gearRatio = 28;
         double initialPosition = 0;
 
         switch (Identity.instance) {
             case COMP_BOT, TEST_BOARD_B0 -> {
-                int supplyLimit = 60;
-                int statorLimit = 40;
-                SimpleDynamics ff = new SimpleDynamics(log, 0, 0);
+                CurrentLimit limit = new CurrentLimit(40, 60);
                 Friction friction = new Friction(log, 0, 0, 0, 0);
                 PIDConstants pid = new PIDConstants(log, 1, 0, 0, 0, 0, 0);
                 m_motor = new KrakenX60Motor(
                         log1,
+                        currentLog,
                         new CanId(18),
                         NeutralMode100.BRAKE,
                         MotorPhase.FORWARD,
-                        supplyLimit,
-                        statorLimit,
-                        ff,
+                        limit,
                         friction,
                         pid);
                 IncrementalBareEncoder encoder = m_motor.encoder();
                 RotaryMechanism climberMech = new RotaryMechanism(
                         log1, m_motor, encoder, initialPosition, gearRatio,
                         Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-                m_servo = new OutboardAngularPositionServo(log1, climberMech, ref);
+                m_servo = new OutboardAngularPositionServo(log1, climberMech, dyn, ref);
                 m_motor2 = new KrakenX60Motor(
                         log2,
+                        currentLog,
                         new CanId(19),
                         NeutralMode100.BRAKE,
                         MotorPhase.FORWARD,
-                        supplyLimit,
-                        statorLimit,
-                        ff,
+                        limit,
                         friction,
                         pid);
                 IncrementalBareEncoder encoder2 = m_motor2.encoder();
                 RotaryMechanism climberMech2 = new RotaryMechanism(
                         log2, m_motor2, encoder2, initialPosition, gearRatio,
                         Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-                m_servo2 = new OutboardAngularPositionServo(log2, climberMech2, ref);
+                m_servo2 = new OutboardAngularPositionServo(log2, climberMech2, dyn,  ref);
             }
 
             default -> {
@@ -92,8 +91,8 @@ public class Climber extends SubsystemBase {
                 RotaryMechanism climberMech2 = new RotaryMechanism(
                         log2, m_motor2, encoder2, initialPosition, gearRatio,
                         Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-                m_servo = new OutboardAngularPositionServo(log1, climberMech, ref);
-                m_servo2 = new OutboardAngularPositionServo(log2, climberMech2, ref);
+                m_servo = new OutboardAngularPositionServo(log1, climberMech, dyn, ref);
+                m_servo2 = new OutboardAngularPositionServo(log2, climberMech2, dyn, ref);
             }
         }
     }
@@ -134,18 +133,18 @@ public class Climber extends SubsystemBase {
     }
 
     private void setL0() {
-        m_servo.actuateWithProfile(m_level0, 0);
-        m_servo2.actuateWithProfile(m_level0, 0);
+        m_servo.actuateWithProfile(m_level0);
+        m_servo2.actuateWithProfile(m_level0);
     }
 
     private void setL1() {
-        m_servo.actuateWithProfile(m_level1, 0);
-        m_servo2.actuateWithProfile(m_level1, 0);
+        m_servo.actuateWithProfile(m_level1);
+        m_servo2.actuateWithProfile(m_level1);
     }
 
     private void setL3() {
-        m_servo.actuateWithProfile(m_level3, 0);
-        m_servo2.actuateWithProfile (m_level3, 0);
+        m_servo.actuateWithProfile(m_level3);
+        m_servo2.actuateWithProfile(m_level3);
     }
 
     @Override
