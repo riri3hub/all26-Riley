@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class SetupMech implements Runnable {
-    private final double CONTROL_SCALE = 0.1;
+    private final double CONTROL_SCALE = 1;
     private final DiscusMech m_discus;
     private final ArmVisualization m_viz;
 
@@ -22,7 +22,9 @@ public class SetupMech implements Runnable {
 
         m_discus = new DiscusMech(logger, currentLog);
         m_viz = new ArmVisualization(m_discus::getPosition, "discus", 0);
-        m_discus.setDefaultCommand(m_discus.position(
+        // m_discus.setDefaultCommand(m_discus.position(
+        //         () -> CONTROL_SCALE * controller.getLeftX()));
+        m_discus.setDefaultCommand(m_discus.velocity(
                 () -> CONTROL_SCALE * controller.getLeftX()));
 
         // These bindings are remembered by the trigger event loop, so we don't need to
@@ -31,6 +33,8 @@ public class SetupMech implements Runnable {
         new Trigger(controller::getAButton).whileTrue(m_discus.home());
         // button 2, "x" in the sim
         new Trigger(controller::getBButton).onTrue(m_discus.zero());
+        new Trigger(controller::getXButton).onTrue(m_discus.position(() -> 2));
+        new Trigger(controller::getYButton).onTrue(m_discus.position(() -> -2));
     }
 
     @Override

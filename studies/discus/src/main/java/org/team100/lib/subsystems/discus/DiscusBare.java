@@ -26,9 +26,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * duty cycle input.
  */
 public class DiscusBare extends SubsystemBase {
-    private static final double SCALE = 0.01;
-    private static final double SUPPLY_LIMIT = 5;
-    private static final double STATOR_LIMIT = 5;
+    private static final double SCALE = 0.05;
+    private static final double SUPPLY_LIMIT = 100;
+    private static final double STATOR_LIMIT = 100;
     private final BareMotor m_motor;
     private final RotaryPositionSensor m_sensor;
 
@@ -37,8 +37,8 @@ public class DiscusBare extends SubsystemBase {
         switch (Identity.instance) {
             case TEAM100_2018 -> {
                 SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
-                Friction friction = new Friction(logger, 0, 0, 0, 0);
-                PIDConstants pid = PIDConstants.makePositionPID(logger, 2.0);
+                Friction friction = new Friction(logger, 0.1, 0.1, 0, 0);
+                PIDConstants pid = PIDConstants.makePositionPID(logger, 0.0);
                 m_motor = new Falcon500Motor(
                         logger,
                         currentLog,

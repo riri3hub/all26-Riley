@@ -29,8 +29,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class DiscusMech extends SubsystemBase {
 
     /** Low current limits */
-    private static final double SUPPLY_LIMIT = 10;
-    private static final double STATOR_LIMIT = 10;
+    private static final double SUPPLY_LIMIT = 100;
+    private static final double STATOR_LIMIT = 100;
 
     private final RotaryMechanism m_mechP1;
 
@@ -42,11 +42,11 @@ public class DiscusMech extends SubsystemBase {
         LoggerFactory logger = parent.type(this);
         /** Units of positional PID are volts per revolution. */
         PIDConstants pid = PIDConstants.makePositionPID(
-                logger, 2.0);
+                logger, 0.0); // 2.0
         /** We never use feedforward since all our goals are motionless. */
         SimpleDynamics ff = new SimpleDynamics(logger, 0, 0);
-        Friction friction = new Friction(logger, 0, 0, 0, 0);
-
+        Friction friction = new Friction(logger, 0.16, 0.15, 0, 0);
+ 
         switch (Identity.instance) {
             case TEAM100_2018 -> {
                 Falcon500Motor motorP1 = new Falcon500Motor(
@@ -105,6 +105,10 @@ public class DiscusMech extends SubsystemBase {
         m_mechP1.setUnwrappedPosition(p1, 0, 0, 0);
     }
 
+    public void setVelocity(double v) {
+        m_mechP1.setVelocity(v  , 0, 0);
+    }
+
     @Override
     public void periodic() {
         m_mechP1.periodic();
@@ -146,5 +150,9 @@ public class DiscusMech extends SubsystemBase {
     /** Update position by adding. */
     public Command position(DoubleSupplier p1) {
         return run(() -> add(p1.getAsDouble()));
+    }
+
+    public Command velocity(DoubleSupplier v) {
+        return run(()-> setVelocity(v.getAsDouble()));
     }
 }
