@@ -11,7 +11,8 @@ from typing_extensions import override, Buffer
 from wpimath.geometry._geometry import Transform3d
 from app.camera.camera_protocol import Camera, Request, Size
 from app.config.identity import Identity
-from app.dashboard.display import Display
+from app.dashboard.display_protocol import Display
+from app.dashboard.display_util import DisplayUtil
 from app.decoder.decoder_protocol import Decoder
 from app.interpreter.interpreter_protocol import Interpreter
 from app.localization.detector_util import DetectorUtil
@@ -29,17 +30,23 @@ class TagDetector(Interpreter):
         self,
         identity: Identity,
         cam: Camera,
-        display: Display,
+        display1: Display,
+        display2: Display,
         network: Network,
         timestamps: Timestamps,
     ) -> None:
-        """Debug is very slow.  It writes apriltag detector debug images
-        into the same filenames over and over, and also writes
-        timestamped images for later analysis.
+        """Finds Apriltags.
+
+        :identity: chooses tag size
+        :cam: camera implementation
+        :display1: shows annotated image
+        :display2: optionally shows undistorted image
+        :timestamps: timing source.
         """
         self._identity = identity
         self._cam = cam
-        self._display = display
+        self._display1 = display1
+        self._display2 = display2
         self._network = network
         self._timestamps = timestamps
 
@@ -81,7 +88,7 @@ class TagDetector(Interpreter):
         # stddev of the blur kernel in pixels: seems to help with small tags
         config.quadSigma = 0.0
 
-        # Write calibration images to local storage.  Very slow.
+        # Write detector debug images to local storage.  Very slow.
         # config.debug = True
 
         self._at_detector.setConfig(config)
@@ -140,11 +147,14 @@ class TagDetector(Interpreter):
             img: MatLike | None = decoder.mono(buffer)
             if img is None:
                 return
+            
             if self._network.calibrate():
+                # Save the raw image for calibration if requested
                 self.write_calibration_image(img)
-
-            # Uncomment this line to undistort the whole image, for debugging.
-            # img = undistort(img, self.mtx, self.dist)
+                
+            if self._network.undistort_view():
+                # Show the undistorted image only if requested.
+                self._display2.put(cv2.undistort(img, self._mtx, self._dist))
 
             result: list[AprilTagDetection] = self._at_detector.detect(img.data)
 
@@ -159,7 +169,7 @@ class TagDetector(Interpreter):
                 timestamp_boottime_us
             )
 
-            self.detect_tags(img, result, servertime)
+            self.show_and_send_detections(img, result, servertime)
 
             # Send camera FPS to network.
             fps: float = req.fps()
@@ -173,16 +183,16 @@ class TagDetector(Interpreter):
             # Do the drawing after the NT payload is written to minimize latency.
             # This is not particularly fast or important for prod.
 
-            self._display.text(img, f"FPS {fps:2.0f}", (10, 80))
-            self._display.text(img, f"DELAY (ms) {delay_us/1000:2.0f}", (10, 160))
-            self._display.put(img)
+            DisplayUtil.text(img, f"FPS {fps:2.0f}", (10, 80))
+            DisplayUtil.text(img, f"DELAY (ms) {delay_us/1000:2.0f}", (10, 160))
+            self._display1.put(img)
 
-    def detect_tags(
+    def show_and_send_detections(
         self,
         img: MatLike,
         result: list[AprilTagDetection],
         servertime: int,
-    ):
+    ) -> None:
         blips: list[Blip] = []
         blips_with_corners: list[BlipWithCorners] = []
         tag: AprilTagDetection
@@ -213,7 +223,7 @@ class TagDetector(Interpreter):
             blips_with_corners.append(
                 BlipWithCorners.make(servertime, tag.getId(), raw_corners, pose)
             )
-            self._display.tag(img, tag, pose)
+            DisplayUtil.tag(img, tag, pose)
 
             # Send sightings to network.
         self._blips.send(blips)
@@ -237,6 +247,8 @@ class TagDetector(Interpreter):
 
     def write_calibration_image(self, img: NDArray[np.uint8]) -> None:
         """Write an image for later analysis (e.g. calibration).
+
+        WARNING! This is VERY VERY SLOW, like 1 FPS.
 
         To retrieve these files, use, e.g.:
 

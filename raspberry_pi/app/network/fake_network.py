@@ -60,6 +60,10 @@ class FakeNetwork(Network):
         return False
 
     @override
+    def undistort_view(self) -> bool:
+        return False
+
+    @override
     def flush(self) -> None:
         pass
 

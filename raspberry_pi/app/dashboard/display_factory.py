@@ -1,51 +1,42 @@
+# pylint: disable=C0415
+
+from platform import system
+
 from app.camera.camera_protocol import Camera
 from app.camera.size import Size
 from app.config.identity import Identity
-from app.dashboard.display import Display
-from app.dashboard.fake_display import FakeDisplay
-from app.dashboard.real_display import RealDisplay
+from app.dashboard.display_protocol import Display
 
 
 class DisplayFactory:
     @staticmethod
-    def get(identity: Identity, cam: Camera) -> Display:
-        match identity:
-            case (
-                Identity.CAMERA_FRONT
-                | Identity.CLIMB_LEFT
-                | Identity.CLIMB_RIGHT
-                | Identity.DEV
-                | Identity.DEV2
-                | Identity.DIST_TEST
-                | Identity.FUNNEL
-                | Identity.GAME_PIECE
-                | Identity.CAMERA_BACK
-                | Identity.LEFTAMP
-                | Identity.JOELS_TEST
-                | Identity.RIGHTAMP
-                | Identity.SHOOTER
-                | Identity.SWERVE_LEFT
-                | Identity.SWERVE_RIGHT
-            ):
-                size: Size = cam.get_size()
-                scale: float = DisplayFactory.get_scale(identity)
-                display_width: int = int(scale * size.width)
-                display_height = int(scale * size.height)
-                return RealDisplay(display_width, display_height)
-            case _:
-                return FakeDisplay()
+    def get(
+        identity: Identity,
+        cam: Camera,
+        name: str,
+        scale: float,
+    ) -> Display:
+        """Select a Display implementation.
 
-    @staticmethod
-    def get_scale(identity: Identity) -> float:
-        match identity:
-            case Identity.DIST_TEST:
-                return 1.0  # full size for debugging; slow.
-            case Identity.DEV:  # on the camera bot at the moment
-                return 0.25  # ok for dashboard
-                # scale = 1.0 # full size for debugging; slow.
-            case Identity.FUNNEL:
-                return 0.25
-            case Identity.UNKNOWN:
-                return 1.0  # full size for debugging; slow.
-            case _:
-                return 0.25  # ok for dashboard
+        :identity: to identify a real Raspberry Pi
+        :cam: for size
+        :name: must be unique
+        :scale: 0.25 is good for comp, 1.0 is good for debugging (but slow)"""
+        size: Size = cam.get_size()
+        display_width: int = int(scale * size.width)
+        display_height = int(scale * size.height)
+
+        # imports are inline to avoid import errors
+        if system() == "Windows":
+            from app.dashboard.windows_display import WindowsDisplay
+
+            return WindowsDisplay(name, display_width, display_height)
+
+        if identity == Identity.UNKNOWN:
+            from app.dashboard.fake_display import FakeDisplay
+
+            return FakeDisplay()
+
+        from app.dashboard.linux_display import LinuxDisplay
+
+        return LinuxDisplay(name, display_width, display_height)

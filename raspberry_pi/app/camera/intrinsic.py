@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from app.config.identity import Identity
-                
+
 
 class Intrinsic:
     """Camera intrinsic matrix.
@@ -53,15 +53,15 @@ class Intrinsic:
                         [0, 0, 1],
                     ]
                 )
-            case identity.FUNNEL:
+            case Identity.FUNNEL:
                 self._mtx = np.array(
-                    [   
-                        [381.36481, 0, 1382.951086],
-                        [0,749.8494768, 708.7874336],
-                        [0,0,1],
+                    [
+                        [381.36481, 0.0, 1382.951086],
+                        [0.0, 749.8494768, 708.7874336],
+                        [0, 0, 1],
                     ]
                 )
-                
+
             # TODO: clean up the entries below
             #
 

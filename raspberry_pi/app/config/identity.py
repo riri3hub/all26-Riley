@@ -73,6 +73,7 @@ class Identity(Enum):
 
     @staticmethod
     def get() -> "Identity":
+        """Returns UNKNOWN if serial is not recognized, and in tests."""
         serial = _serial
         print(f"\n*** Coprocessor serial: {serial}")
         identity: Identity = Identity(serial)

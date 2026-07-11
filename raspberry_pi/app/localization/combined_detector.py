@@ -7,13 +7,14 @@ from typing_extensions import override
 from wpimath.geometry import Rotation3d, Transform3d
 from cv2.typing import MatLike, Moments
 from app.camera.camera_protocol import Camera, Request, Size
-from app.interpreter.interpreter_protocol import Interpreter
 from app.config.identity import Identity
-from app.dashboard.display import Display
+from app.dashboard.display_protocol import Display
+from app.dashboard.display_util import DisplayUtil
 from app.decoder.decoder_protocol import Decoder
+from app.interpreter.interpreter_protocol import Interpreter
 from app.localization.detector_util import DetectorUtil
-from app.network.structs import Blip, BlipWithCorners, Target
 from app.network.network_protocol import Network
+from app.network.structs import Blip, BlipWithCorners, Target
 from app.util.timestamps import Timestamps
 
 
@@ -24,20 +25,23 @@ class CombinedDetector(Interpreter):
         self,
         identity: Identity,
         cam: Camera,
-        display: Display,
+        display1: Display,
+        display2: Display,
         network: Network,
         timestamps: Timestamps,
         object_lower: NDArray[np.int32],
         object_higher: NDArray[np.int32],  # type: ignore
     ) -> None:
         """
-        Parameters:
-        - object_lower and object_higher: HSV bounds for object detection ([H, S, V])
-          Note: hue values are 0-180, half the usual range.
+        Note: hue values are 0-180, half the usual range.
+
+        :object_lower: ([H, S, V]) lower bound 
+        :object_higher: ([H, S, V]) upper bound
         """
         self._identity = identity
         self._cam = cam
-        self._display = display
+        self._display1 = display1
+        self._display2 = display2
         self._network = network
         self._timestamps = timestamps
 
@@ -88,10 +92,12 @@ class CombinedDetector(Interpreter):
         """Process both tags and objects from the BGR image."""
         with req.buffer() as buffer:
             decoder: Decoder = req.decoder()
+            # Image for analysis, do not modify.
             img_bgr: MatLike | None = decoder.color(buffer)
             if img_bgr is None:
                 return
 
+            # Image for display, with annotations.
             img_display = img_bgr.copy()
 
             # Capture timestamp in boottime.
@@ -113,11 +119,9 @@ class CombinedDetector(Interpreter):
             self._network.flush()
 
             fps = req.fps()
-            self._display.text(img_display, f"FPS {fps:2.0f}", (5, 65))
-            self._display.text(
-                img_display, f"delay (ms) {delay_us/1000:2.0f}", (5, 105)
-            )
-            self._display.put(img_display)
+            DisplayUtil.text(img_display, f"FPS {fps:2.0f}", (5, 65))
+            DisplayUtil.text(img_display, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
+            self._display1.put(img_display)
 
     def undistort_points(self, pointlist: list[list[int]]) -> MatLike:
         """Undistort image points using camera matrix and distortion coefficients."""
@@ -127,13 +131,17 @@ class CombinedDetector(Interpreter):
         undistorted = cv2.undistortImagePoints(points, self._mtx, self._dist)
         return undistorted.reshape(-1, 2)
 
+    # TODO: extract this so tag_detector uses the same thing
     def detect_tags(
         self,
         img_bgr: NDArray[np.uint8],
         img_display: NDArray[np.uint8],
         servertime: int,
     ) -> None:
-        """Detect AprilTags in a BGR image by converting to grayscale internally."""
+        """Detect AprilTags in a BGR image by converting to grayscale internally.
+
+        :img_bgr: image to use for detection.
+        :img_display: image for display, annotated with tag positions"""
         # Convert BGR to grayscale for tag detection
         img_gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
         img_gray = np.ascontiguousarray(img_gray)
@@ -167,18 +175,24 @@ class CombinedDetector(Interpreter):
             blips_with_corners.append(
                 BlipWithCorners.make(servertime, tag.getId(), raw_corners, pose)
             )
-            self._display.tag(img_display, tag, pose)  # Display on BGR image
+            DisplayUtil.tag(img_display, tag, pose)
 
         self._blips.send(blips)
         self._blips_with_corners.send(blips_with_corners)
 
+    # TODO: extract this so that the target_detector uses the same thing.
     def detect_objects(
         self,
         img_bgr: NDArray[np.uint8],
         img_display: NDArray[np.uint8],
         servertime: int,
     ) -> None:
-        """Detect colored objects in a BGR image."""
+        """Detect colored objects in a BGR image.
+
+        :img_bgr: image to use for detection.
+        :img_display: image for display, annotated with tag positions.
+        :servertime: drift-corrected microsecond timestamp of the image.
+        """
         img_hsv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2HSV)
         img_hsv = np.ascontiguousarray(img_hsv)
 
@@ -237,7 +251,7 @@ class CombinedDetector(Interpreter):
                 rotation = Rotation3d(initial=initial, final=final)
 
                 targets.append(Target(servertime, rotation))
-                self._display.note(img_display, c, orig_cX, orig_cY)
+                DisplayUtil.note(img_display, c, orig_cX, orig_cY)
 
             # only send if there's anything to say
             self._targets.send(targets)

@@ -30,25 +30,19 @@ class TargetDetectorTest(unittest.TestCase):
         # GREEN PRACTICE TARGET
         # no distortion
         camera = FakeCamera("images/green_blob.jpg")
-        display = FakeDisplay()
+        display1 = FakeDisplay()
+        display2 = FakeDisplay()
 
         # GREEN TARGET VALUES
         object_lower = np.array((40, 50, 100))
         object_higher = np.array((70, 255, 255))
         note_detector = TargetDetector(
-            camera, display, network, timestamps, object_lower, object_higher
+            camera, display1, display2, network, timestamps, object_lower, object_higher
         )
         request = camera.capture_request()
         note_detector.analyze(request)
 
-        self.assertEqual(1, len(display.notes))
-        self.assertEqual(1, len(display.circles))
-        self.assertEqual(2, len(display.msgs))
-        self.assertEqual(2, len(display.locs))
-        self.assertEqual(1, display.frame_count)
-
-        self.assertEqual(498, display.circles[0][0])
-        self.assertEqual(414, display.circles[0][1])
+        self.assertEqual(1, display1.frame_count)
 
         rots: list[Target] = network.targets
         self.assertEqual(1, len(rots))
@@ -99,26 +93,20 @@ class TargetDetectorTest(unittest.TestCase):
     def test_target_undistort(self) -> None:
         # "barrel" to keep the blob in the frame
         camera = FakeCamera("images/green_blob.jpg", None, -0.1)
-        display = FakeDisplay()
+        display1 = FakeDisplay()
+        display2 = FakeDisplay()
         network = FakeNetwork()
         timestamps = Timestamps(network)
 
         object_lower = np.array((40, 50, 100))
         object_higher = np.array((70, 255, 255))
         note_detector = TargetDetector(
-            camera, display, network, timestamps, object_lower, object_higher
+            camera, display1, display2, network, timestamps, object_lower, object_higher
         )
         request = camera.capture_request()
         note_detector.analyze(request)
 
-        self.assertEqual(1, len(display.notes))
-        self.assertEqual(1, len(display.circles))
-        self.assertEqual(2, len(display.msgs))
-        self.assertEqual(2, len(display.locs))
-        self.assertEqual(1, display.frame_count)
-
-        self.assertEqual(497, display.circles[0][0])
-        self.assertEqual(414, display.circles[0][1])
+        self.assertEqual(1, display1.frame_count)
 
         # the extracted rotation should be undistorted.
         rots: list[Target] = network.targets
@@ -146,22 +134,19 @@ class TargetDetectorTest(unittest.TestCase):
 
         # nothing in this image
         camera = FakeCamera("images/white_square.jpg")
-        display = FakeDisplay()
+        display1 = FakeDisplay()
+        display2 = FakeDisplay()
 
         # GREEN TARGET VALUES
         object_lower = np.array((40, 50, 100))
         object_higher = np.array((70, 255, 255))
         note_detector = TargetDetector(
-            camera, display, network, timestamps, object_lower, object_higher
+            camera, display1, display2, network, timestamps, object_lower, object_higher
         )
         request = camera.capture_request()
         note_detector.analyze(request)
 
-        self.assertEqual(0, len(display.notes))
-        self.assertEqual(0, len(display.circles))
-        self.assertEqual(2, len(display.msgs))
-        self.assertEqual(2, len(display.locs))
-        self.assertEqual(1, display.frame_count)
+        self.assertEqual(1, display1.frame_count)
 
         ## always publish even if empty
 

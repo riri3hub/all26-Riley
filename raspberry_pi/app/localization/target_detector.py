@@ -8,8 +8,9 @@ from cv2.typing import MatLike, Moments
 from typing_extensions import override, Buffer
 
 from app.camera.camera_protocol import Camera, Request, Size
+from app.dashboard.display_util import DisplayUtil
 from app.interpreter.interpreter_protocol import Interpreter
-from app.dashboard.display import Display
+from app.dashboard.display_protocol import Display
 from app.network.network_protocol import Network
 from app.network.structs import Target
 from app.decoder.decoder_protocol import Decoder
@@ -22,18 +23,22 @@ class TargetDetector(Interpreter):
     def __init__(
         self,
         cam: Camera,
-        display: Display,
+        display1: Display,
+        display2: Display,
         network: Network,
         timestamps: Timestamps,
         object_lower: NDArray[np.int32],
         object_higher: NDArray[np.int32], # type: ignore
     ) -> None:
         """
-        object_lower and object_higher are ([H, S, V]) bounds.
-        NOTE: hue values are 0-180, half the usual range.
+        Note: hue values are 0-180, half the usual range.
+
+        :object_lower: ([H, S, V]) lower bound
+        :object_higher: ([H, S, V]) upper bound
         """
         self._cam = cam
-        self._display = display
+        self._display1 = display1
+        self._display2 = display2
         self._network = network
         self._timestamps = timestamps
         print("\n*** Interpreter: NoteDetector")
@@ -140,7 +145,7 @@ class TargetDetector(Interpreter):
                     rotation = Rotation3d(initial=initial, final=final)
 
                     targets.append(Target(servertime, rotation))
-                    self._display.note(img_bgr, c, orig_cX, orig_cY)
+                    DisplayUtil.note(img_bgr, c, orig_cX, orig_cY)
 
                 # only send if there's anything to say
                 self._targets.send(targets)
@@ -148,6 +153,6 @@ class TargetDetector(Interpreter):
                 self._network.flush()
 
             fps = req.fps()
-            self._display.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
-            self._display.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
-            self._display.put(img_bgr)
+            DisplayUtil.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
+            DisplayUtil.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
+            self._display1.put(img_bgr)

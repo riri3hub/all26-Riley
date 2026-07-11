@@ -18,7 +18,7 @@ from app.interpreter.interpreter_factory import InterpreterFactory
 from app.interpreter.interpreter_protocol import Interpreter
 from app.camera.camera_loop import CameraLoop
 from app.config.identity import Identity
-from app.dashboard.display import Display
+from app.dashboard.display_protocol import Display
 from app.dashboard.display_factory import DisplayFactory
 from app.network.network_protocol import Network
 from app.network.real_network import RealNetwork
@@ -31,11 +31,14 @@ def main() -> None:
     thread: Thread | None = None
     try:
         camera: Camera = CameraFactory.get(identity)
-        display: Display = DisplayFactory.get(identity, camera)
+        # main display for annotated images
+        display1: Display = DisplayFactory.get(identity, camera, "display1", 0.25)
+        # secondary display
+        display2: Display = DisplayFactory.get(identity, camera, "display2", 1.0)
         network: Network = RealNetwork(identity, done)
         timestamps = Timestamps(network)
         interpreter: Interpreter = InterpreterFactory.get(
-            identity, camera, display, network, timestamps
+            identity, camera, display1, display2, network, timestamps
         )
         camera_loop: CameraLoop = CameraLoop(camera, interpreter, done)
         thread = Thread(target=camera_loop.run)

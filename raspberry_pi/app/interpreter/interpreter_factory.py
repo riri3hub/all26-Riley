@@ -1,10 +1,10 @@
-# pylint: disable=C0301,E0611,E1101,R0903
+# pylint: disable=C0301,E0611,E1101,R0903,R0913,R0917
 import numpy as np
 from numpy.typing import NDArray
 
 from app.camera.camera_protocol import Camera
 from app.config.identity import Identity
-from app.dashboard.display import Display
+from app.dashboard.display_protocol import Display
 from app.interpreter.interpreter_protocol import Interpreter
 from app.interpreter.viewfinder import Viewfinder
 from app.localization.combined_detector import CombinedDetector
@@ -21,13 +21,14 @@ class InterpreterFactory:
     def get(
         identity: Identity,
         cam: Camera,
-        display: Display,
+        display1: Display,
+        display2: Display,
         network: Network,
         timestamps: Timestamps,
     ) -> Interpreter:
         if USE_NULL:
             # For testing.
-            return Viewfinder(display, network)
+            return Viewfinder(display1, display2, network)
 
         # GREEN TARGET VALUES
         # object_lower = np.array((40, 50, 100))
@@ -40,11 +41,14 @@ class InterpreterFactory:
 
         match identity:
             case Identity.FUNNEL:
-                return TagDetector(identity, cam, display, network, timestamps)
+                return TagDetector(
+                    identity, cam, display1, display2, network, timestamps
+                )
             case Identity.GAME_PIECE:
                 return TargetDetector(
                     cam,
-                    display,
+                    display1,
+                    display2,
                     network,
                     timestamps,
                     object_lower,
@@ -64,16 +68,21 @@ class InterpreterFactory:
                 | Identity.SWERVE_RIGHT
                 | Identity.SWERVE_LEFT
             ):
-                return TagDetector(identity, cam, display, network, timestamps)
+                return TagDetector(
+                    identity, cam, display1, display2, network, timestamps
+                )
             case Identity.DEV2:
                 return CombinedDetector(
                     identity,
                     cam,
-                    display,
+                    display1,
+                    display2,
                     network,
                     timestamps,
                     object_lower,
                     object_higher,
                 )
             case _:
-                return TagDetector(identity, cam, display, network, timestamps)
+                return TagDetector(
+                    identity, cam, display1, display2, network, timestamps
+                )

@@ -6,8 +6,9 @@ from app.camera.camera_loop import CameraLoop
 from app.camera.camera_protocol import Camera
 from app.camera.fake_camera import FakeCamera
 from app.config.identity import Identity
-from app.dashboard.display import Display
+from app.dashboard.display_protocol import Display
 from app.dashboard.fake_display import FakeDisplay
+from app.dashboard.linux_display import LinuxDisplay
 from app.interpreter.interpreter_protocol import Interpreter
 from app.localization.tag_detector import TagDetector
 from app.network.network_protocol import Network
@@ -32,12 +33,17 @@ class SemiRealTest(unittest.TestCase):
 
         # unknown uses localhost for the server
         identity: Identity = Identity.SIM0
-        camera: Camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), -0.1)
-        display: Display = FakeDisplay()
+        camera: Camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), -0.2)
+        # Don't use the display at all.
+        # display1: Display = FakeDisplay()
+        # display2: Display = FakeDisplay()
+        # Look at the undistorted image in display2.
+        display1: Display = LinuxDisplay("display1", 550, 310)
+        display2: Display = LinuxDisplay("display2", 1100, 620)
         network: Network = RealNetwork(identity, done)
         timestamps = Timestamps(network)
         interpreter: Interpreter = TagDetector(
-            identity, camera, display, network, timestamps
+            identity, camera, display1, display2, network, timestamps
         )
         camera_loop: CameraLoop = CameraLoop(camera, interpreter, done)
         thread: Thread = Thread(target=camera_loop.run)

@@ -1,16 +1,13 @@
 # pylint: disable=C0114,C0115,C0116,E0401,R0902,R0903,W0212
 
-
-from threading import Event, Thread
 from queue import Queue
+from threading import Event, Thread
 from typing_extensions import override
 
 import ntcore
-from app.network.calibrate import Calibrate
-from app.network.sync_loop import SyncLoop
-from app.network.drift import Drift
 from app.config.identity import Identity
-from app.network.structs import Blip, BlipWithCorners, Target
+from app.network.calibrate import Calibrate
+from app.network.drift import Drift
 from app.network.network_protocol import (
     DoubleSender,
     BlipSender,
@@ -18,6 +15,9 @@ from app.network.network_protocol import (
     TargetSender,
     Network,
 )
+from app.network.structs import Blip, BlipWithCorners, Target
+from app.network.sync_loop import SyncLoop
+from app.network.undistort_view import UndistortView
 
 
 class RealDoubleSender(DoubleSender):
@@ -78,11 +78,14 @@ class RealNetwork(Network):
             case _:
                 # The static RoboRIO IP address.
                 self._inst.setServer("10.1.0.2")
-            
+
         self._queue: Queue[int] = Queue()
 
         # Add the calibration switch
         self._calibrate = Calibrate(self._inst, identity)
+
+        # Add the undistort switch
+        self._undistort_view = UndistortView(self._inst, identity)
 
         # Fill the queue at 50 hz
         syncloop = SyncLoop(self._inst, self._queue, identity, done)
@@ -92,6 +95,10 @@ class RealNetwork(Network):
     @override
     def calibrate(self) -> bool:
         return self._calibrate.get()
+
+    @override
+    def undistort_view(self) -> bool:
+        return self._undistort_view.get()
 
     @override
     def flush(self) -> None:
