@@ -26,7 +26,7 @@ class CameraLoop(Looper):
     def execute(self) -> None:
         req = self._camera.capture_request()
         try:
-            self._interpreter.analyze(req)
+            self._interpreter.interpret(req)
         finally:
             req.release()
 

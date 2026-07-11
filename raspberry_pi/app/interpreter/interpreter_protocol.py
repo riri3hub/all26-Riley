@@ -5,6 +5,6 @@ from app.camera.camera_protocol import Request
 
 
 class Interpreter(Protocol):
-    """Interface for image interpreters."""
+    """Interface for request interpreters."""
 
-    def analyze(self, req: Request) -> None: ...
+    def interpret(self, req: Request) -> None: ...

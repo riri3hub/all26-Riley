@@ -15,7 +15,7 @@ class DisplayTest(unittest.TestCase):
     def test_display(self) -> None:
         display: Display = FakeDisplay()
         img: NDArray[np.uint8] = np.zeros([100, 100], dtype=np.uint8)
-        DisplayUtil.text(img, "hi", (0, 0))
+        DisplayUtil.text(img, "hi", (0, 0), 0)
         display.put(img)
 
     def test_identity(self) -> None:

@@ -9,6 +9,7 @@ import cv2
 from app.camera.fake_camera import FakeCamera
 from app.config.identity import Identity
 from app.dashboard.fake_display import FakeDisplay
+from app.localization.apriltags import AprilTags
 from app.localization.tag_detector import TagDetector
 from app.network.fake_network import FakeNetwork
 from app.util.timestamps import Timestamps
@@ -26,10 +27,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, len(network.blips))
         pose = network.blips[0].pose
@@ -58,10 +64,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, len(network.blips))
         pose = network.blips[0].pose
@@ -92,10 +103,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, len(network.blips))
         pose = network.blips[0].pose
@@ -125,10 +141,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, len(network.blips))
         pose = network.blips[0].pose
@@ -155,10 +176,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, len(network.blips))
         pose = network.blips[0].pose
@@ -186,10 +212,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, len(network.blips))
         pose = network.blips[0].pose
@@ -217,10 +248,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, len(network.blips))
         pose = network.blips[0].pose
@@ -251,10 +287,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, len(network.blips))
         pose = network.blips[0].pose
@@ -284,10 +325,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, display1.frame_count)
 
@@ -299,10 +345,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(1, len(network.blips))
         pose = network.blips[0].pose
@@ -332,10 +383,15 @@ class TagDetectorTest(unittest.TestCase):
         display1 = FakeDisplay()
         display2 = FakeDisplay()
         tag_detector = TagDetector(
-            identity, camera, display1, display2, network, timestamps
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
         )
         request = camera.capture_request()
-        tag_detector.analyze(request)
+        tag_detector.interpret(request)
 
         self.assertEqual(0, len(network.blips))
         self.assertEqual(1, display1.frame_count)
@@ -361,9 +417,14 @@ class TagDetectorTest(unittest.TestCase):
         camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), 0)
         display1 = FakeDisplay()
         display2 = FakeDisplay()
-        TagDetector(identity, camera, display1, display2, network, timestamps).analyze(
-            camera.capture_request()
-        )
+        TagDetector(
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
+        ).interpret(camera.capture_request())
         self.assertEqual(1, len(network.blips))
         self.verify_pose(network.blips[0].pose, 0.001)
 
@@ -372,9 +433,14 @@ class TagDetectorTest(unittest.TestCase):
         camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), -0.1)
         display1 = FakeDisplay()
         display2 = FakeDisplay()
-        TagDetector(identity, camera, display1, display2, network, timestamps).analyze(
-            camera.capture_request()
-        )
+        TagDetector(
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
+        ).interpret(camera.capture_request())
         self.assertEqual(1, len(network.blips))
         # A tiny bit more tolerance
         self.verify_pose(network.blips[0].pose, 0.002)
@@ -384,9 +450,14 @@ class TagDetectorTest(unittest.TestCase):
         camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), -0.3)
         display1 = FakeDisplay()
         display2 = FakeDisplay()
-        TagDetector(identity, camera, display1, display2, network, timestamps).analyze(
-            camera.capture_request()
-        )
+        TagDetector(
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
+        ).interpret(camera.capture_request())
         self.assertEqual(1, len(network.blips))
         # A bit more tolerance
         self.verify_pose(network.blips[0].pose, 0.003)
@@ -397,9 +468,14 @@ class TagDetectorTest(unittest.TestCase):
         camera = FakeCamera("images/tag_and_board.jpg", (1100, 620), -2)
         display1 = FakeDisplay()
         display2 = FakeDisplay()
-        TagDetector(identity, camera, display1, display2, network, timestamps).analyze(
-            camera.capture_request()
-        )
+        TagDetector(
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            AprilTags(identity, camera, network),
+        ).interpret(camera.capture_request())
 
     def test_redistort(self) -> None:
         """This is just to see what it's doing."""

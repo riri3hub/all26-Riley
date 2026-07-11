@@ -8,6 +8,7 @@ from numpy.typing import NDArray
 
 from app.camera.fake_camera import FakeCamera
 from app.dashboard.fake_display import FakeDisplay
+from app.localization.blobs import Blobs
 from app.localization.target_detector import TargetDetector
 from app.network.structs import Target
 from app.network.fake_network import FakeNetwork
@@ -37,10 +38,15 @@ class TargetDetectorTest(unittest.TestCase):
         object_lower = np.array((40, 50, 100))
         object_higher = np.array((70, 255, 255))
         note_detector = TargetDetector(
-            camera, display1, display2, network, timestamps, object_lower, object_higher
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            Blobs(camera, network, object_lower, object_higher),
         )
         request = camera.capture_request()
-        note_detector.analyze(request)
+        note_detector.interpret(request)
 
         self.assertEqual(1, display1.frame_count)
 
@@ -101,10 +107,15 @@ class TargetDetectorTest(unittest.TestCase):
         object_lower = np.array((40, 50, 100))
         object_higher = np.array((70, 255, 255))
         note_detector = TargetDetector(
-            camera, display1, display2, network, timestamps, object_lower, object_higher
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            Blobs(camera, network, object_lower, object_higher),
         )
         request = camera.capture_request()
-        note_detector.analyze(request)
+        note_detector.interpret(request)
 
         self.assertEqual(1, display1.frame_count)
 
@@ -141,10 +152,15 @@ class TargetDetectorTest(unittest.TestCase):
         object_lower = np.array((40, 50, 100))
         object_higher = np.array((70, 255, 255))
         note_detector = TargetDetector(
-            camera, display1, display2, network, timestamps, object_lower, object_higher
+            camera,
+            display1,
+            display2,
+            network,
+            timestamps,
+            Blobs(camera, network, object_lower, object_higher),
         )
         request = camera.capture_request()
-        note_detector.analyze(request)
+        note_detector.interpret(request)
 
         self.assertEqual(1, display1.frame_count)
 

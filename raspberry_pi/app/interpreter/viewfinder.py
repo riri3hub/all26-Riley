@@ -27,7 +27,7 @@ class Viewfinder(Interpreter):
 
 
     @override
-    def analyze(self, req: Request) -> None:
+    def interpret(self, req: Request) -> None:
         buffer: Buffer
         with req.buffer() as buffer:
             decoder: Decoder = req.decoder()
@@ -37,7 +37,7 @@ class Viewfinder(Interpreter):
             fps = req.fps()
             self._fps.send(fps)
             delay_us = Timestamps.delta_us(req.timestamp_boottime_us())
-            DisplayUtil.text(img_bgr, f"FPS {fps:2.0f}", (5, 65))
-            DisplayUtil.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 105))
+            DisplayUtil.text(img_bgr, f"FPS {fps:2.0f}", (5, 5), 0)
+            DisplayUtil.text(img_bgr, f"delay (ms) {delay_us/1000:2.0f}", (5, 5), 1)
             self._display1.put(img_bgr)
             self._display2.put(img_bgr)

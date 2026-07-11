@@ -6,7 +6,9 @@ from robotpy_apriltag import AprilTagDetection
 from wpimath.geometry import Transform3d
 
 
-FONT = cv2.FONT_HERSHEY_SIMPLEX
+FONT = cv2.FONT_HERSHEY_PLAIN
+SCALE = 2
+THICKNESS = 1
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
@@ -21,14 +23,28 @@ class DisplayUtil:
         cv2.circle(image, (c_x, c_y), 7, (0, 0, 0), -1)
 
     @staticmethod
-    def text(image: MatLike, msg: str, loc: tuple[int, int]) -> None:
-        """Write msg at loc in img, in WPI coords (x-forward), not camera coordinates (z-forward)"""
-        cv2.putText(image, msg, loc, FONT, 3, BLACK, 10)  # black background
-        cv2.putText(image, msg, loc, FONT, 3, WHITE, 5)  # white text
+    def text(image: MatLike, msg: str, loc: tuple[int, int], row: int) -> None:
+        """Write text message in the image.
+
+        Note opencv 5 fonts look very different (!)
+
+        :image: to write in
+        :msg: text to write
+        :loc: pixel location to start, upper left corner
+        :row: for multiline messages, which row"""
+        x, y = loc
+        (size_w, size_h), baseline = cv2.getTextSize(msg, FONT, SCALE, THICKNESS)
+        y = y + size_h + row * (size_h + baseline)
+        cv2.rectangle(image, (x, y + baseline), (x + size_w, y - size_h), BLACK, -1)
+        cv2.putText(image, msg, (x, y), FONT, SCALE, WHITE, THICKNESS)
 
     @staticmethod
     def tag(image: MatLike, tag: AprilTagDetection, pose: Transform3d) -> None:
-        """Draw the tag outline, and annotate its pose."""
+        """Draw the tag outline, and annotate its pose.
+
+        :image: to draw on
+        :tag: to draw
+        :pose: of the tag, to print, transformed to x-forward (!)"""
         for i in range(4):
             j = (i + 1) % 4
             point1 = (int(tag.getCorner(i).x), int(tag.getCorner(i).y))
@@ -37,6 +53,6 @@ class DisplayUtil:
         (c_x, c_y) = (int(tag.getCenter().x), int(tag.getCenter().y))
         cv2.circle(image, (c_x, c_y), 10, WHITE, -1)
         t = pose.translation()
-        DisplayUtil.text(image, f"X: {t.z:6.3f}", (c_x, c_y))
-        DisplayUtil.text(image, f"Y: {-t.x:6.3f}", (c_x, c_y + 80))
-        DisplayUtil.text(image, f"Z: {-t.y:6.3f}", (c_x, c_y + 160))
+        DisplayUtil.text(image, f"X: {t.z:5.2f}", (c_x, c_y), 0)
+        DisplayUtil.text(image, f"Y: {-t.x:5.2f}", (c_x, c_y), 1)
+        DisplayUtil.text(image, f"Z: {-t.y:5.2f}", (c_x, c_y), 2)

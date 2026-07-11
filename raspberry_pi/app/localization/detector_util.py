@@ -10,7 +10,7 @@ SRC_POINTS = np.array([[-1, 1], [1, 1], [1, -1], [-1, -1]])
 
 
 class DetectorUtil:
-    """Methods used by multiple detectors."""
+    """Static methods used by multiple detectors."""
 
     @staticmethod
     def raw_corners(
