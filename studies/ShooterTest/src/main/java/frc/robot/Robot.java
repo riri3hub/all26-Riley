@@ -38,8 +38,8 @@ public class Robot extends TimedRobot {
                 NeutralMode100.BRAKE,
                 MotorPhase.FORWARD,
                 new CurrentLimit(1, 1),
-                new Friction(rootLogger, 0, 0, 0, 0),
-                PIDConstants.zero(rootLogger), 0, 0);
+                new Friction(0, 0, 0, 0),
+                PIDConstants.zero(), 0, 0);
         bottom = new NeoVortexCANSparkMotor(
                 rootLogger,
                 currentLog,
@@ -47,8 +47,8 @@ public class Robot extends TimedRobot {
                 NeutralMode100.BRAKE,
                 MotorPhase.FORWARD,
                 new CurrentLimit(1, 1),
-                new Friction(rootLogger, 0, 0, 0, 0),
-                PIDConstants.makeVelocityPID(rootLogger, 1), 0, 0);
+                new Friction(0, 0, 0, 0),
+                PIDConstants.makeVelocityPID(1), 0, 0);
     }
 
     @Override
