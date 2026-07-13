@@ -70,7 +70,7 @@ public class PivotSubsystem extends SubsystemBase {
     }
 
     public Command stop() {
-        return run(this::stop);
+        return run(this::zero);
     }
 
     @Override

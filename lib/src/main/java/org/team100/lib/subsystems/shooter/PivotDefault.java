@@ -24,6 +24,6 @@ public class PivotDefault extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        m_pivot.stop();
+        m_pivot.zero();
     }
 }
