@@ -1,12 +1,13 @@
 package org.team100.frc2026;
 
 import static edu.wpi.first.wpilibj2.command.Commands.parallel;
-import static edu.wpi.first.wpilibj2.command.Commands.waitSeconds;
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
 import org.team100.lib.coherence.Cache;
 import org.team100.lib.coherence.Takt;
 import org.team100.lib.config.CurrentLimit;
+import org.team100.lib.dynamics.differential.DifferentialDriveDynamics;
+import org.team100.lib.dynamics.p.PDynamics;
 import org.team100.lib.experiments.Experiment;
 import org.team100.lib.experiments.Experiments;
 import org.team100.lib.framework.TimedRobot100;
@@ -97,7 +98,7 @@ public class Robot extends TimedRobot100 {
         m_led.state(this::ledColor);
         // TODO: use machine state instead of buttons
         m_led.event(xbox::leftTrigger, Color.kWhite);
-
+        DifferentialDriveDynamics driveDynamics = new DifferentialDriveDynamics(10, 1, 0.4);
         m_drive = TankDriveFactory.make(
                 fieldLogger,
                 logger,
@@ -108,7 +109,8 @@ public class Robot extends TimedRobot100 {
                 TRACK_WIDTH,
                 MAX_SPEED_M_S,
                 DRIVE_GEAR_RATIO,
-                DRIVE_WHEEL_DIAM);
+                DRIVE_WHEEL_DIAM,
+                driveDynamics);
         // changed back to all-right-side because it's easier to explain
         m_drive.setDefaultCommand(new TankManual(
                 logger,
@@ -118,6 +120,7 @@ public class Robot extends TimedRobot100 {
                 MAX_OMEGA_RAD_S,
                 m_drive));
 
+        PDynamics pdynamics = PDynamics.drum(0.5, SHOOTER_WHEEL_DIA_M / 2);
         DualDrumShooterFactory shooterFactory = new DualDrumShooterFactory(
                 logger,
                 m_currentLog,
@@ -128,10 +131,12 @@ public class Robot extends TimedRobot100 {
                 new CanId(8),
                 SHOOTER_GEAR_RATIO,
                 SHOOTER_WHEEL_DIA_M,
-                false);
+                false,
+                pdynamics);
         m_shooter = shooterFactory.get(SHOOTER);
         m_shooter.setDefaultCommand(m_shooter.stop());
 
+        PDynamics idynamics = PDynamics.drum(0.1, INDEXER_WHEEL_DIAMETER / 2);
         IndexerFactory indexerFactory = new IndexerFactory(
                 logger,
                 m_currentLog,
@@ -142,7 +147,8 @@ public class Robot extends TimedRobot100 {
                 new CanId(7),
                 INDEXER_GEAR_RATIO,
                 INDEXER_WHEEL_DIAMETER,
-                true);
+                true,
+                idynamics);
         m_indexer = indexerFactory.get(INDEXER);
         m_indexer.setDefaultCommand(m_indexer.stop());
 
