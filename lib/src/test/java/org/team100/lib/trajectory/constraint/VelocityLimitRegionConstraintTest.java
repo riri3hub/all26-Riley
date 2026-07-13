@@ -8,9 +8,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.trajectory.TrajectorySE2;
 import org.team100.lib.trajectory.TrajectorySE2Factory;
 import org.team100.lib.trajectory.TrajectorySE2ToVectorSeries;
@@ -26,7 +23,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class VelocityLimitRegionConstraintTest {
-    private static final LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
 
     /** Show that the velocity constraint is applied in the correct region */
     @Test
@@ -42,8 +38,8 @@ public class VelocityLimitRegionConstraintTest {
         PathSE2Factory pathFactory = new PathSE2Factory(0.1, 0.02, 0.1);
         PathSE2 path = pathFactory.get(splines);
         List<TimingConstraint> constraints = List.of(
-                new ConstantConstraint(log, 2, 1),
-                new VelocityLimitRegionConstraint(log,
+                new ConstantConstraint(2, 1),
+                new VelocityLimitRegionConstraint(
                         new Rectangle2d(
                                 new Translation2d(2, 0),
                                 new Translation2d(3, 2)),

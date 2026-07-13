@@ -11,9 +11,6 @@ import org.jfree.data.xy.VectorSeries;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.trajectory.TrajectorySE2;
 import org.team100.lib.trajectory.TrajectorySE2Entry;
 import org.team100.lib.trajectory.TrajectorySE2Factory;
@@ -21,8 +18,8 @@ import org.team100.lib.trajectory.TrajectorySE2ToVectorSeries;
 import org.team100.lib.trajectory.path.PathSE2;
 import org.team100.lib.trajectory.path.PathSE2Factory;
 import org.team100.lib.trajectory.path.PathSE2ToVectorSeries;
-import org.team100.lib.trajectory.spline.SplineSE2Factory;
 import org.team100.lib.trajectory.spline.SplineSE2;
+import org.team100.lib.trajectory.spline.SplineSE2Factory;
 import org.team100.lib.util.ChartUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -33,7 +30,6 @@ public class TrajectorySE2FactoryTest {
     private static final boolean DEBUG = false;
     public static final double EPSILON = 1e-12;
     private static final double DELTA = 0.01;
-    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     /** Straight, then s-shaped, then straight. **/
     public static final List<WaypointSE2> waypoints = Arrays.asList(
@@ -47,7 +43,7 @@ public class TrajectorySE2FactoryTest {
     void testConstrained1() {
         double maxV = 20;
         double maxA = 5;
-        List<TimingConstraint> constraints = List.of(new ConstantConstraint(logger, maxV, maxA));
+        List<TimingConstraint> constraints = List.of(new ConstantConstraint(maxV, maxA));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2 path = getPath();
         double start_vel = 0;
@@ -76,7 +72,7 @@ public class TrajectorySE2FactoryTest {
     void testConstrained2() {
         double maxV = 3;
         double maxA = 5;
-        List<TimingConstraint> constraints = List.of(new ConstantConstraint(logger, maxV, maxA));
+        List<TimingConstraint> constraints = List.of(new ConstantConstraint(maxV, maxA));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2 path = getPath();
         double start_vel = 0;
@@ -100,7 +96,7 @@ public class TrajectorySE2FactoryTest {
     void testConstrained3() {
         double maxV = 6;
         double maxA = 5;
-        List<TimingConstraint> constraints = List.of(new ConstantConstraint(logger, maxV, maxA));
+        List<TimingConstraint> constraints = List.of(new ConstantConstraint(maxV, maxA));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2 path = getPath();
         double start_vel = 5;
@@ -125,7 +121,7 @@ public class TrajectorySE2FactoryTest {
     @Test
     void testCentripetalConstraint1() {
         List<TimingConstraint> constraints = List.of(
-                new CapsizeAccelerationConstraint(logger, 2, 1));
+                new CapsizeAccelerationConstraint(2, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2 path = getPath();
         double start_vel = 0;
@@ -146,7 +142,7 @@ public class TrajectorySE2FactoryTest {
     @Test
     void testCentripetalConstraint2() {
         List<TimingConstraint> constraints = List.of(
-                new CapsizeAccelerationConstraint(logger, 3, 1));
+                new CapsizeAccelerationConstraint(3, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2 path = getPath();
         double start_vel = 0;
@@ -167,7 +163,7 @@ public class TrajectorySE2FactoryTest {
     @Test
     void testCentripetalConstraint3() {
         List<TimingConstraint> constraints = List.of(
-                new CapsizeAccelerationConstraint(logger, 2, 1));
+                new CapsizeAccelerationConstraint(2, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2 path = getPath();
         // higher than this gets clamped, so don't do that.

@@ -43,7 +43,7 @@ class DriveWithTrajectoryListFunctionTest implements Timeless {
     @Test
     void testSimple() throws IOException {
         Fixture fixture = new Fixture();
-        List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).allGood(logger);
+        List<TimingConstraint> constraints = new TimingConstraintFactory(fixture.swerveKinodynamics).allGood();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

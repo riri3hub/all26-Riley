@@ -5,7 +5,6 @@ import java.util.function.Function;
 
 import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.trajectory.TrajectorySE2;
 import org.team100.lib.trajectory.TrajectorySE2Factory;
@@ -21,8 +20,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public class BigLoop implements Function<Pose2d, TrajectorySE2> {
     private final TrajectorySE2Planner m_planner;
 
-    public BigLoop(LoggerFactory log, SwerveKinodynamics kinodynamics) {
-        List<TimingConstraint> constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
+    public BigLoop(SwerveKinodynamics kinodynamics) {
+        List<TimingConstraint> constraints = new TimingConstraintFactory(kinodynamics).auto();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         m_planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

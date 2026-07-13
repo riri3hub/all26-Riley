@@ -59,8 +59,8 @@ public class DriveWithTrajectoryTest implements Timeless {
 
     @Test
     void testTrajectoryStart() {
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
-        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood(logger);
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);
@@ -116,8 +116,8 @@ public class DriveWithTrajectoryTest implements Timeless {
 
     @Test
     void testTrajectoryDone() {
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
-        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood(logger);
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);
@@ -157,11 +157,11 @@ public class DriveWithTrajectoryTest implements Timeless {
         // it's on (otherwise it's in whatever state the previous test left it)
         Experiments.instance.testOverride(Experiment.UseSwerveLimiter, true);
         // 1m along +x, no rotation.
-        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
         SwerveModuleCollection collection = SwerveModuleCollection.get(
                 logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), swerveKinodynamics);
         collection.reset();
-        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood(logger);
+        List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

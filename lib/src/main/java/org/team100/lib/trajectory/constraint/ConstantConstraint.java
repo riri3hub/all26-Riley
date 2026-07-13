@@ -1,19 +1,16 @@
 package org.team100.lib.trajectory.constraint;
 
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.trajectory.path.PathSE2Point;
-import org.team100.lib.tuning.Mutable;
 
 /** Trivial constraint for testing. */
 public class ConstantConstraint implements TimingConstraint {
-    private final Mutable m_maxVelocity;
-    private final Mutable m_maxAccel;
+    private final double m_maxVelocity;
+    private final double m_maxAccel;
 
-    public ConstantConstraint(LoggerFactory parent, double maxV, double maxA) {
-        LoggerFactory log = parent.type(this);
-        m_maxVelocity = new Mutable(log, "maxV", maxV);
-        m_maxAccel = new Mutable(log, "maxA", maxA);
+    public ConstantConstraint(double maxV, double maxA) {
+        m_maxVelocity = maxV;
+        m_maxAccel = maxA;
     }
 
     /**
@@ -23,27 +20,26 @@ public class ConstantConstraint implements TimingConstraint {
      * @param limits absolute maxima
      */
     public ConstantConstraint(
-            LoggerFactory log,
             double vScale,
             double aScale,
             SwerveKinodynamics limits) {
-        this(log,
+        this(
                 vScale * limits.getMaxDriveVelocityM_S(),
                 aScale * limits.getMaxDriveAccelerationM_S2());
     }
 
     @Override
     public double maxV(PathSE2Point point) {
-        return m_maxVelocity.getAsDouble();
+        return m_maxVelocity;
     }
 
     @Override
     public double maxAccel(PathSE2Point point, double velocityM_S) {
-        return m_maxAccel.getAsDouble();
+        return m_maxAccel;
     }
 
     @Override
     public double maxDecel(PathSE2Point point, double velocity) {
-        return -m_maxAccel.getAsDouble();
+        return -m_maxAccel;
     }
 }

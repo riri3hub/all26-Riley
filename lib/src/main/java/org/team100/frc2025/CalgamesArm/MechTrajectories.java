@@ -37,8 +37,8 @@ public class MechTrajectories extends Command {
         List<TimingConstraint> c = new ArrayList<>();
 
         // These are known to work, but suboptimal.
-        c.add(new ConstantConstraint(m_log, 10, 5));
-        c.add(new YawRateConstraint(m_log, 10, 5));
+        c.add(new ConstantConstraint( 10, 5));
+        c.add(new YawRateConstraint( 10, 5));
         // This is new
         c.add(new TorqueConstraint(20));
 

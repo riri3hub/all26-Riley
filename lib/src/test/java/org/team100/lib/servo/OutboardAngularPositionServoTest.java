@@ -36,7 +36,7 @@ public class OutboardAngularPositionServoTest implements Timeless {
     /** At goal should be false after initialization */
     @Test
     void testAtGoal() {
-        Friction friction = new Friction(log, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(friction);
         MockIncrementalBareEncoder encoder = new MockIncrementalBareEncoder();
         MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
@@ -49,7 +49,7 @@ public class OutboardAngularPositionServoTest implements Timeless {
         RotaryMechanism mech = new RotaryMechanism(
                 log, motor, combinedEncoder, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
-        ProfileR1 profile = new TrapezoidProfileR1(log, 1, 1, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(1, 1, 0.05);
         ProfileReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.01, 0.01);
         OutboardAngularPositionServo servo = new OutboardAngularPositionServo(
                 log, mech, dyn, ref);
@@ -82,7 +82,7 @@ public class OutboardAngularPositionServoTest implements Timeless {
     @Test
     void testNoReset() {
         RDynamics dyn = new RDynamics(0, 0, 0);
-        Friction friction = new Friction(log, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(friction);
         MockIncrementalBareEncoder encoder = new MockIncrementalBareEncoder();
         MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
@@ -94,7 +94,7 @@ public class OutboardAngularPositionServoTest implements Timeless {
         RotaryMechanism mech = new RotaryMechanism(
                 log, motor, combinedEncoder, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
-        ProfileR1 profile = new TrapezoidProfileR1(log, 1, 1, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(1, 1, 0.05);
         ProfileReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.01, 0.01);
         OutboardAngularPositionServo servo = new OutboardAngularPositionServo(
                 log, mech, dyn, ref);
@@ -104,7 +104,7 @@ public class OutboardAngularPositionServoTest implements Timeless {
 
     @Test
     void testProfiled() {
-        Friction friction = new Friction(log, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         final MockBareMotor motor = new MockBareMotor(friction);
         final MockIncrementalBareEncoder encoder = new MockIncrementalBareEncoder();
         final MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
@@ -116,7 +116,7 @@ public class OutboardAngularPositionServoTest implements Timeless {
         final RotaryMechanism mech = new RotaryMechanism(
                 log, motor, combinedEncoder, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
-        final ProfileR1 profile = new TrapezoidProfileR1(log, 1, 1, 0.05);
+        final ProfileR1 profile = new TrapezoidProfileR1(1, 1, 0.05);
         final ProfileReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.01, 0.01);
         final OutboardAngularPositionServo servo = new OutboardAngularPositionServo(
                 log, mech, dyn, ref);
@@ -401,7 +401,7 @@ public class OutboardAngularPositionServoTest implements Timeless {
                 log, motor, sensor, 1, -3.1, 3.1);
         // very fast profile so we can see it; this is used for the "go around"
         // even though we're trying to use "direct" mode.
-        ProfileR1 profile = new TrapezoidProfileR1(log, 200, 10000, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(200, 10000, 0.05);
         ProfileReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.01, 0.01);
         OutboardAngularPositionServo servo = new OutboardAngularPositionServo(
                 log, mech, dyn, ref);

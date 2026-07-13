@@ -100,7 +100,7 @@ public class Machinery {
         // POSE ESTIMATION
         //
         LoggerFactory driveLog = logger.name("Drive");
-        m_swerveKinodynamics = SwerveKinodynamicsFactory.get(driveLog);
+        m_swerveKinodynamics = SwerveKinodynamicsFactory.get();
 
         m_modules = SwerveModuleCollection.get(
                 driveLog,

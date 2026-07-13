@@ -8,11 +8,9 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.AccelerationSE2;
 import org.team100.lib.geometry.VelocitySE2;
 import org.team100.lib.hid.Velocity;
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.state.VelocityControlSE2;
 import org.team100.lib.subsystems.mecanum.MecanumDrive100;
 import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveLimiter;
-import org.team100.lib.tuning.Mutable;
 import org.team100.lib.util.EnumChooser;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -32,9 +30,9 @@ public class ManualMecanum extends Command {
     }
 
     private final Supplier<Velocity> m_velocity;
-    private final Mutable m_maxVX;
-    private final Mutable m_maxVY;
-    private final Mutable m_maxOmega;
+    private final double m_maxVX;
+    private final double m_maxVY;
+    private final double m_maxOmega;
     private final SwerveLimiter m_limiter;
     private final MecanumDrive100 m_drive;
     private final EnumChooser<InputScaling> m_chooser;
@@ -42,7 +40,6 @@ public class ManualMecanum extends Command {
     private VelocitySE2 m_v;
 
     public ManualMecanum(
-            LoggerFactory parent,
             Supplier<Velocity> velocity,
             double maxVX,
             double maxVY,
@@ -51,11 +48,10 @@ public class ManualMecanum extends Command {
             MecanumDrive100 drive) {
         if (maxVY > maxVX)
             throw new IllegalArgumentException();
-        LoggerFactory log = parent.type(this);
         m_velocity = velocity;
-        m_maxVX = new Mutable(log, "maxVX", maxVX);
-        m_maxVY = new Mutable(log, "maxVY", maxVY);
-        m_maxOmega = new Mutable(log, "maxOmega", maxOmega);
+        m_maxVX =  maxVX;
+        m_maxVY =  maxVY;
+        m_maxOmega =  maxOmega;
         m_limiter = limiter;
         m_drive = drive;
         m_chooser = new EnumChooser<>("Input Scaling", InputScaling.NONE);
@@ -75,7 +71,7 @@ public class ManualMecanum extends Command {
         // Raw stick input.
         Velocity input = m_velocity.get();
         // Clip the input to the diamond shape.
-        double y_x = m_maxVY.getAsDouble() / m_maxVX.getAsDouble();
+        double y_x = m_maxVY / m_maxVX;
         Velocity clippedOrSquashed = switch (m_chooser.get()) {
             case NONE -> input;
             case CLIP -> input.diamond(1, y_x, poseRotation);
@@ -83,7 +79,7 @@ public class ManualMecanum extends Command {
         };
         // Scale stick input to field-relative velocity.
         VelocityControlSE2 scaled = VelocityControlSE2.scale(
-                clippedOrSquashed, m_maxVX.getAsDouble(), m_maxOmega.getAsDouble());
+                clippedOrSquashed, m_maxVX, m_maxOmega);
         // Apply field-relative limits.
         if (Experiments.instance.enabled(Experiment.UseSwerveLimiter)) {
             scaled = m_limiter.apply(scaled);

@@ -52,9 +52,9 @@ public class Feeder extends SubsystemBase {
         switch (Identity.instance) {
             case TEST_BOARD_B0 -> {
                 // friction test 3/12/26
-                Friction friction = new Friction(log, 0.9, 0.9, 0.0, 0.5);
+                Friction friction = new Friction(0.9, 0.9, 0.0, 0.5);
                 // tuned 3/12/26
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.05);
+                PIDConstants pid = PIDConstants.makeVelocityPID(0.05);
 
                 m1 = new KrakenX44Motor(
                         log1, currentLog, canID1, NeutralMode100.COAST, MotorPhase.FORWARD,

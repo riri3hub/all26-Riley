@@ -8,13 +8,10 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.VelocitySE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.optimization.NumericalJacobian100;
 import org.team100.lib.state.ModelSE2;
-import org.team100.lib.trajectory.TrajectorySE2Entry;
 import org.team100.lib.trajectory.TrajectorySE2;
+import org.team100.lib.trajectory.TrajectorySE2Entry;
 import org.team100.lib.trajectory.TrajectorySE2Factory;
 import org.team100.lib.trajectory.TrajectorySE2Planner;
 import org.team100.lib.trajectory.constraint.ConstantConstraint;
@@ -33,7 +30,6 @@ import edu.wpi.first.math.numbers.N3;
 public class JacobianTest {
     private static final boolean DEBUG = false;
     private static final double DELTA = 0.001;
-    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void test0() {
@@ -232,7 +228,7 @@ public class JacobianTest {
         final ElevatorArmWristKinematics k = new ElevatorArmWristKinematics(2, 1);
         Jacobian j = new Jacobian(k);
 
-        List<TimingConstraint> constraints = List.of(new ConstantConstraint(logger, 1, 1));
+        List<TimingConstraint> constraints = List.of(new ConstantConstraint(1, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

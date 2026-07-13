@@ -17,7 +17,6 @@ import org.team100.lib.profile.r1.VelocityProfileR1;
 import org.team100.lib.reference.r1.VelocityProfileReferenceR1;
 import org.team100.lib.reference.r1.VelocityReferenceR1;
 import org.team100.lib.servo.OutboardLinearVelocityServo;
-import org.team100.lib.tuning.Mutable;
 import org.team100.lib.util.CanId;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,7 +28,7 @@ public class Intake extends SubsystemBase {
     private static final double TOLERANCE_M_S = 1;
     private static final double GEAR_RATIO = 2;
     private static final double WHEEL_DIAMETER_M = 0.05;
-    private final Mutable NORMAL_SPEED;
+    private static final double NORMAL_SPEED = 10;
 
     private final OutboardLinearVelocityServo m_servo1;
     private final OutboardLinearVelocityServo m_servo2;
@@ -38,8 +37,6 @@ public class Intake extends SubsystemBase {
         LoggerFactory log = parent.type(this);
         LoggerFactory log1 = log.name("motor1");
         LoggerFactory log2 = log.name("motor2");
-        // tuned 3/12/26
-        NORMAL_SPEED = new Mutable(log, "Intake Speed", 10);
         // equivalent linear dynamics for the actual drum inertia.
         PDynamics dynamics = PDynamics.drum(0.001, 0.025);
         // VelocityProfileR1 profile = new CurrentLimitedExponentialVelocityProfileR1(
@@ -54,9 +51,9 @@ public class Intake extends SubsystemBase {
             case TEST_BOARD_B0, COMP_BOT -> {
 
                 // friction test 3/12/26
-                Friction friction = new Friction(log, 0.5, 0.5, 0.0, 0.5);
+                Friction friction = new Friction(0.5, 0.5, 0.0, 0.5);
                 // tuned 3/12/26
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.08);
+                PIDConstants pid = PIDConstants.makeVelocityPID(0.08);
                 m1 = new KrakenX44Motor(
                         log1, currentLog, CAN_ID_1, NeutralMode100.COAST, MotorPhase.FORWARD,
                         CurrentLimits.INTAKE, friction, pid);
@@ -82,7 +79,7 @@ public class Intake extends SubsystemBase {
     public Command intake() {
         return startRun(
                 this::reset,
-                () -> setVelocityProfiled(NORMAL_SPEED.getAsDouble()))
+                () -> setVelocityProfiled(NORMAL_SPEED))
                 .finallyDo(this::stopMotor)
                 .withName("Intake Normal Speed");
     }

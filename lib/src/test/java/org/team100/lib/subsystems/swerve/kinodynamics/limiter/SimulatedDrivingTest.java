@@ -57,7 +57,7 @@ public class SimulatedDrivingTest implements Timeless {
 
     SimulatedDrivingTest() throws IOException {
         LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
-        swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
         collection = SwerveModuleCollection.forTest(
                 logger, swerveKinodynamics);
         gyro = new SimulatedGyro(logger, swerveKinodynamics, collection, 0);

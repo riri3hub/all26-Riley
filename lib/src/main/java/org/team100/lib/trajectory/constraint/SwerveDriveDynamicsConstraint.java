@@ -1,12 +1,10 @@
 package org.team100.lib.trajectory.constraint;
 
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.limiter.SwerveUtil;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleState100;
 import org.team100.lib.subsystems.swerve.module.state.SwerveModuleStates;
 import org.team100.lib.trajectory.path.PathSE2Point;
-import org.team100.lib.tuning.Mutable;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -22,19 +20,17 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     private static final boolean DEBUG = false;
     private final SwerveKinodynamics m_limits;
-    private final Mutable vScale;
-    private final Mutable aScale;
+    private final double vScale;
+    private final double aScale;
 
     /** Use the factory. */
     public SwerveDriveDynamicsConstraint(
-            LoggerFactory parent,
             SwerveKinodynamics limits,
             double vScale,
             double aScale) {
-        LoggerFactory log = parent.type(this);
         m_limits = limits;
-        this.vScale = new Mutable(log, "vScale", vScale);
-        this.aScale = new Mutable(log, "aScale", aScale);
+        this.vScale = vScale;
+        this.aScale = aScale;
     }
 
     /**
@@ -68,7 +64,7 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     }
 
     double maxV() {
-        return vScale.getAsDouble() * m_limits.getMaxDriveVelocityM_S();
+        return vScale * m_limits.getMaxDriveVelocityM_S();
     }
 
     /**
@@ -98,6 +94,6 @@ public class SwerveDriveDynamicsConstraint implements TimingConstraint {
     }
 
     private double maxA() {
-        return aScale.getAsDouble() * m_limits.getMaxDriveDecelerationM_S2();
+        return aScale * m_limits.getMaxDriveDecelerationM_S2();
     }
 }

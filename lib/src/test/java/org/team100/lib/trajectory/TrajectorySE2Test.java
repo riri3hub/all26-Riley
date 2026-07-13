@@ -8,9 +8,6 @@ import org.jfree.data.xy.VectorSeries;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.testing.Timeless;
@@ -30,11 +27,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 class TrajectorySE2Test implements Timeless {
     private static final double DELTA = 0.001;
     private static final boolean DEBUG = false;
-    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testPreviewAndAdvance() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forRealisticTest();
         Pose2d start = Pose2d.kZero;
         Pose2d end = start.plus(new Transform2d(1, 0, Rotation2d.kZero));
 
@@ -46,7 +42,7 @@ class TrajectorySE2Test implements Timeless {
                 new WaypointSE2(start, DirectionSE2.irrotational(angleToGoal), 1),
                 new WaypointSE2(end, DirectionSE2.irrotational(angleToGoal), 1));
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast(logger);
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);
@@ -68,7 +64,7 @@ class TrajectorySE2Test implements Timeless {
 
     @Test
     void testSample() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3();
         Pose2d start = Pose2d.kZero;
         Pose2d end = start.plus(new Transform2d(1, 0, Rotation2d.kZero));
 
@@ -80,7 +76,7 @@ class TrajectorySE2Test implements Timeless {
                 new WaypointSE2(start, DirectionSE2.irrotational(angleToGoal), 1),
                 new WaypointSE2(end, DirectionSE2.irrotational(angleToGoal), 1));
 
-        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast(logger);
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);
@@ -115,8 +111,8 @@ class TrajectorySE2Test implements Timeless {
                                 Rotation2d.kZero),
                         new DirectionSE2(1, 0, 0), 1));
 
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3(logger);
-        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);
@@ -213,8 +209,8 @@ class TrajectorySE2Test implements Timeless {
         /////////////
         // INTERPOLATE TRAJECTORY POINTS (335 ns)
 
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3(logger);
-        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest3();
+        List<TimingConstraint> constraints = new TimingConstraintFactory(limits).fast();
         TrajectorySE2Factory generator = new TrajectorySE2Factory(constraints);
 
         TrajectorySE2 trajectory = generator.fromPath(path, 0, 0);

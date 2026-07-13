@@ -24,7 +24,7 @@ public class OdometryUpdaterTest {
     private static final boolean DEBUG = false;
     private static final double DELTA = 0.001;
     private static final LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
-    private static final SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forRealisticTest(log);
+    private static final SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
 
     private SwerveModulePositions positions;
 

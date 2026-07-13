@@ -59,7 +59,7 @@ public class SwerveDrivePoseEstimator100PerformanceTest {
     // There's no need to run this all the time
     // @Test
     void test0() {
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest();
         IsotropicNoiseSE2 visionMeasurementStdDevs = IsotropicNoiseSE2.fromStdDev(0.5, Double.MAX_VALUE);
 
         Gyro gyro = new MockGyro();

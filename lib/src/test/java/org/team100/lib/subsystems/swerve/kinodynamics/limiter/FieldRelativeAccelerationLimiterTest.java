@@ -19,7 +19,7 @@ public class FieldRelativeAccelerationLimiterTest implements Timeless {
 
     @Test
     void testMotionless() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         FieldRelativeAccelerationLimiter limiter = new FieldRelativeAccelerationLimiter(logger, limits, 1, 1);
         VelocitySE2 result = limiter.apply(
                 new VelocitySE2(0, 0, 0),
@@ -31,7 +31,7 @@ public class FieldRelativeAccelerationLimiterTest implements Timeless {
 
     @Test
     void testConstrained() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         FieldRelativeAccelerationLimiter limiter = new FieldRelativeAccelerationLimiter(logger, limits, 1, 1);
         VelocitySE2 result = limiter.apply(
                 new VelocitySE2(0, 0, 0),
@@ -43,7 +43,7 @@ public class FieldRelativeAccelerationLimiterTest implements Timeless {
 
     @Test
     void testCartesianScale() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         FieldRelativeAccelerationLimiter limiter = new FieldRelativeAccelerationLimiter(logger, limits, 1, 1);
         VelocitySE2 prev = new VelocitySE2(0, 0, 0);
         VelocitySE2 target = new VelocitySE2(1, 0, 0);
@@ -58,7 +58,7 @@ public class FieldRelativeAccelerationLimiterTest implements Timeless {
 
     @Test
     void testAlpha() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         FieldRelativeAccelerationLimiter limiter = new FieldRelativeAccelerationLimiter(logger, limits, 1, 1);
         VelocitySE2 result = limiter.apply(
                 new VelocitySE2(0, 0, 0),
@@ -70,7 +70,7 @@ public class FieldRelativeAccelerationLimiterTest implements Timeless {
 
     @Test
     void testAlphaRatio() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         FieldRelativeAccelerationLimiter limiter = new FieldRelativeAccelerationLimiter(logger, limits, 1, 1);
         VelocitySE2 result = limiter.apply(
                 new VelocitySE2(0, 0, 0),
@@ -82,7 +82,7 @@ public class FieldRelativeAccelerationLimiterTest implements Timeless {
 
     @Test
     void testPureAlpha() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         FieldRelativeAccelerationLimiter limiter = new FieldRelativeAccelerationLimiter(logger, limits, 1, 1);
         VelocitySE2 result = limiter.apply(
                 new VelocitySE2(0, 0, 0),

@@ -7,11 +7,10 @@ import org.team100.lib.framework.TimedRobot100;
 import org.team100.lib.geometry.AccelerationSE2;
 import org.team100.lib.geometry.ChassisAcceleration;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.state.ControlSE2;
 import org.team100.lib.subsystems.tank.TankDrive;
-import org.team100.lib.trajectory.TrajectorySE2Entry;
 import org.team100.lib.trajectory.TrajectorySE2;
+import org.team100.lib.trajectory.TrajectorySE2Entry;
 import org.team100.lib.trajectory.TrajectorySE2Factory;
 import org.team100.lib.trajectory.TrajectorySE2Planner;
 import org.team100.lib.trajectory.TrajectorySE2Point;
@@ -37,15 +36,13 @@ public class ToPoseWithTrajectory extends Command {
     private TrajectorySE2 m_trajectory;
 
     public ToPoseWithTrajectory(
-            LoggerFactory parent,
             Pose2d goal,
             TankDrive drive,
             TrajectoryVisualization viz) {
-        LoggerFactory log = parent.type(this);
         m_goal = goal;
         m_drive = drive;
         m_viz = viz;
-        List<TimingConstraint> constraints = List.of(new ConstantConstraint(log, 1, 1));
+        List<TimingConstraint> constraints = List.of(new ConstantConstraint(1, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         m_planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

@@ -26,7 +26,7 @@ class SimulatedHeadingTest implements Timeless {
 
     @Test
     void testInitial() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest();
         SwerveModuleCollection c = SwerveModuleCollection.get(
                 logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), l);
         SimulatedGyro h = new SimulatedGyro(logger, l, c, 0);
@@ -36,7 +36,7 @@ class SimulatedHeadingTest implements Timeless {
 
     @Test
     void testTranslation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest();
         SwerveModuleCollection c = SwerveModuleCollection.get(
                 logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), l);
         SwerveModulePositions p = c.positions();
@@ -66,7 +66,7 @@ class SimulatedHeadingTest implements Timeless {
 
     @Test
     void testRotation() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest();
         SwerveModuleCollection c = SwerveModuleCollection.get(
                 logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), l);
         SimulatedGyro h = new SimulatedGyro(logger, l, c, 0);
@@ -96,7 +96,7 @@ class SimulatedHeadingTest implements Timeless {
 
     @Test
     void testHolonomic() {
-        SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics l = SwerveKinodynamicsFactory.forRealisticTest();
 
         ChassisSpeeds speeds = new ChassisSpeeds(1, 0, 1);
         // includes discretization

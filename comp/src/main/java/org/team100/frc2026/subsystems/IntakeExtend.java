@@ -43,7 +43,7 @@ public class IntakeExtend extends SubsystemBase {
         // Mass is zero for now because gravity coordinate doesn't match
         // the mechanism.
         RDynamics dynamics = new RDynamics(0, 0, 0);
-        TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 4, 8, 0.1);
+        TrapezoidProfileR1 profile = new TrapezoidProfileR1(4, 8, 0.1);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.1, 0.05);
         final BareMotor motor;
         final BareMotor motor2;
@@ -51,10 +51,10 @@ public class IntakeExtend extends SubsystemBase {
             case TEST_BOARD_B0, COMP_BOT -> {
 
                 // friction test 3/12/26
-                Friction friction = new Friction(log, 0.32, 0.32, 0.0, 0.5);
+                Friction friction = new Friction(0.32, 0.32, 0.0, 0.5);
                 // tuned 3/12/26
                 // TODO: get correct pid value
-                PIDConstants pid = PIDConstants.makePositionPID(log, 1);
+                PIDConstants pid = PIDConstants.makePositionPID(1);
                 motor = new KrakenX44Motor(
                         log1, currentLog, CAN_ID,
                         NeutralMode100.COAST, MotorPhase.REVERSE,

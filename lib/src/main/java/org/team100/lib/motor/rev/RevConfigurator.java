@@ -7,7 +7,6 @@ import org.team100.lib.config.PIDConstants;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
-import org.team100.lib.tuning.Mutable;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
@@ -33,7 +32,7 @@ public class RevConfigurator {
     private final SparkBase m_motor;
     private final NeutralMode100 m_neutral;
     private final MotorPhase m_phase;
-    private final Mutable m_statorCurrentLimit;
+    private final double m_statorCurrentLimit;
     private final PIDConstants m_pid;
     /**
      * Used for the Minion motor, see SparkMaxConfig.Presets.CTRE_Minion.
@@ -70,9 +69,7 @@ public class RevConfigurator {
     private final int m_measurementPeriod;
 
     /**
-     * Stator current limit is mutable.
      * Does not support supply limit.
-     * pid has mutable parts.
      * 
      * @param averageDepth      for Max, must be in [1,64], default 64
      *                          for Flex, must be one of 1,2,4, or 8, default 8
@@ -92,7 +89,7 @@ public class RevConfigurator {
         m_motor = motor;
         m_neutral = neutral;
         m_phase = phase;
-        m_statorCurrentLimit = new Mutable(log, "stator current limit (a)", limit.stator(), (x) -> currentConfig());
+        m_statorCurrentLimit =  limit.stator();
         m_pid = pid;
         // reapply the pid parameters if any change.
         m_pid.register(this::pidConfig);
@@ -190,7 +187,7 @@ public class RevConfigurator {
 
     public void currentConfig() {
         SparkMaxConfig conf = new SparkMaxConfig();
-        conf.smartCurrentLimit((int) m_statorCurrentLimit.getAsDouble());
+        conf.smartCurrentLimit((int) m_statorCurrentLimit);
         crash(() -> m_motor.configure(conf, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters));
     }
 

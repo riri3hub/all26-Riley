@@ -21,7 +21,6 @@ import org.team100.lib.reference.r1.ReferenceR1;
 import org.team100.lib.servo.AngularPositionServo;
 import org.team100.lib.servo.OutboardAngularPositionServo;
 import org.team100.lib.state.ModelR1;
-import org.team100.lib.tuning.Mutable;
 import org.team100.lib.util.CanId;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  * Shooter hood must be at the minimum position at startup.
  */
 public class ShooterHood extends SubsystemBase {
+    private static final double TUNING_SETTING = 0;
     private static final CanId CAN_ID = new CanId(13);
     // from Yotaro 3/12/26
     private static final double GEAR_RATIO = 270;
@@ -40,7 +40,6 @@ public class ShooterHood extends SubsystemBase {
 
     private final Supplier<OptionalDouble> m_angle;
     private final AngularPositionServo m_servo;
-    private final Mutable m_tuningSetting;
 
     /**
      * @param parent log
@@ -49,21 +48,20 @@ public class ShooterHood extends SubsystemBase {
     public ShooterHood(LoggerFactory parent, TotalCurrentLog currentLog, Supplier<OptionalDouble> angle) {
         LoggerFactory log = parent.type(this);
         m_angle = angle;
-        m_tuningSetting = new Mutable(log, "for tuning", 0);
 
         // mass is zero for now because dynamics gravity direction doesn't match.
         // TODO: make the coordinates here match.
         RDynamics dynamics = new RDynamics(0.000, 0.007, 0.001);
-        TrapezoidProfileR1 profile = new TrapezoidProfileR1(log, 8, 16, 0.05);
+        TrapezoidProfileR1 profile = new TrapezoidProfileR1(8, 16, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
 
         final BareMotor motor;
         switch (Identity.instance) {
             case TEST_BOARD_B0 -> {
 
-                Friction friction = new Friction(log, 0.350, 0.350, 0.0, 0.5);
+                Friction friction = new Friction(0.350, 0.350, 0.0, 0.5);
                 // tuned 3/12/26
-                PIDConstants pid = PIDConstants.makePositionPID(log, 1.0);
+                PIDConstants pid = PIDConstants.makePositionPID(1.0);
 
                 motor = new NeoVortexCANSparkMotor(
                         log, currentLog, CAN_ID, NeutralMode100.COAST, MotorPhase.REVERSE,
@@ -132,8 +130,7 @@ public class ShooterHood extends SubsystemBase {
     public Command tune() {
         return startRun(
                 this::reset,
-                () -> actuateWithProfile(
-                        m_tuningSetting.getAsDouble()))
+                () -> actuateWithProfile(TUNING_SETTING))
                 .withName("Tune Hood");
     }
 

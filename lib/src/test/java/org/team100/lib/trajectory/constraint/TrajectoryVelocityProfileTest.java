@@ -5,9 +5,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.testing.Timeless;
@@ -15,8 +12,8 @@ import org.team100.lib.trajectory.TrajectorySE2;
 import org.team100.lib.trajectory.TrajectorySE2Factory;
 import org.team100.lib.trajectory.path.PathSE2;
 import org.team100.lib.trajectory.path.PathSE2Factory;
-import org.team100.lib.trajectory.spline.SplineSE2Factory;
 import org.team100.lib.trajectory.spline.SplineSE2;
+import org.team100.lib.trajectory.spline.SplineSE2Factory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,7 +25,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
  */
 public class TrajectoryVelocityProfileTest implements Timeless {
     private static final boolean DEBUG = false;
-    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     // A five-meter straight line.
     static WaypointSE2 w0 = WaypointSE2.irrotational(new Pose2d(0, 0, new Rotation2d(0)), 0, 1.2);
@@ -59,8 +55,8 @@ public class TrajectoryVelocityProfileTest implements Timeless {
     @Test
     void testConstantConstraint() {
         // somewhat realistic numbers
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTrajectoryTimingTest(logger);
-        List<TimingConstraint> constraints = List.of(new ConstantConstraint(logger, 1, 1, limits));
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTrajectoryTimingTest();
+        List<TimingConstraint> constraints = List.of(new ConstantConstraint(1, 1, limits));
         TrajectorySE2Factory u = new TrajectorySE2Factory(constraints);
         TrajectorySE2 traj = u.fromPath(path, 0, 0);
         if (DEBUG)
@@ -75,8 +71,8 @@ public class TrajectoryVelocityProfileTest implements Timeless {
      */
     @Test
     void testSwerveConstraint() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTrajectoryTimingTest(logger);
-        List<TimingConstraint> constraints = List.of(new SwerveDriveDynamicsConstraint(logger, limits, 1, 1));
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTrajectoryTimingTest();
+        List<TimingConstraint> constraints = List.of(new SwerveDriveDynamicsConstraint(limits, 1, 1));
         TrajectorySE2Factory u = new TrajectorySE2Factory(constraints);
         TrajectorySE2 traj = u.fromPath(path, 0, 0);
         if (DEBUG)
@@ -90,9 +86,9 @@ public class TrajectoryVelocityProfileTest implements Timeless {
      */
     @Test
     void testAuto() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTrajectoryTimingTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTrajectoryTimingTest();
         TimingConstraintFactory timing = new TimingConstraintFactory(limits);
-        List<TimingConstraint> constraints = timing.testAuto(logger);
+        List<TimingConstraint> constraints = timing.testAuto();
         TrajectorySE2Factory u = new TrajectorySE2Factory(constraints);
         TrajectorySE2 traj = u.fromPath(path, 0, 0);
         if (DEBUG)

@@ -1,8 +1,5 @@
 package org.team100.lib.config;
 
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.tuning.Mutable;
-
 /**
  * Friction model for static, dynamic, and viscous friction.
  * 
@@ -18,16 +15,15 @@ import org.team100.lib.tuning.Mutable;
  */
 public class Friction {
     /** Volts */
-    private final Mutable kS;
+    private final double kS;
     /** Volts */
-    private final Mutable kD;
+    private final double kD;
     /** Volt-sec/rad */
-    private final Mutable kV;
+    private final double kV;
     /** rad/sec */
     private final double vS;
 
     /**
-     * @param log for mutables
      * @param kS  Static friction. Voltage to just barely get the mechanism moving
      *            from a stop.
      * @param kD  Dynamic friction. Voltage to just barely keep the mechanism
@@ -37,17 +33,15 @@ public class Friction {
      * @param vS  Velocity threshold for static friction, rad/s.
      */
     public Friction(
-            LoggerFactory log,
             double kS,
             double kD,
             double kV,
             double vS) {
         if (kS < kD)
             throw new IllegalArgumentException("static friction is always at least as high as dynamic friction");
-        LoggerFactory fLog = log.type(this);
-        this.kS = new Mutable(fLog, "kS", kS);
-        this.kD = new Mutable(fLog, "kD", kD);
-        this.kV = new Mutable(fLog, "kV", kV);
+        this.kS = kS;
+        this.kD = kD;
+        this.kV = kV;
         this.vS = vS;
     }
 
@@ -61,11 +55,11 @@ public class Friction {
      * @param motorRad_S setpoint speed rad/s
      */
     public double frictionFFVolts(double motorRad_S) {
-        double viscous = kV.getAsDouble() * motorRad_S;
+        double viscous = kV * motorRad_S;
         double direction = Math.signum(motorRad_S);
         if (Math.abs(motorRad_S) < vS) {
-            return viscous + kS.getAsDouble() * direction;
+            return viscous + kS * direction;
         }
-        return viscous + kD.getAsDouble() * direction;
+        return viscous + kD * direction;
     }
 }

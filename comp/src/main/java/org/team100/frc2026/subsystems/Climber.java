@@ -38,7 +38,7 @@ public class Climber extends SubsystemBase {
         LoggerFactory log2 = log.name("motor2");
         // Dynamics are unimportant for this mechanism.
         RDynamics dynamics = new RDynamics(0, 0, 0);
-        ProfileR1 profile = new TrapezoidProfileR1(log, 3, 5, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(3, 5, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
         double initialPosition = 0;
         final BareMotor m1;
@@ -46,8 +46,8 @@ public class Climber extends SubsystemBase {
         switch (Identity.instance) {
             case TEST_BOARD_B0 -> {
                 CurrentLimit limit = new CurrentLimit(60, 40);
-                Friction friction = new Friction(log, 0, 0, 0, 0);
-                PIDConstants pid = new PIDConstants(log, 1, 0, 0, 0, 0, 0);
+                Friction friction = new Friction(0, 0, 0, 0);
+                PIDConstants pid = new PIDConstants(1, 0, 0, 0, 0, 0);
                 m1 = new KrakenX60Motor(
                         log1, currentLog, new CanId(6),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,

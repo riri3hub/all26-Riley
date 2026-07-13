@@ -99,8 +99,8 @@ public class RotaryPositionSubsystem1d extends SubsystemBase {
                 int supplyLimit = 60;
                 int statorLimit = 90;
                 double inputOffset = 0.135541;
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.05);
-                Friction friction = new Friction(log, 0.100, 0.100, 0.0, 0.1);
+                PIDConstants pid = PIDConstants.makeVelocityPID(0.05);
+                Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
                 KrakenX60Motor motor = new KrakenX60Motor(
                         log, currentLog, new CanId(1),
                         NeutralMode100.COAST, MotorPhase.REVERSE,

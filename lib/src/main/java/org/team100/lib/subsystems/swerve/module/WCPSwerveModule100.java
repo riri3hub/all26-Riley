@@ -134,9 +134,9 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             CanId driveMotorCanId,
             DriveRatio ratio) {
         // note (10/2/24) 0.4 produces oscillation, on carpet.
-        Friction friction = new Friction(parent, 0.26, 0.26, 0.006, 0.5);
+        Friction friction = new Friction(0.26, 0.26, 0.006, 0.5);
         // 3/14/26 lowered P from 0.05 to 0.03 to investigate oscillation
-        PIDConstants pid = PIDConstants.makeVelocityPID(parent, 0.03);
+        PIDConstants pid = PIDConstants.makeVelocityPID(0.03);
         KrakenX60Motor driveMotor = new KrakenX60Motor(
                 parent,
                 currentLog,
@@ -162,8 +162,8 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             CurrentLimit limit,
             CanId driveMotorCanId,
             DriveRatio ratio) {
-        Friction friction = new Friction(parent, 0.260, 0.260, 0.002, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(parent, 0.05);
+        Friction friction = new Friction(0.260, 0.260, 0.002, 0.5);
+        PIDConstants pid = PIDConstants.makeVelocityPID(0.05);
         Falcon500Motor driveMotor = new Falcon500Motor(
                 parent,
                 currentLog,
@@ -190,12 +190,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             EncoderDrive drive,
             NeutralMode100 neutral,
             MotorPhase motorPhase) {
-        Friction friction = new Friction(parent, 0.100, 0.100, 0.005, 0.5);
+        Friction friction = new Friction(0.100, 0.100, 0.005, 0.5);
 
         // Talon outboard POSITION PID
         // 10/2/24 drive torque produces about a 0.5 degree deviation so maybe
         // this is too low.
-        PIDConstants pid = PIDConstants.makePositionPID(parent, 2.0);
+        PIDConstants pid = PIDConstants.makePositionPID(2.0);
 
         Falcon500Motor turningMotor = new Falcon500Motor(
                 parent,
@@ -236,12 +236,12 @@ public class WCPSwerveModule100 extends SwerveModule100 {
             EncoderDrive drive,
             NeutralMode100 neutral,
             MotorPhase motorPhase) {
-        Friction friction = new Friction(parent, 0.100, 0.100, 0.005, 0.5);
+        Friction friction = new Friction(0.100, 0.100, 0.005, 0.5);
 
         // Talon outboard POSITION PID
         // 10/2/24 drive torque produces about a 0.5 degree deviation so maybe
         // this is too low.
-        PIDConstants pid = PIDConstants.makePositionPID(parent, 1.0);
+        PIDConstants pid = PIDConstants.makePositionPID(1.0);
 
         KrakenX60Motor turningMotor = new KrakenX60Motor(
                 parent,

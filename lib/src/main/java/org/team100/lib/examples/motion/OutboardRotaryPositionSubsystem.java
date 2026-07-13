@@ -47,7 +47,6 @@ public class OutboardRotaryPositionSubsystem extends SubsystemBase {
                 0.3, // arm length m
                 0); // arm moment, kg m^2
         ProfileR1 profile = new TrapezoidProfileR1(
-                log,
                 1, // max velocity rad/s
                 1, // max accel rad/s^2
                 0.01); // tolerance
@@ -76,8 +75,8 @@ public class OutboardRotaryPositionSubsystem extends SubsystemBase {
                         NeutralMode100.BRAKE,
                         MotorPhase.FORWARD,
                         new CurrentLimit(10, 10), // Stator current limit, amps
-                        new Friction(log, 0.5, 0.5, 0.0, 0.5),
-                        PIDConstants.makePositionPID(log, 0.2),
+                        new Friction( 0.5, 0.5, 0.0, 0.5),
+                        PIDConstants.makePositionPID(0.2),
                         0,
                         0);
                 IncrementalBareEncoder encoder = motor.encoder();

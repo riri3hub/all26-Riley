@@ -43,8 +43,8 @@ public class OpenLoopSubsystem extends SubsystemBase {
             case COMP_BOT -> {
                 CanId canId = new CanId(1);
                 CurrentLimit limit = new CurrentLimit(90, 60);
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.05);
-                Friction friction = new Friction(log, 0.100, 0.100, 0.0, 0.1);
+                PIDConstants pid = PIDConstants.makeVelocityPID(0.05);
+                Friction friction = new Friction( 0.100, 0.100, 0.0, 0.1);
                 m_motor = new Falcon500Motor(
                         log, currentLog, canId,
                         NeutralMode100.COAST, MotorPhase.FORWARD,

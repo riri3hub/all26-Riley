@@ -1,8 +1,6 @@
 package org.team100.frc2026.auton;
 
-import java.lang.reflect.Array;
 import java.util.List;
-import java.util.Map;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rectangle2d;

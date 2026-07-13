@@ -61,20 +61,20 @@ public class Manipulator extends SubsystemBase implements Music {
                         NeutralMode100.COAST,
                         MotorPhase.FORWARD,
                         new CurrentLimit(40, 40),
-                        new Friction(leftMotorLog, 0.900, 0.900, 0.0, 0.5),
-                        PIDConstants.zero(leftMotorLog));
+                        new Friction(0.900, 0.900, 0.0, 0.5),
+                        PIDConstants.zero());
                 KrakenX60Motor rightMotor = new KrakenX60Motor(
                         rightMotorLog, currentLog, new CanId(20), NeutralMode100.COAST,
                         MotorPhase.REVERSE,
                         new CurrentLimit(40, 40),
-                        new Friction(rightMotorLog, 0.900, 0.900, 0.0, 0.5),
-                        PIDConstants.zero(rightMotorLog));
+                        new Friction(0.900, 0.900, 0.0, 0.5),
+                        PIDConstants.zero());
                 KrakenX60Motor algaeMotor = new KrakenX60Motor(
                         algaeMotorLog, currentLog, new CanId(21), NeutralMode100.COAST,
                         MotorPhase.FORWARD,
                         new CurrentLimit(120, 120),
-                        new Friction(algaeMotorLog, 0.900, 0.900, 0.0, 0.5),
-                        PIDConstants.zero(algaeMotorLog));
+                        new Friction(0.900, 0.900, 0.0, 0.5),
+                        PIDConstants.zero());
                 algaeMotor.setTorqueLimit(4);
                 m_algaeMotor = algaeMotor;
                 m_rightLaser = new LaserCan100(new CanId(17));

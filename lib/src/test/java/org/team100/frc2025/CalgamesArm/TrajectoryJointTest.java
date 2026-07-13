@@ -49,8 +49,8 @@ public class TrajectoryJointTest {
     @Test
     void homeToL4() {
         List<TimingConstraint> c = List.of(
-                new ConstantConstraint(log, 1, 1),
-                new YawRateConstraint(log, 1, 1));
+                new ConstantConstraint(1, 1),
+                new YawRateConstraint(1, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(c);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner m_planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

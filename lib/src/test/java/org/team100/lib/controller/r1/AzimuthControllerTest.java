@@ -7,7 +7,6 @@ import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.TestLoggerFactory;
 import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.state.ModelR1;
-import org.team100.lib.tuning.Mutable;
 
 public class AzimuthControllerTest {
     private static final double DELTA = 0.001;
@@ -15,7 +14,6 @@ public class AzimuthControllerTest {
 
     @Test
     void test0() {
-        Mutable.unpublishAll();
         FeedbackR1 feedback = new FullStateFeedback(log, 1, 0.01, false, 1, 1);
         AzimuthController aim = new AzimuthController(log, () -> 5.0, feedback);
         aim.reset();

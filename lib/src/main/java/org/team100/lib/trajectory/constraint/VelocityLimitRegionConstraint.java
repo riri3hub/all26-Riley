@@ -1,8 +1,6 @@
 package org.team100.lib.trajectory.constraint;
 
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.trajectory.path.PathSE2Point;
-import org.team100.lib.tuning.Mutable;
 
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -12,21 +10,20 @@ import edu.wpi.first.math.geometry.Translation2d;
  */
 public class VelocityLimitRegionConstraint implements TimingConstraint {
     private final Rectangle2d m_region;
-    private final Mutable m_maxV;
+    private final double m_maxV;
 
-    public VelocityLimitRegionConstraint(LoggerFactory parent, Rectangle2d region, double maxV) {
+    public VelocityLimitRegionConstraint(Rectangle2d region, double maxV) {
         if (maxV < 0)
             throw new IllegalArgumentException();
-        LoggerFactory log = parent.type(this);
         m_region = region;
-        m_maxV = new Mutable(log, "maxV", maxV);
+        m_maxV = maxV;
     }
 
     @Override
     public double maxV(PathSE2Point point) {
         final Translation2d translation = point.waypoint().pose().getTranslation();
         if (m_region.contains(translation))
-            return m_maxV.getAsDouble();
+            return m_maxV;
         return Double.POSITIVE_INFINITY;
     }
 

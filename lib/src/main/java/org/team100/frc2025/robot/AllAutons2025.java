@@ -40,7 +40,7 @@ public class AllAutons2025 {
         final FullStateControllerSE2 controller = ControllerFactorySE2
                 .auto2025LooseTolerance(autoLog);
         List<TimingConstraint> constraints = new TimingConstraintFactory(machinery.m_swerveKinodynamics)
-                .medium(autoLog);
+                .medium();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         final TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

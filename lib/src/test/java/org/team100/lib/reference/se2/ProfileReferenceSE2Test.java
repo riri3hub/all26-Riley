@@ -23,7 +23,7 @@ public class ProfileReferenceSE2Test implements Timeless {
     void testSimple() {
         ModelSE2 measurement = new ModelSE2(new Pose2d(0, 0, Rotation2d.kZero));
         ModelSE2 goal = new ModelSE2(new Pose2d(1, 0, Rotation2d.kZero));
-        HolonomicProfile hp = HolonomicProfileFactory.trapezoidal(logger, 1, 1, 0.01, 1, 1, 0.01);
+        HolonomicProfile hp = HolonomicProfileFactory.trapezoidal(1, 1, 0.01, 1, 1, 0.01);
         ProfileReferenceSE2 r = new ProfileReferenceSE2(logger, hp, "test");
         r.setGoal(goal);
         r.initialize(measurement);

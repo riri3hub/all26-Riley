@@ -18,7 +18,7 @@ public class BatterySagSpeedLimitTest implements Timeless {
 
     @Test
     void testLimit() {
-        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest();
         BatterySagSpeedLimit s = new BatterySagSpeedLimit(logger, k, () -> volts);
         volts = 0;
         assertEquals(0, s.getMaxDriveVelocityM_S(), DELTA);

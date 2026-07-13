@@ -191,9 +191,8 @@ public class FiveBarMech extends SubsystemBase {
 
     private Falcon500Motor makeMotor(LoggerFactory logger, TotalCurrentLog currentLog, CanId canId) {
         /** Units of positional PID are volts per revolution. */
-        PIDConstants pid = PIDConstants.makePositionPID(
-                logger, 2.0);
-        Friction friction = new Friction(logger, 0, 0, 0, 0);
+        PIDConstants pid = PIDConstants.makePositionPID(2.0);
+        Friction friction = new Friction(0, 0, 0, 0);
         return new Falcon500Motor(
                 logger,
                 currentLog,

@@ -5,9 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.testing.Timeless;
@@ -19,12 +16,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 class SwerveDriveDynamicsConstraintTest implements Timeless {
     private static final double DELTA = 0.001;
-    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testVelocity() {
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
-        SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(logger, kinodynamics, 1, 1);
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
+        SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(kinodynamics, 1, 1);
 
         // motionless
         double maxV = c.maxV(new PathSE2Point(
@@ -68,8 +64,8 @@ class SwerveDriveDynamicsConstraintTest implements Timeless {
 
     @Test
     void testAccel() {
-        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
-        SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(logger, kinodynamics, 1, 1);
+        SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
+        SwerveDriveDynamicsConstraint c = new SwerveDriveDynamicsConstraint(kinodynamics, 1, 1);
         // this is constant
         Pose2d p = new Pose2d(0, 0, new Rotation2d(0));
         PathSE2Point p2 = new PathSE2Point(

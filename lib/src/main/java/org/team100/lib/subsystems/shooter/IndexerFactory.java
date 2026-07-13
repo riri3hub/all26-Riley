@@ -96,9 +96,9 @@ public class IndexerFactory {
             throw new IllegalArgumentException();
         if (fullDutyCycle == 0)
             throw new IllegalArgumentException();
-        Friction friction = new Friction(log, 0.02, 0.02, 0.0, 0.5);
+        Friction friction = new Friction(0.02, 0.02, 0.0, 0.5);
         // duty cycle, no feedback.
-        PIDConstants pid = PIDConstants.zero(log);
+        PIDConstants pid = PIDConstants.zero();
         // for simulation
         double maxSpeedM_S = 10;
         double freeSpeedRad_S = maxSpeedM_S * gearRatio / (0.5 * wheelDiaM);
@@ -114,7 +114,7 @@ public class IndexerFactory {
         LinearMechanism mech = getPositionMech(
                 log, currentLog, limit, canId, gearRatio, wheelDiaM);
         TrapezoidProfileR1 profile = new TrapezoidProfileR1(
-                log, VELOCITY, ACCEL, 0.02);
+                VELOCITY, ACCEL, 0.02);
         ProfileReferenceR1 ref = new ProfileReferenceR1(
                 log, () -> profile, 0.02, 0.02);
         OutboardLinearPositionServo servo = new OutboardLinearPositionServo(
@@ -145,8 +145,8 @@ public class IndexerFactory {
             CanId canId,
             double gearRatio,
             double wheelDiaM) {
-        Friction friction = new Friction(log, 0.02, 0.02, 0.00, 0.5);
-        PIDConstants pid = PIDConstants.makePositionPID(log, 0.5);
+        Friction friction = new Friction(0.02, 0.02, 0.00, 0.5);
+        PIDConstants pid = PIDConstants.makePositionPID(0.5);
         // for simulation
         double maxSpeedM_S = 10;
         double freeSpeedRad_S = maxSpeedM_S * gearRatio / (0.5 * wheelDiaM);
@@ -166,8 +166,8 @@ public class IndexerFactory {
             CanId canId,
             double gearRatio,
             double wheelDiaM) {
-        Friction friction = new Friction(log, 0.02, 0.02, 0.0, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
+        Friction friction = new Friction(0.02, 0.02, 0.0, 0.5);
+        PIDConstants pid = PIDConstants.makeVelocityPID(0.005);
         // for simulation
         double maxSpeedM_S = 10;
         double freeSpeedRad_S = maxSpeedM_S * gearRatio / (0.5 * wheelDiaM);

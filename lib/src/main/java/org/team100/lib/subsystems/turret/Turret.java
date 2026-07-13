@@ -107,7 +107,7 @@ public class Turret extends SubsystemBase {
 
     private static AngularPositionServo pivot(LoggerFactory log) {
         RDynamics dyn = new RDynamics(0.005);
-        ProfileR1 profile = new TrapezoidProfileR1(log, 5, 10, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(5, 10, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
         PIDFeedback feedback = new PIDFeedback(log, 5, 0, 0, false, 0.05, 0.1);
         // TODO: real motor
@@ -125,7 +125,7 @@ public class Turret extends SubsystemBase {
 
     private static AngularPositionServo elevation(LoggerFactory log) {
         RDynamics dyn = new RDynamics(0, 0, 0);
-        ProfileR1 profile = new TrapezoidProfileR1(log, 5, 10, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(5, 10, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
         PIDFeedback feedback = new PIDFeedback(log, 5, 0, 0, false, 0.05, 0.1);
         // TODO: real motor

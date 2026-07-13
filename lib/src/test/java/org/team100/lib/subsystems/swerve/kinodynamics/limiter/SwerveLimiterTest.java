@@ -22,7 +22,7 @@ public class SwerveLimiterTest implements Timeless {
     private static final boolean DEBUG = false;
     private final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
     private static final SwerveKinodynamics KINEMATIC_LIMITS = SwerveKinodynamicsFactory
-            .limiting(new TestLoggerFactory(new TestPrimitiveLogger()));
+            .limiting();
 
     /** The setpoint generator never changes the field-relative course. */
     @Test
@@ -92,7 +92,7 @@ public class SwerveLimiterTest implements Timeless {
 
     @Test
     void motionlessNoOp() {
-        SwerveKinodynamics unlimited = SwerveKinodynamicsFactory.unlimited(logger);
+        SwerveKinodynamics unlimited = SwerveKinodynamicsFactory.unlimited();
         SwerveLimiter limiter = new SwerveLimiter(logger, unlimited, () -> 12);
 
         VelocityControlSE2 target = new VelocityControlSE2(0, 0, 0);
@@ -112,7 +112,7 @@ public class SwerveLimiterTest implements Timeless {
 
     @Test
     void driveNoOp() {
-        SwerveKinodynamics unlimited = SwerveKinodynamicsFactory.unlimited(logger);
+        SwerveKinodynamics unlimited = SwerveKinodynamicsFactory.unlimited();
         SwerveLimiter limiter = new SwerveLimiter(logger, unlimited, () -> 12);
 
         VelocityControlSE2 target = new VelocityControlSE2(1, 0, 0);
@@ -132,7 +132,7 @@ public class SwerveLimiterTest implements Timeless {
 
     @Test
     void spinNoOp() {
-        SwerveKinodynamics unlimited = SwerveKinodynamicsFactory.unlimited(logger);
+        SwerveKinodynamics unlimited = SwerveKinodynamicsFactory.unlimited();
         SwerveLimiter limiter = new SwerveLimiter(logger, unlimited, () -> 12);
 
         VelocityControlSE2 target = new VelocityControlSE2(0, 0, 1);
@@ -151,7 +151,7 @@ public class SwerveLimiterTest implements Timeless {
 
     @Test
     void driveAndSpin() {
-        SwerveKinodynamics unlimited = SwerveKinodynamicsFactory.unlimited(logger);
+        SwerveKinodynamics unlimited = SwerveKinodynamicsFactory.unlimited();
         SwerveLimiter limiter = new SwerveLimiter(logger, unlimited, () -> 12);
 
         // spin fast to make the discretization effect larger
@@ -176,7 +176,7 @@ public class SwerveLimiterTest implements Timeless {
     void testAccel() {
         // limit accel is 10 m/s^2
         // capsize limit is 24.5 m/s^2
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize();
         assertEquals(24.5, limits.getMaxCapsizeAccelM_S2(), DELTA);
         SwerveLimiter limiter = new SwerveLimiter(logger, limits, () -> 12);
 
@@ -211,7 +211,7 @@ public class SwerveLimiterTest implements Timeless {
     @Test
     void testNotLimiting() {
         // high centripetal limit to stay out of the way
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize();
         SwerveLimiter limiter = new SwerveLimiter(logger, limits, () -> 12);
 
         // initially at rest.
@@ -230,7 +230,7 @@ public class SwerveLimiterTest implements Timeless {
     @Test
     void testLimitingALittle() {
         // high centripetal limit to stay out of the way
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.highCapsize();
         SwerveLimiter limiter = new SwerveLimiter(logger, limits, () -> 12);
 
         // initially at rest.
@@ -254,7 +254,7 @@ public class SwerveLimiterTest implements Timeless {
 
     @Test
     void testCase4() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.decelCase(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.decelCase();
         SwerveLimiter limiter = new SwerveLimiter(logger, limits, () -> 12);
 
         // initially moving 0.5 +y
@@ -286,7 +286,7 @@ public class SwerveLimiterTest implements Timeless {
      */
     @Test
     void testSweep() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.likeComp25(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.likeComp25();
         SwerveLimiter limiter = new SwerveLimiter(logger, limits, () -> 12);
         // target is infeasible and constant
         final VelocityControlSE2 target = new VelocityControlSE2(5, 0, 0);
@@ -329,11 +329,11 @@ public class SwerveLimiterTest implements Timeless {
     @Test
     void testProfile() {
         // profile v and a constraints match the limits
-        ProfileR1 profile = new TrapezoidProfileR1(logger, 3, 5, 0.01);
+        ProfileR1 profile = new TrapezoidProfileR1(3, 5, 0.01);
         final ModelR1 goal = new ModelR1(5, 0);
         final ModelR1 initial = new ModelR1(0, 0);
 
-        final SwerveKinodynamics limits = SwerveKinodynamicsFactory.likeComp25(logger);
+        final SwerveKinodynamics limits = SwerveKinodynamicsFactory.likeComp25();
         final SwerveLimiter limiter = new SwerveLimiter(logger, limits, () -> 12);
 
         ControlR1 profileTarget = initial.control();

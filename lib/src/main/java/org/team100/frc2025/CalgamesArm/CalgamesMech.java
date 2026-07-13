@@ -172,8 +172,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         new CanId(11),
                         NeutralMode100.BRAKE, MotorPhase.REVERSE,
                         new CurrentLimit(100, 100),
-                        new Friction(elevatorfrontLog, 0.100, 0.100, 0.005, 0.5),
-                        PIDConstants.makePositionPID(elevatorfrontLog, 1));
+                        new Friction(0.100, 0.100, 0.005, 0.5),
+                        PIDConstants.makePositionPID(1));
                 IncrementalBareEncoder elevatorFrontEncoder = elevatorFrontMotor.encoder();
 
                 m_elevatorFront = new LinearMechanism(
@@ -187,8 +187,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         new CanId(12),
                         NeutralMode100.BRAKE, MotorPhase.FORWARD,
                         new CurrentLimit(100, 100),
-                        new Friction(elevatorbackLog, 0.100, 0.100, 0.005, 0.5),
-                        PIDConstants.makePositionPID(elevatorbackLog, 1));
+                        new Friction(0.100, 0.100, 0.005, 0.5),
+                        PIDConstants.makePositionPID(1));
                 Talon6Encoder elevatorBackEncoder = elevatorBackMotor.encoder();
                 m_elevatorBack = new LinearMechanism(
                         elevatorbackLog, elevatorBackMotor, elevatorBackEncoder,
@@ -202,8 +202,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         NeutralMode100.BRAKE,
                         MotorPhase.REVERSE,
                         new CurrentLimit(100, 100),
-                        new Friction(shoulderLog, 0.100, 0.100, 0.005, 0.5),
-                        PIDConstants.makePositionPID(shoulderLog, 1));
+                        new Friction(0.100, 0.100, 0.005, 0.5),
+                        PIDConstants.makePositionPID(1));
                 Talon6Encoder shoulderEncoder = shoulderMotor.encoder();
                 // The shoulder has a 5048 on the intermediate shaft
                 AS5048RotaryPositionSensor shoulderSensor = new AS5048RotaryPositionSensor(
@@ -232,8 +232,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
                         new CanId(22),
                         NeutralMode100.COAST, MotorPhase.FORWARD,
                         new CurrentLimit(40, 60),
-                        new Friction(wristLog, 0.100, 0.100, 0.005, 0.5),
-                        PIDConstants.makePositionPID(wristLog, 1));
+                        new Friction(0.100, 0.100, 0.005, 0.5),
+                        PIDConstants.makePositionPID(1));
                 // the wrist has no angle sensor, so it needs to start in the "zero" position.
                 Talon6Encoder wristEncoder = wristMotor.encoder();
                 final double wristGearRatio = 55.710;

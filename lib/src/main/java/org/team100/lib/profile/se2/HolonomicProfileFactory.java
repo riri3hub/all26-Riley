@@ -1,7 +1,5 @@
 package org.team100.lib.profile.se2;
 
-import org.team100.lib.logging.Level;
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.profile.r1.DualProfileR1;
 import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.profile.r1.WPITrapezoidProfileR1;
@@ -21,14 +19,12 @@ public class HolonomicProfileFactory {
      * specified.
      */
     public static HolonomicProfile get(
-            LoggerFactory logger,
             SwerveKinodynamics kinodynamics,
             double vScale,
             double aScale,
             double omegaScale,
             double alphaScale) {
-        LoggerFactory log = logger.name("HolonomicProfile");
-        log.stringLogger(Level.TRACE, "profile").log(() -> PROFILE.name());
+ 
         switch (PROFILE) {
             case EXP -> {
                 return currentLimitedExponential(
@@ -50,7 +46,6 @@ public class HolonomicProfileFactory {
 
             case P100 -> {
                 return trapezoidal(
-                        log,
                         kinodynamics.getMaxDriveVelocityM_S() * vScale,
                         kinodynamics.getMaxDriveAccelerationM_S2() * aScale,
                         0.05,
@@ -77,7 +72,6 @@ public class HolonomicProfileFactory {
     }
 
     public static HolonomicProfile trapezoidal(
-            LoggerFactory log,
             double maxXYVel,
             double maxXYAccel,
             double xyTolerance,
@@ -85,9 +79,9 @@ public class HolonomicProfileFactory {
             double maxAlpha,
             double angularTolerance) {
         return new HolonomicProfile(
-                new TrapezoidProfileR1(log.name("x"), maxXYVel, maxXYAccel, xyTolerance),
-                new TrapezoidProfileR1(log.name("y"), maxXYVel, maxXYAccel, xyTolerance),
-                new TrapezoidProfileR1(log.name("theta"), maxOmega, maxAlpha, angularTolerance));
+                new TrapezoidProfileR1(maxXYVel, maxXYAccel, xyTolerance),
+                new TrapezoidProfileR1(maxXYVel, maxXYAccel, xyTolerance),
+                new TrapezoidProfileR1(maxOmega, maxAlpha, angularTolerance));
     }
 
     public static HolonomicProfile currentLimitedExponential(

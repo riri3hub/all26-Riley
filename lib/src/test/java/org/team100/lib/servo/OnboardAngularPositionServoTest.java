@@ -30,7 +30,7 @@ public class OnboardAngularPositionServoTest implements Timeless {
     void testNoReset() {
         // what happens if you don't reset it?
         RDynamics dyn = new RDynamics(0, 0, 0);
-        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         MockBareMotor turningMotor = new MockBareMotor(friction);
         MockRotaryPositionSensor positionSensor = new MockRotaryPositionSensor();
         RotaryMechanism mech = new RotaryMechanism(
@@ -38,7 +38,7 @@ public class OnboardAngularPositionServoTest implements Timeless {
                 Double.POSITIVE_INFINITY);
         FeedbackR1 turningFeedback2 = new PIDFeedback(
                 logger, 1, 0, 0, false, 0.05, 1);
-        ProfileR1 profile = new TrapezoidProfileR1(logger, 1, 1, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(1, 1, 0.05);
         ProfileReferenceR1 ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         OnboardAngularPositionServo servo = new OnboardAngularPositionServo(
                 logger, mech, dyn, ref, turningFeedback2);
@@ -49,7 +49,7 @@ public class OnboardAngularPositionServoTest implements Timeless {
     @Test
     void testOnboard() {
         RDynamics dyn = new RDynamics(0, 0, 0);
-        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         final MockBareMotor turningMotor = new MockBareMotor(friction);
         final MockRotaryPositionSensor positionSensor = new MockRotaryPositionSensor();
         final RotaryMechanism mech = new RotaryMechanism(
@@ -57,7 +57,7 @@ public class OnboardAngularPositionServoTest implements Timeless {
                 Double.POSITIVE_INFINITY);
         final FeedbackR1 turningFeedback2 = new PIDFeedback(
                 logger, 1, 0, 0, false, 0.05, 1);
-        final ProfileR1 profile = new TrapezoidProfileR1(logger, 1, 1, 0.05);
+        final ProfileR1 profile = new TrapezoidProfileR1(1, 1, 0.05);
         final ProfileReferenceR1 ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         final OnboardAngularPositionServo servo = new OnboardAngularPositionServo(
                 logger, mech, dyn, ref, turningFeedback2);
@@ -91,7 +91,7 @@ public class OnboardAngularPositionServoTest implements Timeless {
                 Double.POSITIVE_INFINITY);
         FeedbackR1 turningFeedback2 = new PIDFeedback(
                 logger, 10, 0, 0, false, 0.05, 1);
-        ProfileR1 profile = new TrapezoidProfileR1(logger, 2, 2, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(2, 2, 0.05);
         ProfileReferenceR1 ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         OnboardAngularPositionServo servo = new OnboardAngularPositionServo(
                 logger, mech, dyn, ref, turningFeedback2);
@@ -156,7 +156,7 @@ public class OnboardAngularPositionServoTest implements Timeless {
                 logger, motor, sensor, 1, -3.1, 3.1);
         FeedbackR1 turningFeedback2 = new PIDFeedback(
                 logger, 10, 0, 0, false, 0.05, 1);
-        ProfileR1 profile = new TrapezoidProfileR1(logger, 2, 2, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(2, 2, 0.05);
         // IncrementalProfile profile = new TrapezoidProfileWPI(2, 2);
         ProfileReferenceR1 ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         OnboardAngularPositionServo servo = new OnboardAngularPositionServo(
@@ -215,7 +215,7 @@ public class OnboardAngularPositionServoTest implements Timeless {
         SimulatedRotaryPositionSensor sensor = new SimulatedRotaryPositionSensor(logger, encoder, 1);
         RotaryMechanism mech = new RotaryMechanism(
                 logger, motor, sensor, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-        final ProfileR1 profile = new TrapezoidProfileR1(logger, 1, 1, 0.05);
+        final ProfileR1 profile = new TrapezoidProfileR1(1, 1, 0.05);
         final ProfileReferenceR1 ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         final FeedbackR1 turningFeedback2 = new PIDFeedback(
                 logger, 10, 0, 0, false, 0.05, 1);
@@ -254,7 +254,7 @@ public class OnboardAngularPositionServoTest implements Timeless {
         SimulatedRotaryPositionSensor sensor = new SimulatedRotaryPositionSensor(logger, encoder, 1);
         RotaryMechanism mech = new RotaryMechanism(
                 logger, motor, sensor, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-        final ProfileR1 profile = new TrapezoidProfileR1(logger, 1, 1, 0.05);
+        final ProfileR1 profile = new TrapezoidProfileR1(1, 1, 0.05);
         final ProfileReferenceR1 ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         // lots of feedback here since there's no setpoint velocity.
         final FeedbackR1 turningFeedback2 = new PIDFeedback(
@@ -324,7 +324,7 @@ public class OnboardAngularPositionServoTest implements Timeless {
         SimulatedRotaryPositionSensor sensor = new SimulatedRotaryPositionSensor(logger, encoder, 1);
         RotaryMechanism mech = new RotaryMechanism(
                 logger, motor, sensor, 1, -3.1, 3.1);
-        final ProfileR1 profile = new TrapezoidProfileR1(logger, 2, 2, 0.05);
+        final ProfileR1 profile = new TrapezoidProfileR1(2, 2, 0.05);
         final ProfileReferenceR1 ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         // lots of feedback here since control velocity is zero
         // note that we don't use "continuous" feedback here

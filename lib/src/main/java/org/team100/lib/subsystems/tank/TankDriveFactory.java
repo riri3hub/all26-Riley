@@ -36,8 +36,8 @@ public class TankDriveFactory {
         LoggerFactory logL = log.name("left");
         LoggerFactory logR = log.name("right");
 
-        Friction friction = new Friction(log, 0.2, 0.2, 0.0, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
+        Friction friction = new Friction(0.2, 0.2, 0.0, 0.5);
+        PIDConstants pid = PIDConstants.makeVelocityPID(0.005);
 
         // ensure the simulated motor can go fast enough.
         double freeSpeedRad_S = maxSpeedM_S * gearRatio / (0.5 * wheelDiaM);

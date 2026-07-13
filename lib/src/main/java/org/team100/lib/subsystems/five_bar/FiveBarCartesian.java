@@ -71,8 +71,8 @@ public class FiveBarCartesian extends SubsystemBase {
         m_log_feasible = m_logger.booleanLogger(Level.COMP, "feasible");
 
         // zeros
-        PIDConstants pid = PIDConstants.makePositionPID(m_logger, 2.0);
-        Friction friction = new Friction(m_logger, 0, 0, 0, 0);
+        PIDConstants pid = PIDConstants.makePositionPID(2.0);
+        Friction friction = new Friction(0, 0, 0, 0);
 
         BareMotor motorP1;
         BareMotor motorP5;

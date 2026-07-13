@@ -77,8 +77,8 @@ public class DualDrumShooterFactory {
     public DualDrumDutyCycleShooter makeDutyCycleShooter() {
         LoggerFactory logL = log.name("left");
         LoggerFactory logR = log.name("right");
-        Friction friction = new Friction(log, 0.0, 0.0, 0.0, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
+        Friction friction = new Friction( 0.0, 0.0, 0.0, 0.5);
+        PIDConstants pid = PIDConstants.makeVelocityPID(0.005);
 
         BareMotor left = getMotor(
                 limit, logL, currentLog, 600, canL,
@@ -96,8 +96,8 @@ public class DualDrumShooterFactory {
         LoggerFactory logL = log.name("left");
         LoggerFactory logR = log.name("right");
 
-        Friction friction = new Friction(log, 0.0, 0.0, 0.0, 0.5);
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.005);
+        Friction friction = new Friction(0.0, 0.0, 0.0, 0.5);
+        PIDConstants pid = PIDConstants.makeVelocityPID(0.005);
 
         // for simulation
         double maxSpeedM_S = 10;

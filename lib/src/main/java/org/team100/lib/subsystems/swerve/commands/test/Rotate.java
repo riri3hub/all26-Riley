@@ -49,7 +49,6 @@ public class Rotate extends MoveAndHold {
         m_swerveKinodynamics = swerveKinodynamics;
         m_target = new Rotation2d(targetAngleRadians);
         m_profile = HolonomicProfileFactory.trapezoidal(
-                m_log.name("profile"),
                 m_swerveKinodynamics.getMaxDriveVelocityM_S(),
                 m_swerveKinodynamics.getMaxDriveAccelerationM_S2(),
                 0.01,

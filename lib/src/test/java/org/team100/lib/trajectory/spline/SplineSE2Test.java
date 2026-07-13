@@ -14,9 +14,6 @@ import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.GeometryUtil;
 import org.team100.lib.geometry.Metrics;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamicsFactory;
 import org.team100.lib.testing.Timeless;
@@ -42,7 +39,6 @@ import edu.wpi.first.math.numbers.N2;
 class SplineSE2Test implements Timeless {
     private static final boolean DEBUG = false;
     private static final double DELTA = 0.001;
-    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testCurvature() {
@@ -471,7 +467,7 @@ class SplineSE2Test implements Timeless {
         PathSE2 path = pathFactory.get(splines);
         if (DEBUG)
             System.out.printf("path %s\n", path);
-        List<TimingConstraint> constraints = List.of(new ConstantConstraint(logger, 1, 1));
+        List<TimingConstraint> constraints = List.of(new ConstantConstraint(1, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         TrajectorySE2 traj = trajectoryFactory.fromPath(path, 0, 0);
         if (DEBUG)
@@ -523,11 +519,11 @@ class SplineSE2Test implements Timeless {
 
         // if we enter a circle at the capsize velocity, we should continue at that same
         // speed.
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forRealisticTest();
         // centripetal accel is 8.166 m/s^2
         assertEquals(8.166666, limits.getMaxCapsizeAccelM_S2(), 1e-6);
         List<TimingConstraint> constraints = List.of(
-                new CapsizeAccelerationConstraint(logger, limits, 1.0));
+                new CapsizeAccelerationConstraint(limits, 1.0));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         // speed
         // a = v^2/r so v = sqrt(ar) = 2.858

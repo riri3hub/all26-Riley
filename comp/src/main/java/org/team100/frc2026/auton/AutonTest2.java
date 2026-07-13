@@ -45,17 +45,17 @@ public class AutonTest2 implements AnnotatedCommand {
         log = parent.name(name());
         this.controller = controller;
         this.machinery = machinery;
-        constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
+        constraints = new TimingConstraintFactory(kinodynamics).auto();
         double maxBumpVelocity = 1.6;
         List<TimingConstraint> new_constraints = new ArrayList<>(constraints);
         VelocityLimitRegionConstraint slow_bump_zone = new VelocityLimitRegionConstraint(
-                log, BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
+                BumpZones.BLUE_BUMP_LEFT, maxBumpVelocity);
         VelocityLimitRegionConstraint slow_bump_zone2 = new VelocityLimitRegionConstraint(
-                log, BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
+                BumpZones.BLUE_BUMP_RIGHT, maxBumpVelocity);
         VelocityLimitRegionConstraint slow_bump_zone3 = new VelocityLimitRegionConstraint(
-                log, BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
+                BumpZones.RED_BUMP_LEFT, maxBumpVelocity);
         VelocityLimitRegionConstraint slow_bump_zone4 = new VelocityLimitRegionConstraint(
-                log, BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
+                BumpZones.RED_BUMP_RIGHT, maxBumpVelocity);
         new_constraints.add(slow_bump_zone);
         new_constraints.add(slow_bump_zone2);
         new_constraints.add(slow_bump_zone3);

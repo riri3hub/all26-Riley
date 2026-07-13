@@ -4,9 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.trajectory.path.PathSE2Point;
 
@@ -16,12 +13,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 public class DiamondConstraintTest implements Timeless {
     private static final double DELTA = 0.001;
-    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testSquare() {
         // here the two speeds are the same
-        DiamondConstraint c = new DiamondConstraint(logger, 1, 1, 4);
+        DiamondConstraint c = new DiamondConstraint(1, 1, 4);
         PathSE2Point state = new PathSE2Point(
                 WaypointSE2.irrotational(
                         new Pose2d(0, 0, new Rotation2d(0)), 0, 1.2),
@@ -44,7 +40,7 @@ public class DiamondConstraintTest implements Timeless {
 
     @Test
     void testVelocity() {
-        DiamondConstraint c = new DiamondConstraint(logger, 2, 3, 4);
+        DiamondConstraint c = new DiamondConstraint(2, 3, 4);
         PathSE2Point state = new PathSE2Point(
                 WaypointSE2.irrotational(
                         new Pose2d(0, 0, new Rotation2d(0)), 0, 1.2),

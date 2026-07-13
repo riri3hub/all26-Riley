@@ -1,16 +1,14 @@
 package org.team100.lib.trajectory.constraint;
 
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.trajectory.path.PathSE2Point;
-import org.team100.lib.tuning.Mutable;
 
 /**
  * Velocity limit based on curvature and the capsize limit (scaled).
  */
 public class CapsizeAccelerationConstraint implements TimingConstraint {
     private static final boolean DEBUG = false;
-    private final Mutable m_scale;
+    private final double m_scale;
     private final double m_maxCentripetalAccel;
     private final double m_maxDecel;
 
@@ -24,24 +22,20 @@ public class CapsizeAccelerationConstraint implements TimingConstraint {
      *               the effect of steering lag.
      */
     public CapsizeAccelerationConstraint(
-            LoggerFactory parent,
             SwerveKinodynamics limits,
             double scale) {
-        LoggerFactory log = parent.type(this);
-        m_scale = new Mutable(log, "scale", scale);
+        m_scale = scale;
         m_maxCentripetalAccel = limits.getMaxCapsizeAccelM_S2();
         m_maxDecel = -limits.getMaxDriveDecelerationM_S2();
     }
 
     /**
-     * @param parent
      * @param centripetal
      * @param decel       Used when we're going too fast, to try to slow down. If
      *                    this is active, there's something wrong.
      */
-    public CapsizeAccelerationConstraint(LoggerFactory parent, double centripetal, double decel) {
-        LoggerFactory log = parent.type(this);
-        m_scale = new Mutable(log, "scale", 1);
+    public CapsizeAccelerationConstraint(double centripetal, double decel) {
+        m_scale = 1;
         m_maxCentripetalAccel = centripetal;
         m_maxDecel = -decel;
     }
@@ -57,7 +51,7 @@ public class CapsizeAccelerationConstraint implements TimingConstraint {
     public double maxV(PathSE2Point point) {
         double radius = 1 / Math.abs(point.k());
         // abs is used here to make sure sqrt is happy.
-        double maxV = Math.sqrt(Math.abs(m_maxCentripetalAccel * m_scale.getAsDouble() * radius));
+        double maxV = Math.sqrt(Math.abs(m_maxCentripetalAccel * m_scale * radius));
         if (DEBUG)
             System.out.printf("maxV %f\n", maxV);
         return maxV;
@@ -83,7 +77,7 @@ public class CapsizeAccelerationConstraint implements TimingConstraint {
         if (alongsq < 0) {
             if (DEBUG)
                 System.out.println("too fast for the curvature, slowing down is ok");
-            return m_maxDecel * m_scale.getAsDouble();
+            return m_maxDecel * m_scale;
         }
         double maxD = -Math.sqrt(alongsq);
         if (DEBUG)
@@ -108,7 +102,7 @@ public class CapsizeAccelerationConstraint implements TimingConstraint {
         if (DEBUG)
             System.out.printf("radius %f velocity %f actual centripetal accel %f\n",
                     radius, velocity, actualCentripetalAccel);
-        return m_maxCentripetalAccel * m_scale.getAsDouble() * m_maxCentripetalAccel * m_scale.getAsDouble()
+        return m_maxCentripetalAccel * m_scale * m_maxCentripetalAccel * m_scale
                 - actualCentripetalAccel * actualCentripetalAccel;
     }
 }

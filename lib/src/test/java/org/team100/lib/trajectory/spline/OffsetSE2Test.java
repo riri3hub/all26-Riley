@@ -7,9 +7,6 @@ import org.jfree.data.xy.VectorSeries;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.trajectory.TrajectorySE2;
 import org.team100.lib.trajectory.TrajectorySE2Factory;
 import org.team100.lib.trajectory.TrajectorySE2ToVectorSeries;
@@ -25,7 +22,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 public class OffsetSE2Test {
-    private static final LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
 
     /** Render spline and offset spline */
     @Test
@@ -195,7 +191,7 @@ public class OffsetSE2Test {
         PathSE2 toolpointPath = pathFactory.get(List.of(toolpoint));
         PathSE2 offsetPath = pathFactory.get(List.of(offset));
 
-        List<TimingConstraint> constraints = List.of(new ConstantConstraint(log, 1, 1));
+        List<TimingConstraint> constraints = List.of(new ConstantConstraint(1, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         TrajectorySE2 toolpointTrajectory = trajectoryFactory.fromPath(toolpointPath, 0, 0);
         TrajectorySE2 offsetTrajectory = trajectoryFactory.fromPath(offsetPath, 0, 0);
@@ -246,7 +242,7 @@ public class OffsetSE2Test {
         PathSE2 toolpointPath = pathFactory.get(toolpoint);
         PathSE2 offsetPath = pathFactory.get(offset);
 
-        List<TimingConstraint> constraints = List.of(new ConstantConstraint(log, 1, 1));
+        List<TimingConstraint> constraints = List.of(new ConstantConstraint(1, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         TrajectorySE2 toolpointTrajectory = trajectoryFactory.fromPath(toolpointPath, 0, 0);
         TrajectorySE2 offsetTrajectory = trajectoryFactory.fromPath(offsetPath, 0, 0);

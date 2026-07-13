@@ -5,9 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.state.ModelR1;
 import org.team100.lib.state.ModelSE2;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
@@ -21,10 +18,9 @@ import org.team100.lib.uncertainty.VariableR1;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 class SwerveStateTest implements Timeless {
-    private final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     // this is a 0.5 m square.
-    SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest(logger);
+    SwerveKinodynamics kinodynamics = SwerveKinodynamicsFactory.forTest();
 
     @Test
     void testInterp0() {

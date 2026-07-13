@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.team100.lib.coherence.Cache;
 import org.team100.lib.coherence.Takt;
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.tuning.Mutable;
 
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.wpilibj.simulation.DriverStationSim;
@@ -37,8 +36,6 @@ public interface Timeless {
         DriverStationSim.setEnabled(true);
         DriverStationSim.notifyNewData();
 
-        // Avoid mixing mutable values between tests.
-        Mutable.unpublishAll();
         try {
             // wait for CTRE threads
             Thread.sleep(10);

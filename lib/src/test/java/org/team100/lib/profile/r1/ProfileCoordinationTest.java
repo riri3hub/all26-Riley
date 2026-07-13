@@ -3,9 +3,6 @@ package org.team100.lib.profile.r1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
 import org.team100.lib.testing.Timeless;
@@ -30,7 +27,6 @@ class ProfileCoordinationTest implements Timeless {
     private static final double PROFILE_TOLERANCE = 0.01;
     private static final double DELTA = 0.001;
     private static final double DT = 0.02;
-    private final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     /**
      * Verify that the profile times are what we think they should be:
@@ -44,8 +40,8 @@ class ProfileCoordinationTest implements Timeless {
         final int maxAccel = 1;
         final double tolerance = 0.01;
         // two profiles with the same parameters
-        TrapezoidProfileR1 p1 = new TrapezoidProfileR1(logger, maxVel, maxAccel, tolerance);
-        TrapezoidProfileR1 p2 = new TrapezoidProfileR1(logger, maxVel, maxAccel, tolerance);
+        TrapezoidProfileR1 p1 = new TrapezoidProfileR1(maxVel, maxAccel, tolerance);
+        TrapezoidProfileR1 p2 = new TrapezoidProfileR1(maxVel, maxAccel, tolerance);
         // initial state at the origin at rest
         ModelR1 i1 = new ModelR1(0, 0);
         ModelR1 i2 = new ModelR1(0, 0);
@@ -168,8 +164,8 @@ class ProfileCoordinationTest implements Timeless {
         final int maxAccel = 1;
         final double tolerance = 0.01;
         // two profiles with the same parameters
-        TrapezoidProfileR1 p1 = new TrapezoidProfileR1(logger, maxVel, maxAccel, tolerance);
-        TrapezoidProfileR1 p2 = new TrapezoidProfileR1(logger, maxVel, maxAccel, tolerance);
+        TrapezoidProfileR1 p1 = new TrapezoidProfileR1(maxVel, maxAccel, tolerance);
+        TrapezoidProfileR1 p2 = new TrapezoidProfileR1(maxVel, maxAccel, tolerance);
         // initial state at the origin at rest
         ModelR1 i1 = new ModelR1(0, 0);
         ModelR1 i2 = new ModelR1(0, 0);
@@ -212,8 +208,8 @@ class ProfileCoordinationTest implements Timeless {
         final int maxAccel = 1;
         final double tolerance = 0.01;
         // default x and y profiles
-        TrapezoidProfileR1 px = new TrapezoidProfileR1(logger, maxVel, maxAccel, tolerance);
-        TrapezoidProfileR1 py = new TrapezoidProfileR1(logger, maxVel, maxAccel, tolerance);
+        TrapezoidProfileR1 px = new TrapezoidProfileR1(maxVel, maxAccel, tolerance);
+        TrapezoidProfileR1 py = new TrapezoidProfileR1(maxVel, maxAccel, tolerance);
         // initial x state is moving fast
         ControlR1 ix = new ControlR1(0, 1);
         // initial y state is stationary

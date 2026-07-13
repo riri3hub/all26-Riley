@@ -43,7 +43,7 @@ public class LeftSequenceExample implements AnnotatedCommand {
         log = parent.name(name());
         this.controller = controller;
         this.machinery = machinery;
-        constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
+        constraints = new TimingConstraintFactory(kinodynamics).auto();
         trajectoryFactory = new TrajectorySE2Factory(constraints);
         pathFactory = new PathSE2Factory();
         planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

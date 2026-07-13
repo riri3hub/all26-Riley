@@ -31,8 +31,8 @@ public class ClimberIntake extends SubsystemBase {
                         log, currentLog,
                         canID, NeutralMode100.COAST, MotorPhase.REVERSE,
                         new CurrentLimit(20, 20),
-                        new Friction(log, 0.26, 0.26, 0.006, 0.5),
-                        PIDConstants.zero(log));
+                        new Friction(0.26, 0.26, 0.006, 0.5),
+                        PIDConstants.zero());
             }
             default -> {
                 m_motor = new LazySimulatedBareMotor(

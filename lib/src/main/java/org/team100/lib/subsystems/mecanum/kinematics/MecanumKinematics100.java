@@ -1,8 +1,5 @@
 package org.team100.lib.subsystems.mecanum.kinematics;
 
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.tuning.Mutable;
-
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -24,27 +21,26 @@ public class MecanumKinematics100 {
     }
 
     private final MecanumDriveKinematics m_kinematics;
-    private final Mutable m_kx;
-    private final Mutable m_ky;
-    private final Mutable m_ktheta;
+    private final double m_kx;
+    private final double m_ky;
+    private final double m_ktheta;
 
     public MecanumKinematics100(
-            LoggerFactory parent, Slip slip,
+            Slip slip,
             Translation2d fl, Translation2d fr,
             Translation2d rl, Translation2d rr) {
         m_kinematics = new MecanumDriveKinematics(fl, fr, rl, rr);
-        LoggerFactory log = parent.type(this);
-        m_kx = new Mutable(log, "Slip kx", slip.kx);
-        m_ky = new Mutable(log, "Slip ky", slip.ky);
-        m_ktheta = new Mutable(log, "Slip ktheta", slip.ktheta);
+        m_kx = slip.kx;
+        m_ky = slip.ky;
+        m_ktheta = slip.ktheta;
     }
 
     public MecanumDriveWheelSpeeds toWheelSpeeds(ChassisSpeeds actual) {
         // Slipping wheels need to go faster than the actual speed.
         ChassisSpeeds slipping = new ChassisSpeeds(
-                m_kx.getAsDouble() * actual.vxMetersPerSecond,
-                m_ky.getAsDouble() * actual.vyMetersPerSecond,
-                m_ktheta.getAsDouble() * actual.omegaRadiansPerSecond);
+                m_kx * actual.vxMetersPerSecond,
+                m_ky * actual.vyMetersPerSecond,
+                m_ktheta * actual.omegaRadiansPerSecond);
         return m_kinematics.toWheelSpeeds(slipping);
     }
 
@@ -52,9 +48,9 @@ public class MecanumKinematics100 {
         Twist2d slipping = m_kinematics.toTwist2d(start, end);
         // Actual speed is slower than the slipping wheels would indicate.
         return new Twist2d(
-                slipping.dx / m_kx.getAsDouble(),
-                slipping.dy / m_ky.getAsDouble(),
-                slipping.dtheta / m_ktheta.getAsDouble());
+                slipping.dx / m_kx,
+                slipping.dy / m_ky,
+                slipping.dtheta / m_ktheta);
     }
 
 }

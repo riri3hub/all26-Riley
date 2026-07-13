@@ -23,7 +23,7 @@ class LinearVelocityServoTest {
     @Test
     void testNoReset() {
         PDynamics dyn = new PDynamics(0);
-        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         MockBareMotor driveMotor = new MockBareMotor(friction);
         MockIncrementalBareEncoder driveEncoder = new MockIncrementalBareEncoder();
         LinearMechanism mech = new LinearMechanism(logger,
@@ -40,7 +40,7 @@ class LinearVelocityServoTest {
     @Test
     void testSimple() {
         PDynamics dyn = new PDynamics(0);
-        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         MockBareMotor driveMotor = new MockBareMotor(friction);
         MockIncrementalBareEncoder driveEncoder = new MockIncrementalBareEncoder();
         LinearMechanism mech = new LinearMechanism(logger,

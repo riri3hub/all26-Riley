@@ -67,8 +67,6 @@ for finding the zero of a function.
   * A fundamental robot navigation task is to identify targets to drive to.  The `lib.targeting` package turns camera observations into field-relative targets.
 * [trajectory](trajectory/README.md)
   * A trajectory is a path based on splines, with a precalculated schedule meeting timing constraints.  Trajectories are good for paths that require curves around known obstacles.  Simple trajectories are not *that* time-consuming to create, so can be used on-the-fly in some cases.
-* [tuning](tuning/README.md)
-  * Adjust constants on the fly.
 * [util](util/README.md)
   * Small things that didn't fit anywhere else
 * [visualization](visualization/README.md)

@@ -56,7 +56,7 @@ public class Fixture {
         logger = new TestLoggerFactory(new TestPrimitiveLogger());
         TotalCurrentLog currentLog = new TotalCurrentLog(logger);
         fieldLogger = new TestLoggerFactory(new TestPrimitiveLogger());
-        swerveKinodynamics = SwerveKinodynamicsFactory.forTest(logger);
+        swerveKinodynamics = SwerveKinodynamicsFactory.forTest();
         // uses simulated modules
         collection = SwerveModuleCollection.get(
                 logger, currentLog, new CurrentLimit(10, 20), new CurrentLimit(10, 20), swerveKinodynamics);

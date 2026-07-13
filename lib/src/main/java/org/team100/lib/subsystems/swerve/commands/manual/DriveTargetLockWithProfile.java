@@ -110,7 +110,6 @@ public class DriveTargetLockWithProfile extends Command {
         m_target = target;
         m_thetaController = thetaController;
         m_profile = new TrapezoidProfileR1(
-                log,
                 swerveKinodynamics.getMaxAngleSpeedRad_S() * ROTATION_SPEED,
                 swerveKinodynamics.getMaxAngleAccelRad_S2() * ROTATION_SPEED,
                 0.01);

@@ -3,7 +3,6 @@ package org.team100.lib.profile.r1;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
-import org.team100.lib.tuning.Mutable;
 import org.team100.lib.util.Math100;
 
 import edu.wpi.first.math.MathUtil;
@@ -46,14 +45,14 @@ public class CompleteProfileR1 implements ProfileR1 {
     private static final double FAR_AWAY = 1000;
 
     private final LoggerFactory m_log;
-    private final Mutable m_maxV;
-    private final Mutable m_maxAUnscaled;
-    private final Mutable m_maxDUnscaled;
-    private final Mutable m_stallAUnscaled;
-    private final Mutable m_takeoffJ;
-    private final Mutable m_landingJ;
+    private final double m_maxV;
+    private final double m_maxAUnscaled;
+    private final double m_maxDUnscaled;
+    private final double m_stallAUnscaled;
+    private final double m_takeoffJ;
+    private final double m_landingJ;
     private final double m_scale;
-    private final Mutable m_tolerance;
+    private final double m_tolerance;
     final InterpolatingTreeMap<Double, ControlR1> m_byDistance;
 
     /**
@@ -88,21 +87,21 @@ public class CompleteProfileR1 implements ProfileR1 {
         if (landingJ < 0)
             throw new IllegalArgumentException("landing J may not be positive");
         m_log = log;
-        m_maxV = new Mutable(log, "maxV", maxV, this::update);
-        m_maxAUnscaled = new Mutable(log, "maxA", maxA, this::update);
-        m_maxDUnscaled = new Mutable(log, "maxD", maxD, this::update);
-        m_stallAUnscaled = new Mutable(log, "stallA", stallA, this::update);
-        m_takeoffJ = new Mutable(log, "takeoffJ", takeoffJ, this::update);
-        m_landingJ = new Mutable(log, "landingJ", landingJ, this::update);
+        m_maxV =  maxV;
+        m_maxAUnscaled =  maxA;
+        m_maxDUnscaled =  maxD;
+        m_stallAUnscaled =  stallA;
+        m_takeoffJ =  takeoffJ;
+        m_landingJ =  landingJ;
         m_scale = 1.0;
-        m_tolerance = new Mutable(log, "tolerance", tolerance, this::update);
+        m_tolerance =  tolerance;
         m_byDistance = new InterpolatingTreeMap<>(InverseInterpolator.forDouble(), ControlR1::interpolate);
         init();
     }
 
     public CompleteProfileR1(
-            LoggerFactory log, Mutable maxV, Mutable maxA, Mutable maxD, Mutable stallA,
-            Mutable takeoffJ, Mutable landingJ, double scale, Mutable tolerance) {
+            LoggerFactory log, double maxV, double maxA, double maxD, double stallA,
+            double takeoffJ, double landingJ, double scale, double tolerance) {
         m_log = log;
         m_maxV = maxV;
         m_maxAUnscaled = maxA;
@@ -121,8 +120,7 @@ public class CompleteProfileR1 implements ProfileR1 {
     }
 
     /**
-     * Compute the goal path. This is done on instantiation and also anytime that
-     * any of the Mutables change.
+     * Compute the goal path. This is done on instantiation.
      */
     void init() {
         m_byDistance.clear();
@@ -130,39 +128,39 @@ public class CompleteProfileR1 implements ProfileR1 {
         ControlR1 control = new ControlR1();
         put(0.0, control);
         // Far-away points so that the interpolator always yields maxV.
-        put(0.0, new ControlR1(-FAR_AWAY, m_maxV.getAsDouble(), 0));
-        put(0.0, new ControlR1(FAR_AWAY, -m_maxV.getAsDouble(), 0));
+        put(0.0, new ControlR1(-FAR_AWAY, m_maxV, 0));
+        put(0.0, new ControlR1(FAR_AWAY, -m_maxV, 0));
         // control from the left, so deceleration, walking back in time
         // t is just for debugging
         double t = 0;
         for (int i = 1; i < 1000; ++i) {
-            if (MathUtil.isNear(control.v(), m_maxV.getAsDouble(), m_tolerance.getAsDouble())) {
+            if (MathUtil.isNear(control.v(), m_maxV, m_tolerance)) {
                 // we're already cruising. keep cruising.
                 control = new ControlR1(
-                        control.x() - m_maxV.getAsDouble() * DT,
-                        m_maxV.getAsDouble(),
+                        control.x() - m_maxV * DT,
+                        m_maxV,
                         0);
                 t += DT;
                 put(t, control);
             } else {
                 double jerkLimitedA = jerkLimitedAccel(control);
                 double nextV = control.v() - jerkLimitedA * DT;
-                if (nextV > m_maxV.getAsDouble()) {
+                if (nextV > m_maxV) {
                     // maxV is achieved within DT
                     // how long does it take to get there?
-                    double dt = -1.0 * (m_maxV.getAsDouble() - control.v()) / jerkLimitedA;
+                    double dt = -1.0 * (m_maxV - control.v()) / jerkLimitedA;
                     t += dt;
                     // this should be exactly at the corner.
                     control = new ControlR1(
                             control.x() - control.v() * dt + 0.5 * jerkLimitedA * dt * dt,
-                            m_maxV.getAsDouble(),
+                            m_maxV,
                             jerkLimitedA);
                     put(t, control);
                     // this is zero accel, epsilon away, so that the interpolator doesn't try to
                     // match the full-accel at the corner.
                     ControlR1 corner = new ControlR1(
                             control.x() - 1e-3,
-                            m_maxV.getAsDouble(),
+                            m_maxV,
                             0);
                     put(t, corner);
                     // the "far away" points should take care of the rest.
@@ -187,7 +185,7 @@ public class CompleteProfileR1 implements ProfileR1 {
 
         // Negative togo => setpoint is to the left.
         final double togo = setpoint.x() - goal.x();
-        if (MathUtil.isNear(0, togo, m_tolerance.getAsDouble())) {
+        if (MathUtil.isNear(0, togo, m_tolerance)) {
             // Within tolerance of goal
             return goal.control();
         }
@@ -208,12 +206,12 @@ public class CompleteProfileR1 implements ProfileR1 {
                     System.out.println("We're moving the wrong way (left), so brake.");
                 return control(dt, setpoint, goal, togo, 1.0, getScaledD());
             }
-            if (setpoint.v() + m_tolerance.getAsDouble() < lerp.v()) {
+            if (setpoint.v() + m_tolerance < lerp.v()) {
                 if (DEBUG)
                     System.out.println("Setpoint is below the goal path, so push right.");
                 return control(dt, setpoint, goal, togo, 1.0, maxA);
             }
-            if (setpoint.v() - m_tolerance.getAsDouble() < lerp.v()) {
+            if (setpoint.v() - m_tolerance < lerp.v()) {
                 if (DEBUG)
                     System.out.println("Setpoint is within tolerance of the goal path.");
                 return goalPath(dt, setpoint, goal, togo, lerp.a());
@@ -229,12 +227,12 @@ public class CompleteProfileR1 implements ProfileR1 {
                     System.out.println("We're moving the wrong way (right), so brake.");
                 return control(dt, setpoint, goal, togo, -1.0, getScaledD());
             }
-            if (setpoint.v() - m_tolerance.getAsDouble() > lerp.v()) {
+            if (setpoint.v() - m_tolerance > lerp.v()) {
                 if (DEBUG)
                     System.out.println("Setpoint is above the goal path, so push left.");
                 return control(dt, setpoint, goal, togo, -1.0, maxA);
             }
-            if (setpoint.v() + m_tolerance.getAsDouble() > lerp.v()) {
+            if (setpoint.v() + m_tolerance > lerp.v()) {
                 if (DEBUG)
                     System.out.println("Setpoint is within tolerance of the goal path.");
                 return goalPath(dt, setpoint, goal, togo, lerp.a());
@@ -254,15 +252,15 @@ public class CompleteProfileR1 implements ProfileR1 {
     }
 
     private double getScaledA() {
-        return m_scale * m_maxAUnscaled.getAsDouble();
+        return m_scale * m_maxAUnscaled;
     }
 
     private double getScaledD() {
-        return m_scale * m_maxDUnscaled.getAsDouble();
+        return m_scale * m_maxDUnscaled;
     }
 
     private double getScaledStall() {
-        return m_scale * m_stallAUnscaled.getAsDouble();
+        return m_scale * m_stallAUnscaled;
     }
 
     ///////////////////////////////////////
@@ -305,11 +303,11 @@ public class CompleteProfileR1 implements ProfileR1 {
      * Returns a positive number.
      */
     double accel(double dt, ControlR1 setpoint) {
-        double speedFraction = Math100.limit(Math.abs(setpoint.v()) / m_maxV.getAsDouble(), 0, 1);
+        double speedFraction = Math100.limit(Math.abs(setpoint.v()) / m_maxV, 0, 1);
         double backEmfLimit = 1 - speedFraction;
         double backEmfLimitedAcceleration = backEmfLimit * getScaledStall();
         double currentLimitedAcceleration = getScaledA();
-        double jerkLimitedAcceleration = Math.abs(setpoint.a()) + m_takeoffJ.getAsDouble() * dt;
+        double jerkLimitedAcceleration = Math.abs(setpoint.a()) + m_takeoffJ * dt;
 
         if (DEBUG) {
             System.out.printf("fraction %5.2f backEmfLimited %5.2f currentLimited %5.2f jerklimited %5.2f\n",
@@ -340,10 +338,10 @@ public class CompleteProfileR1 implements ProfileR1 {
      * decel. The jerk limit affects the "landing".
      */
     private double jerkLimitedAccel(ControlR1 control) {
-        if (m_landingJ.getAsDouble() < 1e-6) {
+        if (m_landingJ < 1e-6) {
             // zero endJ means no jerk limit
             return -getScaledD();
         }
-        return Math.max(-getScaledD(), control.a() - m_landingJ.getAsDouble() * DT);
+        return Math.max(-getScaledD(), control.a() - m_landingJ * DT);
     }
 }

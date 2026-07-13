@@ -10,9 +10,6 @@ import org.jfree.data.xy.XYSeriesCollection;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.trajectory.constraint.ConstantConstraint;
 import org.team100.lib.trajectory.constraint.TimingConstraint;
 import org.team100.lib.trajectory.constraint.YawRateConstraint;
@@ -28,7 +25,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 /** To visualize the different ways to parameterize a spline. */
 public class ParameterizationTest {
     private static final boolean DEBUG = false;
-    private static final LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testSplineStraight() {
@@ -84,8 +80,8 @@ public class ParameterizationTest {
     @Test
     void testTrajectory() {
         List<TimingConstraint> c = List.of(
-                new ConstantConstraint(log, 2, 0.5),
-                new YawRateConstraint(log, 1, 1));
+                new ConstantConstraint(2, 0.5),
+                new YawRateConstraint(1, 1));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(c);
         PathSE2Factory pathFactory = new PathSE2Factory();
         TrajectorySE2Planner p = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

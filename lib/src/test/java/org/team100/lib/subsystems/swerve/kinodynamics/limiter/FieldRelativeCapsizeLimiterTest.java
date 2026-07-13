@@ -17,7 +17,7 @@ public class FieldRelativeCapsizeLimiterTest implements Timeless {
 
     @Test
     void testScale() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         FieldRelativeCapsizeLimiter limiter = new FieldRelativeCapsizeLimiter(logger, limits);
         assertEquals(8.166, limits.getMaxCapsizeAccelM_S2(), DELTA);
         // below the limit, scale = 1
@@ -33,7 +33,7 @@ public class FieldRelativeCapsizeLimiterTest implements Timeless {
      */
     @Test
     void testUnconstrained() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         FieldRelativeCapsizeLimiter limiter = new FieldRelativeCapsizeLimiter(logger, limits);
         VelocitySE2 result = limiter.apply(
                 new VelocitySE2(0, 0, 0),
@@ -45,7 +45,7 @@ public class FieldRelativeCapsizeLimiterTest implements Timeless {
 
     @Test
     void testInline() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         assertEquals(8.166, limits.getMaxCapsizeAccelM_S2(), DELTA);
         FieldRelativeCapsizeLimiter limiter = new FieldRelativeCapsizeLimiter(logger, limits);
         VelocitySE2 result = limiter.apply(
@@ -65,7 +65,7 @@ public class FieldRelativeCapsizeLimiterTest implements Timeless {
      */
     @Test
     void testConstrained() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forTest();
         assertEquals(8.166, limits.getMaxCapsizeAccelM_S2(), DELTA);
         FieldRelativeCapsizeLimiter limiter = new FieldRelativeCapsizeLimiter(logger, limits);
         VelocitySE2 result = limiter.apply(
@@ -78,7 +78,7 @@ public class FieldRelativeCapsizeLimiterTest implements Timeless {
 
     @Test
     void testLowCentripetal() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.lowCapsize(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.lowCapsize();
         assertEquals(1.225, limits.getMaxCapsizeAccelM_S2(), DELTA);
         FieldRelativeCapsizeLimiter limiter = new FieldRelativeCapsizeLimiter(logger, limits);
         VelocitySE2 result = limiter.apply(
@@ -91,7 +91,7 @@ public class FieldRelativeCapsizeLimiterTest implements Timeless {
 
     @Test
     void testOverspeedCentripetal() {
-        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics limits = SwerveKinodynamicsFactory.forRealisticTest();
         assertEquals(8.166, limits.getMaxCapsizeAccelM_S2(), DELTA);
         FieldRelativeCapsizeLimiter limiter = new FieldRelativeCapsizeLimiter(logger, limits);
         VelocitySE2 result = limiter.apply(

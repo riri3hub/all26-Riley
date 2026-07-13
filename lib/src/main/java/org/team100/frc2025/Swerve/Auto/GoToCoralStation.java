@@ -8,7 +8,6 @@ import org.team100.frc2025.field.FieldConstants2025;
 import org.team100.frc2025.field.FieldConstants2025.CoralStation;
 import org.team100.lib.geometry.DirectionSE2;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
 import org.team100.lib.trajectory.TrajectorySE2;
 import org.team100.lib.trajectory.TrajectorySE2Factory;
@@ -31,13 +30,12 @@ public class GoToCoralStation implements Function<Pose2d, TrajectorySE2> {
     private final TrajectorySE2Planner m_planner;
 
     public GoToCoralStation(
-            LoggerFactory log,
             SwerveKinodynamics kinodynamics,
             CoralStation station,
             double scale) {
         m_station = station;
         m_scale = scale;
-        List<TimingConstraint> constraints = new TimingConstraintFactory(kinodynamics).auto(log.type(this));
+        List<TimingConstraint> constraints = new TimingConstraintFactory(kinodynamics).auto();
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
         PathSE2Factory pathFactory = new PathSE2Factory();
         m_planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);

@@ -37,7 +37,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 /** Show some trajectories from 2025 in a vector series chart. */
 public class TrajectoryGallery {
     LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
-    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest(log);
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
 
     @Test
     void testGoToCoralStation1() {
@@ -94,8 +94,8 @@ public class TrajectoryGallery {
         // homeToL2
         List<TimingConstraint> c = new ArrayList<>();
         // These are known to work, but suboptimal.
-        c.add(new ConstantConstraint(log, 10, 5));
-        c.add(new YawRateConstraint(log, 10, 5));
+        c.add(new ConstantConstraint(10, 5));
+        c.add(new YawRateConstraint(10, 5));
         // This is new
         c.add(new TorqueConstraint(20));
         TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(c);
@@ -111,7 +111,7 @@ public class TrajectoryGallery {
     }
 
     private List<VectorSeries> series(CoralStation coralStation, ReefPoint reefPoint, ScoringLevel scoringLevel) {
-        GoToCoralStation toStation = new GoToCoralStation(log, swerveKinodynamics, coralStation, 0.5);
+        GoToCoralStation toStation = new GoToCoralStation(swerveKinodynamics, coralStation, 0.5);
         // the start is the goal from the previous maneuver
         Pose2d start = FieldConstants2025.makeGoal(scoringLevel, reefPoint);
         TrajectorySE2 trajectory = toStation.apply(start);

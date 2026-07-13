@@ -3,9 +3,6 @@ package org.team100.lib.subsystems.mecanum;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.subsystems.mecanum.kinematics.MecanumKinematics100;
 import org.team100.lib.subsystems.mecanum.kinematics.MecanumKinematics100.Slip;
 import org.team100.lib.testing.Timeless;
@@ -21,7 +18,6 @@ import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
 public class MecanumKinematics100Test implements Timeless{
     private static final boolean DEBUG = false;
     private static final double DELTA = 0.001;
-    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testWPI() {
@@ -113,7 +109,7 @@ public class MecanumKinematics100Test implements Timeless{
     void testUncorrected() {
         // all correction factors 1 => same as above.
         MecanumKinematics100 k = new MecanumKinematics100(
-                logger, new Slip(1, 1, 1),
+                new Slip(1, 1, 1),
                 new Translation2d(0.5, 0.5),
                 new Translation2d(0.5, -0.5),
                 new Translation2d(-0.5, 0.5),
@@ -168,7 +164,7 @@ public class MecanumKinematics100Test implements Timeless{
     void testCorrected() {
         // most likely case: strafing corrected, others 1.
         MecanumKinematics100 k = new MecanumKinematics100(
-                logger, new Slip(1, 1.5, 1),
+                new Slip(1, 1.5, 1),
                 new Translation2d(0.5, 0.5),
                 new Translation2d(0.5, -0.5),
                 new Translation2d(-0.5, 0.5),
@@ -230,7 +226,7 @@ public class MecanumKinematics100Test implements Timeless{
     @Test
     void testCorrectedEnvelope() {
         MecanumKinematics100 k = new MecanumKinematics100(
-                logger, new Slip(1, 1.5, 1),
+                new Slip(1, 1.5, 1),
                 new Translation2d(0.5, 0.5),
                 new Translation2d(0.5, -0.5),
                 new Translation2d(-0.5, 0.5),

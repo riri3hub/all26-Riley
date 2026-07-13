@@ -33,7 +33,7 @@ class AnglePositionServoProfileTest implements Timeless {
 
     public AnglePositionServoProfileTest() {
         RDynamics dyn = new RDynamics(0, 0, 0);
-        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         motor = new MockBareMotor(friction);
         sensor = new MockRotaryPositionSensor();
         RotaryMechanism mech = new RotaryMechanism(
@@ -44,7 +44,7 @@ class AnglePositionServoProfileTest implements Timeless {
                 Double.NEGATIVE_INFINITY,
                 Double.POSITIVE_INFINITY);
         feedback2 = new PIDFeedback(logger, 1, 0, 0, false, 0.05, 1);
-        ProfileR1 profile = new TrapezoidProfileR1(logger, 1, 1, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(1, 1, 0.05);
         ref = new ProfileReferenceR1(logger, () -> profile, 0.05, 0.05);
         servo = new OnboardAngularPositionServo(logger, mech, dyn, ref, feedback2);
         servo.reset();

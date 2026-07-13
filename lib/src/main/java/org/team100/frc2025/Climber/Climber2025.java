@@ -40,7 +40,7 @@ public class Climber2025 extends SubsystemBase {
         LoggerFactory log = parent.type(this);
         // dynamics are unimportant for the climber
         RDynamics dyn = new RDynamics(0, 0, 0);
-        ProfileR1 profile = new TrapezoidProfileR1(log, 1, 2, 0.05);
+        ProfileR1 profile = new TrapezoidProfileR1(1, 2, 0.05);
         ReferenceR1 ref = new ProfileReferenceR1(log, () -> profile, 0.05, 0.05);
         PIDFeedback feedback = new PIDFeedback(log, 5, 0, 0, false, 0.05, 0.1);
 
@@ -49,8 +49,8 @@ public class Climber2025 extends SubsystemBase {
                 Falcon500Motor motor = new Falcon500Motor(
                         log, currentLog, canID, NeutralMode100.BRAKE, MotorPhase.REVERSE,
                         new CurrentLimit(20, 20),
-                        new Friction(log, 0.100, 0.065, 0.0, 0.5),
-                        PIDConstants.makePositionPID(log, 0.2));
+                        new Friction(0.100, 0.065, 0.0, 0.5),
+                        PIDConstants.makePositionPID(0.2));
 
                 double inputOffset = 0.440602;
                 RotaryPositionSensor sensor = new AS5048RotaryPositionSensor(

@@ -42,8 +42,8 @@ public class MecanumDriveFactory {
         LoggerFactory logRL = log.name("rearLeft");
         LoggerFactory logRR = log.name("rearRight");
 
-        PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.01);
-        Friction friction = new Friction(log, 0.5, 0.5, 0.0, 0.5);
+        PIDConstants pid = PIDConstants.makeVelocityPID(0.01);
+        Friction friction = new Friction(0.5, 0.5, 0.0, 0.5);
 
         Gyro gyro = gyro(log, gyroId);
         slip = slip(slip);

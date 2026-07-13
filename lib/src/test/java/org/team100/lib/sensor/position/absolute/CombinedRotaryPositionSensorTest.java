@@ -18,7 +18,7 @@ class CombinedRotaryPositionSensorTest implements Timeless {
 
     @Test
     void testZeroing() {
-        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(friction);
 
         // this is the "correct" value

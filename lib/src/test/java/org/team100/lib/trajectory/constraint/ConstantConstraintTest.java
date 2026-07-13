@@ -4,9 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.WaypointSE2;
-import org.team100.lib.logging.LoggerFactory;
-import org.team100.lib.logging.TestLoggerFactory;
-import org.team100.lib.logging.primitive.TestPrimitiveLogger;
 import org.team100.lib.testing.Timeless;
 import org.team100.lib.trajectory.path.PathSE2Point;
 
@@ -16,11 +13,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 public class ConstantConstraintTest implements Timeless {
     private static final double DELTA = 0.001;
-    private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
     @Test
     void testVelocity() {
-        ConstantConstraint c = new ConstantConstraint(logger, 2, 3);
+        ConstantConstraint c = new ConstantConstraint(2, 3);
         PathSE2Point state = new PathSE2Point(
                 WaypointSE2.irrotational(
                         new Pose2d(0, 0, new Rotation2d(0)), 0, 1.2),
@@ -30,7 +26,7 @@ public class ConstantConstraintTest implements Timeless {
 
     @Test
     void testAccel() {
-        ConstantConstraint c = new ConstantConstraint(logger, 2, 3);
+        ConstantConstraint c = new ConstantConstraint(2, 3);
         PathSE2Point state = new PathSE2Point(
                 WaypointSE2.irrotational(
                         new Pose2d(0, 0, new Rotation2d(0)), 0, 1.2),

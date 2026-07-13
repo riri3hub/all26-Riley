@@ -18,7 +18,7 @@ public class FieldRelativeVelocityLimiterTest implements Timeless {
 
     @Test
     void testDrive() {
-        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest();
         BatterySagSpeedLimit limit = new BatterySagSpeedLimit(logger, k, () -> 12);
         FieldRelativeVelocityLimiter limiter = new FieldRelativeVelocityLimiter(logger, limit);
         assertEquals(5, k.getMaxDriveVelocityM_S(), DELTA);
@@ -31,7 +31,7 @@ public class FieldRelativeVelocityLimiterTest implements Timeless {
 
     @Test
     void testSpin() {
-        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest();
         BatterySagSpeedLimit limit = new BatterySagSpeedLimit(logger, k, () -> 12);
         FieldRelativeVelocityLimiter limiter = new FieldRelativeVelocityLimiter(logger, limit);
         assertEquals(14.142, k.getMaxAngleSpeedRad_S(), DELTA);
@@ -45,7 +45,7 @@ public class FieldRelativeVelocityLimiterTest implements Timeless {
 
     @Test
     void testMotionless() {
-        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest();
         BatterySagSpeedLimit limit = new BatterySagSpeedLimit(logger, k, () -> 12);
         FieldRelativeVelocityLimiter l = new FieldRelativeVelocityLimiter(logger, limit);
         assertEquals(14.142, k.getMaxAngleSpeedRad_S(), DELTA);
@@ -59,7 +59,7 @@ public class FieldRelativeVelocityLimiterTest implements Timeless {
 
     @Test
     void testPreferRotation2() {
-        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest();
         BatterySagSpeedLimit limit = new BatterySagSpeedLimit(logger, k, () -> 12);
         FieldRelativeVelocityLimiter l = new FieldRelativeVelocityLimiter(logger, limit);
         {
@@ -91,7 +91,7 @@ public class FieldRelativeVelocityLimiterTest implements Timeless {
     /** shouldn't allow any movement at 6v. */
     @Test
     void testBrownout() {
-        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest();
         BatterySagSpeedLimit limit = new BatterySagSpeedLimit(logger, k, () -> 6);
         FieldRelativeVelocityLimiter limiter = new FieldRelativeVelocityLimiter(logger, limit);
         VelocitySE2 target = new VelocitySE2(1, 0, 0);
@@ -104,7 +104,7 @@ public class FieldRelativeVelocityLimiterTest implements Timeless {
     /** desaturation should keep the same instantaneous course. */
     @Test
     void testDesaturationCourseInvariant() {
-        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest(logger);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.forRealisticTest();
         BatterySagSpeedLimit limit = new BatterySagSpeedLimit(logger, k, () -> 12);
         FieldRelativeVelocityLimiter l = new FieldRelativeVelocityLimiter(logger, limit);
 
@@ -149,7 +149,7 @@ public class FieldRelativeVelocityLimiterTest implements Timeless {
 
     @Test
     void driveAndSpinLimited() {
-        SwerveKinodynamics k = SwerveKinodynamicsFactory.limiting(logger);
+        SwerveKinodynamics k = SwerveKinodynamicsFactory.limiting();
         BatterySagSpeedLimit limit = new BatterySagSpeedLimit(logger, k, () -> 12);
         FieldRelativeVelocityLimiter limiter = new FieldRelativeVelocityLimiter(logger, limit);
         VelocitySE2 target = new VelocitySE2(5, 0, 25);

@@ -20,7 +20,6 @@ import org.team100.lib.profile.r1.VelocityProfileR1;
 import org.team100.lib.reference.r1.VelocityProfileReferenceR1;
 import org.team100.lib.reference.r1.VelocityReferenceR1;
 import org.team100.lib.servo.OutboardLinearVelocityServo;
-import org.team100.lib.tuning.Mutable;
 import org.team100.lib.util.CanId;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +27,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
     private static final boolean DEBUG = false;
+    private static final double TUNING_SETTING = 0;
+    private static final double TEST_SPEED = 15;
     private static final CanId CAN_ID_1 = new CanId(2);
     private static final CanId CAN_ID_2 = new CanId(5);
     private static final CanId CAN_ID_3 = new CanId(14);
@@ -44,8 +45,6 @@ public class Shooter extends SubsystemBase {
     private final OutboardLinearVelocityServo m_servo2;
     private final OutboardLinearVelocityServo m_servo3;
     private final OutboardLinearVelocityServo m_servo4;
-    private final Mutable m_tuningSetting;
-    private final Mutable TEST_SPEED;
 
     /**
      * @param parent log
@@ -61,8 +60,6 @@ public class Shooter extends SubsystemBase {
         LoggerFactory log3 = log.name("Shooter3");
         LoggerFactory log4 = log.name("Shooter4");
         m_speed = speed;
-        m_tuningSetting = new Mutable(log, "for tuning", 0);
-        TEST_SPEED = new Mutable(log, "Shooter test speed", 15);
 
         // dynamics are actually about inertia, so we find the "effective"
         // dynamics here.
@@ -81,9 +78,9 @@ public class Shooter extends SubsystemBase {
             case TEST_BOARD_B0, COMP_BOT -> {
 
                 // friction test 3/12/262
-                Friction friction = new Friction(log, 0.3, 0.25, 0.0, 0.5);
+                Friction friction = new Friction(0.3, 0.25, 0.0, 0.5);
                 // tuned 3/12/26
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.075);
+                PIDConstants pid = PIDConstants.makeVelocityPID(0.075);
 
                 int averageDepth = 2;
                 int measurementPeriod = 4;
@@ -130,7 +127,7 @@ public class Shooter extends SubsystemBase {
     public Command tune() {
         return startRun(
                 this::reset,
-                () -> setVelocityProfiled(m_tuningSetting.getAsDouble()))
+                () -> setVelocityProfiled(TUNING_SETTING))
                 .withName("Tune Shooter");
     }
 
@@ -149,7 +146,7 @@ public class Shooter extends SubsystemBase {
     public Command testRun() {
         return startRun(
                 this::reset,
-                () -> setVelocityProfiled(TEST_SPEED.getAsDouble()))
+                () -> setVelocityProfiled(TEST_SPEED))
                 .withName("Shooter Test");
     }
 

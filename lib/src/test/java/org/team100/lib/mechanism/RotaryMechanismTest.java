@@ -18,7 +18,7 @@ public class RotaryMechanismTest implements Timeless {
     /** Show that the limits have effect. */
     @Test
     void testLimits() {
-        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(friction);
         MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
         double gearRatio = 1;
@@ -56,7 +56,7 @@ public class RotaryMechanismTest implements Timeless {
     /** Same cases as above, but unlimited */
     @Test
     void testUnlimited() {
-        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(friction);
         MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
         double gearRatio = 1;
@@ -95,7 +95,7 @@ public class RotaryMechanismTest implements Timeless {
     @Test
     void testWrapNearMeasurement() {
         LoggerFactory log = new TestLoggerFactory(new TestPrimitiveLogger());
-        Friction friction = new Friction(logger, 0.100, 0.100, 0.0, 0.1);
+        Friction friction = new Friction(0.100, 0.100, 0.0, 0.1);
         MockBareMotor motor = new MockBareMotor(friction);
         MockRotaryPositionSensor sensor = new MockRotaryPositionSensor();
         RotaryMechanism mech = new RotaryMechanism(

@@ -81,7 +81,7 @@ public class MecanumDrive100 extends SubsystemBase implements VelocitySubsystemS
         Translation2d rl = new Translation2d(-m_wheelbaseM / 2, m_trackWidthM / 2);
         Translation2d rr = new Translation2d(-m_wheelbaseM / 2, -m_trackWidthM / 2);
         m_kinematics = new MecanumKinematics100(
-                log, slip, fl, fr, rl, rr);
+                slip, fl, fr, rl, rr);
         m_dynamics = new MecanumDynamics(m, I, fl, fr, rl, rr);
         m_positions = new MecanumDriveWheelPositions();
         m_input = VelocitySE2.ZERO;

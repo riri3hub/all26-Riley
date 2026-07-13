@@ -1,9 +1,7 @@
 package org.team100.lib.profile.r1;
 
-import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ModelR1;
-import org.team100.lib.tuning.Mutable;
 
 import edu.wpi.first.math.MathUtil;
 
@@ -59,34 +57,24 @@ import edu.wpi.first.math.MathUtil;
  * note: both the wpi and 100 profiles fail to produce useful feedforward when
  * the distance is reachable in one time step, i.e. high accel and velocity
  * limits.
- * 
- * Nov 4 2025: constraints are Mutables.
  */
 public class TrapezoidProfileR1 implements ProfileR1 {
     private static final boolean DEBUG = false;
 
-    private final LoggerFactory m_log;
-    private final Mutable m_maxVelocity;
-    private final Mutable m_maxAccelerationUnscaled;
+    private final double m_maxVelocity;
+    private final double m_maxAccelerationUnscaled;
     private final double m_scale;
-    private final Mutable m_tolerance;
+    private final double m_tolerance;
 
-    /**
-     * Note the logger name here selects the Mutable values, so be sure it's unique,
-     * if you want unique values.
-     */
-    public TrapezoidProfileR1(
-            LoggerFactory log, double maxVel, double maxAccel, double tolerance) {
-        m_log = log;
+
+    public TrapezoidProfileR1(double maxVel, double maxAccel, double tolerance) {
         m_scale = 1;
-        m_maxVelocity = new Mutable(log, "maxVel", maxVel);
-        m_maxAccelerationUnscaled = new Mutable(log, "maxAccel", maxAccel);
-        m_tolerance = new Mutable(log, "tolerance", tolerance);
+        m_maxVelocity = maxVel;
+        m_maxAccelerationUnscaled = maxAccel;
+        m_tolerance = tolerance;
     }
 
-    public TrapezoidProfileR1(
-            LoggerFactory log, Mutable maxVel, Mutable maxAccel, double scale, Mutable tolerance) {
-        m_log = log;
+    public TrapezoidProfileR1(double maxVel, double maxAccel, double scale, double tolerance) {
         m_maxVelocity = maxVel;
         m_maxAccelerationUnscaled = maxAccel;
         m_scale = scale;
@@ -96,7 +84,6 @@ public class TrapezoidProfileR1 implements ProfileR1 {
     @Override
     public TrapezoidProfileR1 scale(double s) {
         return new TrapezoidProfileR1(
-                m_log,
                 m_maxVelocity,
                 m_maxAccelerationUnscaled,
                 s,
@@ -104,7 +91,7 @@ public class TrapezoidProfileR1 implements ProfileR1 {
     }
 
     private double getScaledAccel() {
-        return m_scale * m_maxAccelerationUnscaled.getAsDouble();
+        return m_scale * m_maxAccelerationUnscaled;
     }
 
     /**
@@ -134,13 +121,13 @@ public class TrapezoidProfileR1 implements ProfileR1 {
             System.out.printf("calculateWithETA %5.3f %s %s\n", dt, initialRaw, goalRaw);
         }
         // Too-high initial speed is handled with braking
-        if (initialRaw.v() > m_maxVelocity.getAsDouble()) {
+        if (initialRaw.v() > m_maxVelocity) {
             if (DEBUG) {
                 System.out.printf("positive entry speed too fast, braking %s\n", initialRaw.toString());
             }
             return full(dt, initialRaw, -1);
         }
-        if (initialRaw.v() < -m_maxVelocity.getAsDouble()) {
+        if (initialRaw.v() < -m_maxVelocity) {
             if (DEBUG) {
                 System.out.printf("negative entry speed too fast, braking %s\n", initialRaw.toString());
             }
@@ -148,12 +135,12 @@ public class TrapezoidProfileR1 implements ProfileR1 {
         }
         ControlR1 initial = initialRaw;
         // Too-high goal speed is not allowed
-        if (goalRaw.v() > m_maxVelocity.getAsDouble() || goalRaw.v() < -m_maxVelocity.getAsDouble()) {
+        if (goalRaw.v() > m_maxVelocity || goalRaw.v() < -m_maxVelocity) {
             System.out.println("WARNING: Goal velocity is higher than profile velocity");
         }
         ModelR1 goal = limitVelocity(goalRaw);
 
-        if (goal.control().near(initial, m_tolerance.getAsDouble())) {
+        if (goal.control().near(initial, m_tolerance)) {
             if (DEBUG) {
                 System.out.print("at goal\n");
             }
@@ -225,7 +212,7 @@ public class TrapezoidProfileR1 implements ProfileR1 {
     private ModelR1 limitVelocity(final ModelR1 s) {
         return new ModelR1(
                 s.x(),
-                MathUtil.clamp(s.v(), -m_maxVelocity.getAsDouble(), m_maxVelocity.getAsDouble()));
+                MathUtil.clamp(s.v(), -m_maxVelocity, m_maxVelocity));
     }
 
     private ControlR1 handleIplus(double dt, ControlR1 initial, ModelR1 goal, double timeToSwitch) {
@@ -237,7 +224,7 @@ public class TrapezoidProfileR1 implements ProfileR1 {
             return full(truncateDt(dt, initial, goal), initial, -1);
         }
         // how much time to get to cruise? (remember initial v is positive)
-        double timeToCruise = (m_maxVelocity.getAsDouble() - initial.v()) / getScaledAccel();
+        double timeToCruise = (m_maxVelocity - initial.v()) / getScaledAccel();
 
         if (timeToSwitch < dt && timeToSwitch < timeToCruise) {
             // We Encounter G- during dt, before cruise, so switch.
@@ -253,7 +240,7 @@ public class TrapezoidProfileR1 implements ProfileR1 {
             double x = initial.x()
                     + initial.v() * timeToCruise
                     + 0.5 * getScaledAccel() * Math.pow(timeToCruise, 2);
-            ControlR1 nextState = new ControlR1(x, m_maxVelocity.getAsDouble());
+            ControlR1 nextState = new ControlR1(x, m_maxVelocity);
             return keepCruising(dt - timeToCruise, nextState, goal);
         }
         // We will not encounter any boundary during dt
@@ -288,7 +275,7 @@ public class TrapezoidProfileR1 implements ProfileR1 {
             return full(truncateDt(dt, initial, goal), initial, 1);
         }
         // how much time to get to cruise? (remember initial v is negative)
-        double timeToCruise = (m_maxVelocity.getAsDouble() + initial.v()) / getScaledAccel();
+        double timeToCruise = (m_maxVelocity + initial.v()) / getScaledAccel();
 
         if (timeToSwitch < dt && timeToSwitch < timeToCruise) {
             // We encounter G+ during dt, so switch.
@@ -300,7 +287,7 @@ public class TrapezoidProfileR1 implements ProfileR1 {
             double x = initial.x()
                     + initial.v() * timeToCruise
                     - 0.5 * getScaledAccel() * Math.pow(timeToCruise, 2);
-            ControlR1 nextState = new ControlR1(x, -m_maxVelocity.getAsDouble());
+            ControlR1 nextState = new ControlR1(x, -m_maxVelocity);
             return keepCruisingMinus(dt - timeToCruise, nextState, goal);
         }
         // We will not encounter any boundary during dt, so the resulting state is just
@@ -332,11 +319,11 @@ public class TrapezoidProfileR1 implements ProfileR1 {
             System.out.printf("c_minus %6.3f\n", c_minus);
         }
         // the G- value at current velocity (vmax)
-        double gminus = c_minus - Math.pow(m_maxVelocity.getAsDouble(), 2) / (2 * getScaledAccel());
+        double gminus = c_minus - Math.pow(m_maxVelocity, 2) / (2 * getScaledAccel());
         // distance to go to the G- intersection
         double dc = gminus - initial.x();
         // time to go to the G- intersection
-        double durationToGMinus = dc / m_maxVelocity.getAsDouble();
+        double durationToGMinus = dc / m_maxVelocity;
         if (MathUtil.isNear(0, durationToGMinus, 1e-12)) {
             // we are at the intersection of vmax and G-, so head down G-
             return full(truncateDt(dt, initial, goal), initial, -1);
@@ -349,12 +336,12 @@ public class TrapezoidProfileR1 implements ProfileR1 {
             if (DEBUG) {
                 System.out.printf("tremaining %6.3f\n", tremaining);
             }
-            return calculate(tremaining, new ControlR1(gminus, m_maxVelocity.getAsDouble()), goal);
+            return calculate(tremaining, new ControlR1(gminus, m_maxVelocity), goal);
         }
         // we won't reach G-, so cruise for all of dt.
         return new ControlR1(
-                initial.x() + m_maxVelocity.getAsDouble() * dt,
-                m_maxVelocity.getAsDouble(),
+                initial.x() + m_maxVelocity * dt,
+                m_maxVelocity,
                 0);
     }
 
@@ -362,23 +349,23 @@ public class TrapezoidProfileR1 implements ProfileR1 {
         // We're already at negative cruising speed, which means G+ is next.
         // will we reach it during dt?
         double c_plus = c_plus(goal.control());
-        double gplus = c_plus + Math.pow(m_maxVelocity.getAsDouble(), 2) / (2 * getScaledAccel());
+        double gplus = c_plus + Math.pow(m_maxVelocity, 2) / (2 * getScaledAccel());
         // negative
         double dc = gplus - initial.x();
         // time to go to the G+ intersection
-        double durationToGPlus = dc / -m_maxVelocity.getAsDouble();
+        double durationToGPlus = dc / -m_maxVelocity;
         if (MathUtil.isNear(0, durationToGPlus, 1e-12)) {
             // We're at the intersection of -vmax and G+, so head up G+
             return full(truncateDt(dt, initial, goal), initial, 1);
         }
         if (durationToGPlus < dt) {
             double tremaining = dt - durationToGPlus;
-            return calculate(tremaining, new ControlR1(gplus, -m_maxVelocity.getAsDouble()), goal);
+            return calculate(tremaining, new ControlR1(gplus, -m_maxVelocity), goal);
         }
         // we won't reach G+, so cruise for all of dt
         return new ControlR1(
-                initial.x() - m_maxVelocity.getAsDouble() * dt,
-                -m_maxVelocity.getAsDouble(),
+                initial.x() - m_maxVelocity * dt,
+                -m_maxVelocity,
                 0);
     }
 
@@ -595,7 +582,7 @@ public class TrapezoidProfileR1 implements ProfileR1 {
     }
 
     public double getMaxVelocity() {
-        return m_maxVelocity.getAsDouble();
+        return m_maxVelocity;
     }
 
     public double getMaxAcceleration() {
@@ -603,6 +590,6 @@ public class TrapezoidProfileR1 implements ProfileR1 {
     }
 
     public double getTolerance() {
-        return m_tolerance.getAsDouble();
+        return m_tolerance;
     }
 }

@@ -248,7 +248,6 @@ public class DriveProfiledReefLock extends Command {
         m_log_max_accel.log(() -> maxAccelRad_S2);
 
         return new TrapezoidProfileR1(
-                m_log,
                 maxSpeedRad_S,
                 maxAccelRad_S2,
                 0.01);

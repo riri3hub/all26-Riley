@@ -50,9 +50,9 @@ public class Conveyor extends SubsystemBase {
         switch (Identity.instance) {
             case TEST_BOARD_B0 -> {
                 // friction test 3/12/262
-                Friction friction = new Friction(log, 0.7, 0.7, 0.0, 0.5);
+                Friction friction = new Friction(0.7, 0.7, 0.0, 0.5);
                 // tune 3/12/26
-                PIDConstants pid = PIDConstants.makeVelocityPID(log, 0.08);
+                PIDConstants pid = PIDConstants.makeVelocityPID(0.08);
 
                 m1 = new KrakenX44Motor(
                         log1, currentLog, canID1, NeutralMode100.COAST, MotorPhase.REVERSE,

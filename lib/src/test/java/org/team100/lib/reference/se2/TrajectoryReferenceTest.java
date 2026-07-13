@@ -29,8 +29,8 @@ public class TrajectoryReferenceTest implements Timeless {
     private static final double DELTA = 0.001;
     private static final LoggerFactory logger = new TestLoggerFactory(new TestPrimitiveLogger());
 
-    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest(logger);
-    List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood(logger);
+    SwerveKinodynamics swerveKinodynamics = SwerveKinodynamicsFactory.forRealisticTest();
+    List<TimingConstraint> constraints = new TimingConstraintFactory(swerveKinodynamics).allGood();
     PathSE2Factory pathFactory = new PathSE2Factory();
     TrajectorySE2Factory trajectoryFactory = new TrajectorySE2Factory(constraints);
     TrajectorySE2Planner planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);
