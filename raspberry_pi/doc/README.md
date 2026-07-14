@@ -3,9 +3,10 @@
 "How to" content:
 
 * [Setup your dev environment](setup.md)
+* [Run the code and the tests on your laptop](run_locally.md)
 * [Setup a Raspberry Pi](pi_setup.md)
-* [Run the code and the tests](run.md)
 * [Deploy to the Raspberry Pi](deploy.md)
+* [Use the Raspberry Pi](use.md)
 
 Background:
 

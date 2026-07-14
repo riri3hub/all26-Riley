@@ -4,7 +4,7 @@ How to deploy to the Raspberry Pi.
 
 ## New way
 
-TODO: finish this part.
+See `studies/pi_borg`
 
 ## Old way
 

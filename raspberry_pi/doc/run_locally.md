@@ -1,8 +1,8 @@
-# Run
+# Run Locally
 
 How to run the code and the tests.
 
-# Run locally
+# Run on your laptop
 
 Everything except the camera itself works on your laptop.
 There's a "fake" camera instead, which loads a file from
