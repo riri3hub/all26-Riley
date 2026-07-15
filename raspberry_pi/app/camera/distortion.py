@@ -41,7 +41,7 @@ class Distortion:
                 )
             case Identity.FUNNEL:
                 self._dist = np.array(
-                    [0.01912500689, -0.009503859475, 0.002487117763, -0.0008741780275]
+                    [-0.03226, 0.01730, 0.00105, 0.00284]
                 )   
             #
             # TODO: clean up the entries below
