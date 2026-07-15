@@ -17,19 +17,18 @@ distributions {
 }
 
 remotes {
-    camera30 { host = '10.1.0.30'; user = 'pi'; password = 'raspberry' }
-    camera31 { host = '10.1.0.31'; user = 'pi'; password = 'raspberry' }
-    camera32 { host = '10.1.0.32'; user = 'pi'; password = 'raspberry' }
-    camera33 { host = '10.1.0.33'; user = 'pi'; password = 'raspberry' }
+    camera30 { host = '10.1.0.30'; user = 'pi'; password = 'raspberry'; timeoutSec = 1 }
+    camera31 { host = '10.1.0.31'; user = 'pi'; password = 'raspberry'; timeoutSec = 1 }
+    camera32 { host = '10.1.0.32'; user = 'pi'; password = 'raspberry'; timeoutSec = 1 }
+    camera33 { host = '10.1.0.33'; user = 'pi'; password = 'raspberry'; timeoutSec = 1 }
 }
 
 task deployAll {
     dependsOn distZip
     doLast {
         ssh.run {
-            settings { inParallel = true } 
             session(remotes) {
-                put from: 'runapp.py', into: '/home/pi'
+                put from: file('runapp.py'), into: '/home/pi'
                 put from: distZip.archiveFile.get().asFile, into: '/home/pi'
                 execute 'supervisorctl restart app'
             }

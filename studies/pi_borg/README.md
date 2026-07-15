@@ -27,12 +27,23 @@ For these steps, the ssh password is "raspberry".
 * Move the conf file to the privileged location.
 * Get supervisor to read it.
 ```
-scp supervisord.conf /tmp
+scp supervisord.conf pi@10.1.0.31:/tmp
 ssh pi@10.1.0.30
 sudo apt install supervisor
 sudo mv /tmp/supervisord.conf /etc/supervisor
-supervisorctl update
+sudo systemctl restart supervisor
+supervisorctl status
 ```
+
+If you haven't yet installed the app code, you should see supervisor
+complain that it can't find it:
+
+```
+app                              FATAL     can't find command '/home/pi/venv/bin/python'
+```
+
+At this point, your laptop browser should show the supervisor
+web page at `http://10.1.0.31:9001/`, with the red "fatal" status.
 
 ## Make the zip file
 
@@ -57,7 +68,9 @@ directory full of tests ("tests").
 
 ## Copy the files
 
-Choose the gradle `deployAll` task.
+Using the gradle pane, find the task `pi_borg > Tasks > other > deployAll`
+
+Run the `deployAll` task.
 
 * Gradle copies `runapp.py` to `/home/pi`
 * Gradle copies `app.zip` to `/home/pi`
