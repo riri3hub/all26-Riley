@@ -7,8 +7,6 @@ This is a study of management and deployment of Python to our Raspbery Pi coproc
     * [distribution](https://docs.gradle.org/current/userguide/distribution_plugin.html) to make a zip file
     * [gradle-ssh](https://gradle-ssh-plugin.github.io/docs) to copy the zip to the pi, and to run commands on the pi
 
-There's a [design doc](https://docs.google.com/document/d/15mUhT1vEGO8y0hBersCINBw1t07pDdcYMedGS_gy2Vk/edit?tab=t.0).
-
 The name "borg" references the thing Google uses for deployment and management,
 which works completely differently, but it's a pithy name.
 
@@ -28,7 +26,7 @@ For these steps, the ssh password is "raspberry".
 * Get supervisor to read it.
 ```
 scp supervisord.conf pi@10.1.0.31:/tmp
-ssh pi@10.1.0.30
+ssh pi@10.1.0.31
 sudo apt install supervisor
 sudo mv /tmp/supervisord.conf /etc/supervisor
 sudo systemctl restart supervisor

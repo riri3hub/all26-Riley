@@ -136,7 +136,35 @@ python -m pip install robotpy-cscore
 
 ## Install Supervisord
 
-For now, the supervisor installation is described in `studies/piborg`.
+We use [supervisor](https://supervisord.org/index.html)
+for management: stop, start, and looking at logs.
+
+For these steps, the ssh password is "raspberry".
+
+* Copy the supervisord conf file to the pi.
+* Install supervisord.
+    * Because we want it to run at startup, we use the
+      system package.
+* Move the `supervisord.conf` file to the privileged location.
+* Get supervisor to read it.
+```
+scp supervisor/supervisord.conf pi@10.1.0.31:/tmp
+ssh pi@10.1.0.31
+sudo apt install supervisor
+sudo mv /tmp/supervisord.conf /etc/supervisor
+sudo systemctl restart supervisor
+supervisorctl status
+```
+
+If you haven't yet installed the app code, you should see supervisor
+complain that it can't find it:
+
+```
+app    FATAL    can't find command '/home/pi/env/bin/python'
+```
+
+At this point, your laptop browser should show the supervisor
+web page at `http://10.1.0.31:9001/`, with the red "fatal" status.
 
 ## Troubleshooting
 

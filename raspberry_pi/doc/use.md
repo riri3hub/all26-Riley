@@ -48,11 +48,22 @@ The main camera stream is small (to avoid overloading the network) and annotated
 
 * Use a browser to connect to the camera on port 1181, e.g. `10.1.0.30:1181`
 
-
 ## Look at the undistorted view
 
 The undistorted stream is large, unannotated, and optional.
 
 * In glass, toggle the "undistort_view" value
 * Use a browser to connect to the camera on port 1182, e.g. `10.1.0.30:1182`
-  
+
+## Turn it off
+
+If you simply remove power from the Raspberry Pi, it
+sometimes corrupts is SD card.  To avoid that, you 
+can gracefully shut it down, using `supervisor`.
+
+* Make sure you can see the green LED on the raspberry pi.
+* Use a browser to connect to the camera on port 9001, e.g. `10.1.0.31:9001`
+* Find the supervisor a task called `shutdown`
+* Start the shutdown task.
+* Wait for the raspberry pi LED to turn red (it should be immediate)
+* Remove power.

@@ -11,7 +11,11 @@ Windows 11 seems to come with python 3.11, which is antique.
 
 ## Linux
 
-* Install Ubuntu 26.04 (the only option for WPILib)
+* Install Ubuntu 26.04
+  * This is the only option for WPILib.
+  * At the moment, the 26.04 release is not actually an LTS release
+    (because there's no 26.04.1 release),
+    so you have to get there using the non-LTS path.
 
 ## Vscode
 
