@@ -17,12 +17,16 @@ distributions {
 }
 
 remotes {
-    camera30 { host = '10.1.0.30'; user = 'pi'; password = 'raspberry'; timeoutSec = 1 }
-    camera31 { host = '10.1.0.31'; user = 'pi'; password = 'raspberry'; timeoutSec = 1 }
-    camera32 { host = '10.1.0.32'; user = 'pi'; password = 'raspberry'; timeoutSec = 1 }
-    camera33 { host = '10.1.0.33'; user = 'pi'; password = 'raspberry'; timeoutSec = 1 }
+    camera30 { host = '10.1.0.30'; user = 'pi'; password = 'raspberry' }
+    camera31 { host = '10.1.0.31'; user = 'pi'; password = 'raspberry' }
+    camera32 { host = '10.1.0.32'; user = 'pi'; password = 'raspberry' }
+    camera33 { host = '10.1.0.33'; user = 'pi'; password = 'raspberry' }
 }
 
+ssh.settings {
+    timeoutSec = 1
+    knownHosts = allowAnyHosts
+}
 task 'Deploy Camera Code' { // pretty name for vscode
     group = 'deploy'
     description = 'zip, deploy, and restart all cameras'
