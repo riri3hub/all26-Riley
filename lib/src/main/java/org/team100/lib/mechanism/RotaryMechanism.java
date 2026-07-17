@@ -12,6 +12,7 @@ import org.team100.lib.sensor.position.incremental.IncrementalBareEncoder;
 import org.team100.lib.state.ModelR1;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.filter.LinearFilter;
 
 /**
  * Uses a motor and gears to produce rotational output, e.g. an arm joint.
@@ -35,8 +36,10 @@ public class RotaryMechanism implements Player {
     private final DoubleLogger m_log_velocity;
     private final DoubleLogger m_log_position;
     private final DoubleLogger m_log_desired_position;
+    private final DoubleLogger m_log_filtered_velocity;
+    LinearFilter lowPassFilter = LinearFilter.singlePoleIIR(0.2375, TimedRobot100.LOOP_PERIOD_S);
 
-    /** For computing acceleration. */
+    /** For computing acceleration. *
     private double m_velocity;
 
     /**
@@ -61,6 +64,7 @@ public class RotaryMechanism implements Player {
         m_log_velocity = log.doubleLogger(Level.DEBUG, "velocity (rad_s)");
         m_log_position = log.doubleLogger(Level.DEBUG, "position (rad)");
         m_log_desired_position = log.doubleLogger(Level.DEBUG, "desired position (rad)");
+        m_log_filtered_velocity = log.doubleLogger(Level.DEBUG, "filtered velocity (rad_s)");
     }
 
     /** There is no absolute position sensor in this case. */
@@ -247,14 +251,22 @@ public class RotaryMechanism implements Player {
     }
 
     public void periodic() {
+        /**
+         * The time constant is the minimum frequency to filter out,
+         * and the period is the rate of sampling. Here, both are 50Hz.
+         */
+        // LinearFilter lowPassFilter = LinearFilter.movingAverage(5);
         m_motor.periodic();
         m_sensor.periodic();
         m_log_position.log(() -> getWrappedPositionRad());
         final double velocity = getVelocityRad_S();
         m_log_velocity.log(() -> velocity);
-        double accel = (velocity - m_velocity) / TimedRobot100.LOOP_PERIOD_S;
-        m_velocity = velocity;
+        double filt = lowPassFilter.calculate(velocity);
+        m_log_filtered_velocity.log(() -> filt);
+        double accel = (filt - m_velocity) / TimedRobot100.LOOP_PERIOD_S;
+        m_velocity = filt;
         m_log_accel.log(() -> accel);
+
     }
 
     @Override

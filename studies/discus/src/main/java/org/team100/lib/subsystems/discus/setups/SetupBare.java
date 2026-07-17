@@ -19,7 +19,9 @@ public class SetupBare implements Runnable {
         XboxController controller = new XboxController(0);
         m_discus = new DiscusBare(logger, currentLog);
         m_viz = new ArmVisualization(m_discus::getPosition, "discus", 0);
-        m_discus.setDefaultCommand(m_discus.dutyCycle(
+        // m_discus.setDefaultCommand(m_discus.dutyCycle(
+        //         controller::getLeftX));
+        m_discus.setDefaultCommand(m_discus.voltage(
                 controller::getLeftX));
     }
 
