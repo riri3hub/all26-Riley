@@ -1,5 +1,9 @@
 package org.team100.lib.geometry.prr;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.numbers.N3;
+
 /**
  * Joint configuration for the PRR example.
  * 
@@ -8,7 +12,15 @@ package org.team100.lib.geometry.prr;
  * @param q3 rotation of the second R joint (CCW from the first)
  */
 public record PRRConfig(double q1, double q2, double q3) {
-        /**
+    public static PRRConfig fromVector(Vector<N3> q) {
+        return new PRRConfig(q.get(0), q.get(1), q.get(2));
+    }
+
+    public Vector<N3> toVector() {
+        return VecBuilder.fill(q1, q2, q3);
+    }
+
+    /**
      * Apply the velocity for period dt.
      * 
      * x = x0 + v dt

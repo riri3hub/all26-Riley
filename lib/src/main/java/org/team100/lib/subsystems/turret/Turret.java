@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import org.team100.lib.controller.r1.PIDFeedback;
 import org.team100.lib.dynamics.p.PDynamics;
 import org.team100.lib.dynamics.r.RDynamics;
-import org.team100.lib.geometry.r2.GlobalVelocityR2;
+import org.team100.lib.geometry.r2.VelocityR2;
 import org.team100.lib.geometry.r2.StateR2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -217,7 +217,7 @@ public class Turret extends SubsystemBase {
         Translation2d targetTranslation = targetOpt.get();
         m_log_field_target.log(() -> new double[] {
                 targetTranslation.getX(), targetTranslation.getY(), 0 });
-        StateR2 target = new StateR2(targetTranslation, GlobalVelocityR2.ZERO);
+        StateR2 target = new StateR2(targetTranslation, VelocityR2.ZERO);
         return m_solver.solve(m_state.get(), target);
     }
 

@@ -28,14 +28,14 @@ public class SetupServo implements Runnable {
 
         // These bindings are remembered by the trigger event loop, so we don't need to
         // retain them.
-        new Trigger(controller::getAButton).whileTrue(m_discus.home());
-        new Trigger(controller::getBButton).onTrue(m_discus.zero());
-        new Trigger(controller::getXButton).whileTrue(m_discus.position(() -> 2));
-        new Trigger(controller::getYButton).whileTrue(m_discus.position(() -> -2));
-        new Trigger(controller::getRightBumperButton).whileTrue(m_discus.position(() -> 4));
-        new Trigger(controller::getLeftBumperButton).whileTrue(m_discus.position(() -> -4));
-        new Trigger(controller::getRightStickButton).whileTrue(m_discus.position(() -> 8));
-        new Trigger(controller::getLeftStickButton).whileTrue(m_discus.position(() -> -8));
+        // new Trigger(controller::getAButton).whileTrue(m_discus.home());
+        // new Trigger(controller::getBButton).onTrue(m_discus.zero());
+        new Trigger(controller::getXButton).whileTrue(m_discus.position(() -> 8));
+        new Trigger(controller::getYButton).whileTrue(m_discus.position(() -> -8));
+        new Trigger(controller::getRightBumperButton).whileTrue(m_discus.position(() -> 12));
+        new Trigger(controller::getLeftBumperButton).whileTrue(m_discus.position(() -> -12));
+        new Trigger(controller::getAButton).whileTrue(m_discus.position(() -> 20));
+        new Trigger(controller::getBButton).whileTrue(m_discus.position(() -> -20));
     }
 
     @Override

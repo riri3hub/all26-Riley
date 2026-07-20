@@ -20,9 +20,9 @@ import os
 import sys
 import traceback
 
-if os.path.isfile("app.zip"):
+if os.path.isfile("/home/pi/app.zip"):
     print("using the zip file")
-    sys.path.insert(0, "app.zip")
+    sys.path.insert(0, "/home/pi/app.zip")
 else:
     print("using the local filesystem")
 

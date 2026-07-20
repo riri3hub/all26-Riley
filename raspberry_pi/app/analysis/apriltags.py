@@ -97,9 +97,9 @@ class AprilTags(MonoAnalysis):
             pose: Transform3d = self._estimator.estimate(
                 homography, undistorted_corners
             )
-            blips.append(Blip(servertime, tag.getId(), pose))
+            blips.append(Blip(int(servertime), tag.getId(), pose))
             blips_with_corners.append(
-                BlipWithCorners.make(servertime, tag.getId(), raw_corners, pose)
+                BlipWithCorners.make(int(servertime), tag.getId(), raw_corners, pose)
             )
             if img_display is not None:
                 DisplayUtil.tag(img_display, tag, pose)

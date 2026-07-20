@@ -4,9 +4,8 @@ import java.util.OptionalDouble;
 
 import org.team100.lib.geometry.lynx_arm.LynxArmConfig;
 import org.team100.lib.geometry.lynx_arm.LynxArmPose;
-import org.team100.lib.geometry.rr.TwoDofArmConfig;
-import org.team100.lib.kinematics.rr.AnalyticTwoDofKinematics;
-import org.team100.lib.kinematics.rr.TwoDofKinematics;
+import org.team100.lib.geometry.rr.RRConfig;
+import org.team100.lib.kinematics.rr.RRKinematics;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -21,7 +20,7 @@ public class AnalyticLynxArmKinematics implements LynxArmKinematics {
     private final double m_stickLength;
     private final double m_wristLength;
     private final double m_gripLength;
-    private final TwoDofKinematics twodof;
+    private final RRKinematics twodof;
 
     /** All distances are in meters. */
     private AnalyticLynxArmKinematics(
@@ -35,7 +34,7 @@ public class AnalyticLynxArmKinematics implements LynxArmKinematics {
         m_stickLength = stickLength;
         m_wristLength = wristLength;
         m_gripLength = gripLength;
-        twodof = new AnalyticTwoDofKinematics(boomLength, stickLength);
+        twodof = new RRKinematics(boomLength, stickLength);
     }
 
     public static AnalyticLynxArmKinematics unit() {
@@ -107,6 +106,9 @@ public class AnalyticLynxArmKinematics implements LynxArmKinematics {
      * 
      * Refer to the diagram
      * https://docs.google.com/document/d/1B6vGPtBtnDSOpfzwHBflI8-nn98W9QvmrX78bon8Ajw
+     * 
+     * TODO: this includes fixups for the bad Rotation2d winding behavior which is
+     * fixed in 2027
      */
     @Override
     public LynxArmConfig inverse(LynxArmConfig c, final Pose3d end) {
@@ -132,7 +134,7 @@ public class AnalyticLynxArmKinematics implements LynxArmKinematics {
         Translation2d twoDofEnd = new Translation2d(
                 hypot,
                 twoDofY);
-        TwoDofArmConfig twoDofConfig = twodof.inverse(twoDofEnd);
+        RRConfig twoDofConfig = twodof.inverse(twoDofEnd);
 
         // the 2d coordinates are inverted for convenience, so fix it here.
         boom = -1.0 * twoDofConfig.q1();
@@ -204,7 +206,14 @@ public class AnalyticLynxArmKinematics implements LynxArmKinematics {
             }
         }
 
-        return new LynxArmConfig(swing, boom, stick, wrist, twist);
+        return new LynxArmConfig(
+                swing.isPresent() ? OptionalDouble.of(MathUtil.angleModulus(swing.getAsDouble()))
+                        : OptionalDouble.empty(),
+                MathUtil.angleModulus(boom),
+                MathUtil.angleModulus(stick),
+                MathUtil.angleModulus(wrist),
+                twist.isPresent() ? OptionalDouble.of(MathUtil.angleModulus(twist.getAsDouble()))
+                        : OptionalDouble.empty());
     }
 
     /////////////////////////////////////////////////

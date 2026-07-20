@@ -16,6 +16,17 @@ Important classes here:
 
 The math, in brief:
 
+```math
+\begin{align}
+s_i &= sin(q_i)\\
+c_i &= cos(q_i) \\
+s_{ij} &= sin(q_i + q_j)\\
+c_{ij} &= cos(q_i + q_j)
+\end{align}
+```
+
+## Position
+
 The mechanism position is:
 
 ```math
@@ -53,6 +64,7 @@ J =
 \end{bmatrix}
 \end{equation}
 ```
+## Velocity
 
 So the function for cartesian velocity, $\dot{x}$, can be written:
 
@@ -70,6 +82,8 @@ And the inverse is
 \end{equation}
 ```
 
+## Acceleration
+
 To find the acceleration, differentiate again and apply the product rule:
 
 ```math
@@ -85,8 +99,10 @@ to apply the chain rule
 \begin{equation}
 \dot{J} =
 \begin{bmatrix}
-0 & -l_2c_2\dot{q_2} - l_3c_{23}(\dot{q_2}+\dot{q_3}) & -l_3c_{23}(\dot{q_2}+\dot{q_3}) \\
-0 & -l_2s_2\dot{q_2} - l_3s_{23}(\dot{q_2}+\dot{q_3}) & -l_3s_{23}(\dot{q_2}+\dot{q_3}) \\
+0 & -l_2c_2\dot{q_2} - l_3c_{23}(\dot{q_2}+\dot{q_3}) 
+& -l_3c_{23}(\dot{q_2}+\dot{q_3}) \\
+0 & -l_2s_2\dot{q_2} - l_3s_{23}(\dot{q_2}+\dot{q_3}) 
+& -l_3s_{23}(\dot{q_2}+\dot{q_3}) \\
 0 & 0 & 0
 \end{bmatrix}
 \end{equation}

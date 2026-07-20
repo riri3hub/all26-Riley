@@ -1,14 +1,11 @@
-# pylint: disable=E0401
+# pylint: disable=E0401,R0902
 
 from pprint import pprint
 from typing import Any
-
+from typing import override
 import numpy as np
 from numpy.typing import NDArray
-
 from picamera2 import CompletedRequest, Picamera2  # type: ignore
-from typing import override
-
 from app.camera.camera_protocol import Camera, Request
 from app.camera.capture_timestamp import CaptureTimestamp
 from app.camera.config.config_factory import ConfigFactory
@@ -38,6 +35,7 @@ class RealCamera(Camera):
     """
 
     def __init__(self, identity: Identity) -> None:
+        print("\n*** Camera: RealCamera", flush=True)
         Picamera2.set_logging(Picamera2.INFO)  # type: ignore
         # debug logs with every frame (!)
         # Picamera2.set_logging(Picamera2.DEBUG)  # type: ignore
@@ -85,6 +83,7 @@ class RealCamera(Camera):
         # or AeEnable doesn't do anything!
         self._cam.set_controls(config.controls())  # type:ignore
         self._frame_time = Timer.time_ns()
+        print("\n*** Camera setup complete", flush=True)
 
     @override
     def capture_request(self) -> Request:

@@ -98,9 +98,9 @@ for this work:
      */
     public static Optional<Rotation2d> intercept(
             Translation2d robotPosition,
-            GlobalVelocityR2 robotVelocity,
+            VelocityR2 robotVelocity,
             Translation2d targetPosition,
-            GlobalVelocityR2 targetVelocity,
+            VelocityR2 targetVelocity,
             double muzzleSpeed) {
 
         return Optional.empty();
@@ -114,7 +114,7 @@ require a pencil to work out.
 
 There are some key library classes to use here:
 
-* `GlobalVelocityR2` is a good representation for the 2d
+* `VelocityR2` is a good representation for the 2d
 velocities, and has a convenience method, `dot()` for the dot
 product with other velocities and also with translations.
 * `GeometryUtil.dot()` is also handy for the dot product between

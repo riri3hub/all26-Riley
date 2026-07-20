@@ -373,6 +373,10 @@ public class GeometryUtil {
                 zForwardToXForward(zForward.getRotation()));
     }
 
+    public static Vector<N3> toVec(Pose2d p) {
+        return VecBuilder.fill(p.getX(), p.getY(), p.getRotation().getRadians());
+    }
+
     public static Vector<N3> toVec(Twist2d twist) {
         return VecBuilder.fill(twist.dx, twist.dy, twist.dtheta);
     }
@@ -385,7 +389,11 @@ public class GeometryUtil {
         return VecBuilder.fill(t.getX(), t.getY());
     }
 
-    public static Rotation2d fromVec(Vector<N2> v) {
+    public static Pose2d pose2dFromVec(Vector<N3> v) {
+        return new Pose2d(v.get(0), v.get(1), new Rotation2d(v.get(2)));
+    }
+
+    public static Rotation2d rotation2dFromVec(Vector<N2> v) {
         return new Rotation2d(v.get(0), v.get(1));
     }
 

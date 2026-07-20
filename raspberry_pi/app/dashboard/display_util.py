@@ -7,7 +7,7 @@ from wpimath.geometry import Transform3d
 
 
 FONT = cv2.FONT_HERSHEY_PLAIN
-SCALE = 2
+SCALE = 3
 THICKNESS = 1
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)

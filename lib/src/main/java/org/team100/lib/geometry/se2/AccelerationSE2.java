@@ -1,10 +1,12 @@
 package org.team100.lib.geometry.se2;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 
 /**
@@ -73,6 +75,10 @@ public record AccelerationSE2(double x, double y, double theta) {
 
     public static AccelerationSE2 fromVector(Vector<N3> v) {
         return new AccelerationSE2(v.get(0), v.get(1), v.get(2));
+    }
+
+    public static AccelerationSE2 fromVector(Matrix<N3, N1> v) {
+        return new AccelerationSE2(v.get(0, 0), v.get(1, 0), v.get(2, 0));
     }
 
     public Vector<N3> toVector() {

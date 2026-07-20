@@ -85,9 +85,23 @@ class Blobs(ColorAnalysis):
             mmnts: Moments = cv2.moments(contour)
 
             # reject too small (m00 is in pixels)
-            if mmnts["m00"] < 100:
+            if mmnts["m00"] < 175:
                 continue
 
+            # reject if not round enough
+
+            # Roundness tolerance
+
+            # roundtolo = 0.85
+
+            # perimeter = cv2.arcLength(contour, True) ** 2
+
+            # In a circle, the area is c^2 over 4 pi
+            # fourpi = 4*3.14
+
+            # if cv2.contourArea(contour) < roundtolo * ( perimeter / fourpi):
+                continue
+            
             cX: int = int(mmnts["m10"] / mmnts["m00"])
             cY: int = int(mmnts["m01"] / mmnts["m00"])
 
@@ -120,7 +134,7 @@ class Blobs(ColorAnalysis):
                 final = np.array([1, xNormalized, yNormalized], dtype=np.float64)
                 rotation = Rotation3d(initial=initial, final=final)
 
-                targets.append(Target(servertime, rotation))
+                targets.append(Target(int(servertime), rotation))
                 if img_display is not None:
                     DisplayUtil.note(img_display, c, orig_cX, orig_cY)
 

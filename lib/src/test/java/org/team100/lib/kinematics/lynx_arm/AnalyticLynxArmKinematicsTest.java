@@ -12,6 +12,7 @@ import org.team100.lib.geometry.lynx_arm.LynxArmConfig;
 import org.team100.lib.geometry.lynx_arm.LynxArmPose;
 import org.team100.lib.util.StrUtil;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -396,15 +397,19 @@ public class AnalyticLynxArmKinematicsTest {
 
     void verifyInv(LynxArmConfig expected, LynxArmConfig actual) {
         if (expected.swing().isPresent()) {
-            assertEquals(expected.swing().getAsDouble(), actual.swing().getAsDouble(), DELTA, "inv swing");
+            assertEquals(MathUtil.angleModulus(expected.swing().getAsDouble()),
+                    MathUtil.angleModulus(actual.swing().getAsDouble()), DELTA, "inv swing");
         } else {
             assertTrue(actual.swing().isEmpty(), "inv swing");
         }
-        assertEquals(expected.boom(), actual.boom(), DELTA, "inv boom");
-        assertEquals(expected.stick(), actual.stick(), DELTA, "inv stick");
-        assertEquals(expected.wrist(), actual.wrist(), DELTA, "inv wrist");
+        assertEquals(MathUtil.angleModulus(expected.boom()), MathUtil.angleModulus(actual.boom()), DELTA, "inv boom");
+        assertEquals(MathUtil.angleModulus(expected.stick()), MathUtil.angleModulus(actual.stick()), DELTA,
+                "inv stick");
+        assertEquals(MathUtil.angleModulus(expected.wrist()), MathUtil.angleModulus(actual.wrist()), DELTA,
+                "inv wrist");
         if (expected.twist().isPresent()) {
-            assertEquals(expected.twist().getAsDouble(), actual.twist().getAsDouble(), DELTA, "inv twist");
+            assertEquals(MathUtil.angleModulus(expected.twist().getAsDouble()),
+                    MathUtil.angleModulus(actual.twist().getAsDouble()), DELTA, "inv twist");
         } else {
             assertTrue(actual.twist().isEmpty());
         }

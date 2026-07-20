@@ -3,11 +3,11 @@ package org.team100.lib.targeting;
 import java.util.List;
 import java.util.Optional;
 
-import org.team100.lib.geometry.r2.GlobalVelocityR2;
+import org.team100.lib.geometry.r2.VelocityR2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleLogger;
-import org.team100.lib.logging.LoggerFactory.GlobalVelocityR2Logger;
+import org.team100.lib.logging.LoggerFactory.VelocityR2Logger;
 import org.team100.lib.logging.LoggerFactory.Translation2dLogger;
 import org.team100.lib.util.Math100;
 
@@ -19,13 +19,13 @@ import edu.wpi.first.math.geometry.Translation2d;
  */
 public class Intercept {
     private final Translation2dLogger m_logT0;
-    private final GlobalVelocityR2Logger m_logVT;
+    private final VelocityR2Logger m_logVT;
     private final DoubleLogger m_logEta;
 
     public Intercept(LoggerFactory parent) {
         LoggerFactory log = parent.type(this);
         m_logT0 = log.translation2dLogger(Level.TRACE, "T0");
-        m_logVT = log.globalVelocityR2Logger(Level.TRACE, "vT");
+        m_logVT = log.VelocityR2Logger(Level.TRACE, "vT");
         m_logEta = log.doubleLogger(Level.TRACE, "ETA");
     }
 
@@ -43,9 +43,9 @@ public class Intercept {
      */
     public Optional<Rotation2d> intercept(
             Translation2d robotPosition,
-            GlobalVelocityR2 robotVelocity,
+            VelocityR2 robotVelocity,
             Translation2d targetPosition,
-            GlobalVelocityR2 targetVelocity,
+            VelocityR2 targetVelocity,
             double muzzleSpeed) {
         double T0x = targetPosition.getX() - robotPosition.getX();
         double T0y = targetPosition.getY() - robotPosition.getY();
@@ -54,7 +54,7 @@ public class Intercept {
 
         double vTx = targetVelocity.x() - robotVelocity.x();
         double vTy = targetVelocity.y() - robotVelocity.y();
-        GlobalVelocityR2 vT = new GlobalVelocityR2(vTx, vTy);
+        VelocityR2 vT = new VelocityR2(vTx, vTy);
         m_logVT.log(() -> vT);
 
         double T0_dot_vT = T0x * vTx + T0y * vTy;

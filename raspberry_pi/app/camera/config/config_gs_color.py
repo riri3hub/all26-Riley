@@ -49,8 +49,8 @@ class ConfigGsColor(Config):
             #
             # AUTO EXPOSURE
             # Must be true for outside or in bright sun.
-            # "AeEnable": True,
-            "AeEnable": False,
+            "AeEnable": True,
+            # "AeEnable": False,
             #
             # AUTO WHITE BALANCE
             # Screws up color sensing.
@@ -60,7 +60,7 @@ class ConfigGsColor(Config):
             # Minimizes blur.  Requires pretty good light.
             # "ExposureTime": 500,
             # Works in less light, slightly more blur.
-            "ExposureTime": 2000,
+            # "ExposureTime": 500,
             #
             # COLOUR GAINS
             # The first argument is the red gain, second is blue gain.

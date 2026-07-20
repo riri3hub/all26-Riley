@@ -102,7 +102,7 @@ public class TrajectoryGallery {
         PathSE2Factory pathFactory = new PathSE2Factory(0.05, 0.01, 0.1);
         TrajectorySE2Planner m_planner = new TrajectorySE2Planner(pathFactory, trajectoryFactory);
 
-        PRRKinematics m_kinematics = new PRRKinematics(0.5, 0.343);
+        PRRKinematics m_kinematics = new PRRKinematics(0.5, 0.343, PRRKinematics.Solver.ANALYTIC);
         Pose2d m_home = m_kinematics.forward(CalgamesMech.HOME);
         WaypointSE2 start = new WaypointSE2(m_home, m_course, 1);
         TrajectorySE2 m_trajectory = m_planner.restToRest(List.of(start, m_goal));

@@ -1,6 +1,6 @@
 package org.team100.lib.state;
 
-import org.team100.lib.geometry.r2.GlobalVelocityR2;
+import org.team100.lib.geometry.r2.VelocityR2;
 import org.team100.lib.geometry.se2.VelocitySE2;
 import org.team100.lib.geometry.se2.WaypointSE2;
 import org.team100.lib.subsystems.swerve.kinodynamics.SwerveKinodynamics;
@@ -112,8 +112,8 @@ public class ModelSE2 {
         return new VelocitySE2(m_x.v(), m_y.v(), m_theta.v());
     }
 
-    public GlobalVelocityR2 velocityR2() {
-        return new GlobalVelocityR2(m_x.v(), m_y.v());
+    public VelocityR2 velocityR2() {
+        return new VelocityR2(m_x.v(), m_y.v());
     }
 
     /** Robot-relative speeds. */

@@ -26,6 +26,7 @@ class InterpreterFactory:
         network: Network,
         timestamps: Timestamps,
     ) -> Interpreter:
+        print("\n*** InterpreterFactory selecting an interpreter", flush=True)
         if USE_NULL:
             # For testing.
             return Viewfinder(display1, display2, network)
@@ -36,8 +37,14 @@ class InterpreterFactory:
         # get these values from changing the range till the object is highlighted
 
         # WHITE TARGET VALUES
-        object_lower: NDArray[np.int32] = np.array((0, 0, 200))
-        object_higher: NDArray[np.int32] = np.array((255, 150, 255))
+        # object_lower: NDArray[np.int32] = np.array((0, 0, 200))
+        # object_higher: NDArray[np.int32] = np.array((255, 150, 255))
+
+        # YELLOW TARGET VALUES
+        object_lower: NDArray[np.int32] = np.array((15, 100, 133))
+        object_higher: NDArray[np.int32] = np.array((35, 255, 255))
+
+        # https://medium.com/@pkusolruangchai/find-hsv-range-interactive-sliders-in-opencv-1571c4c64433
 
         match identity:
             case Identity.FUNNEL:
@@ -48,9 +55,9 @@ class InterpreterFactory:
                     network,
                     timestamps,
                     AprilTags(identity, cam, network),
-                    None
+                    None,
                 )
-            case Identity.GAME_PIECE:
+            case Identity.GAME_PIECE | Identity.COLOR_DETECT_1:
                 return DualInterpreter(
                     cam,
                     display1,
@@ -61,8 +68,7 @@ class InterpreterFactory:
                     Blobs(cam, network, object_lower, object_higher),
                 )
             case (
-                Identity.CAMERA_FRONT
-                | Identity.DEV
+                Identity.DEV
                 | Identity.DIST_TEST
                 | Identity.LEFTAMP
                 | Identity.CAMERA_BACK
@@ -81,9 +87,9 @@ class InterpreterFactory:
                     network,
                     timestamps,
                     AprilTags(identity, cam, network),
-                    None
+                    None,
                 )
-            case Identity.DEV2:
+            case Identity.CAMERA_FRONT | Identity.DEV2:
                 return DualInterpreter(
                     cam,
                     display1,
@@ -101,5 +107,5 @@ class InterpreterFactory:
                     network,
                     timestamps,
                     AprilTags(identity, cam, network),
-                    None
+                    None,
                 )

@@ -11,7 +11,7 @@ import org.team100.lib.dynamics.prr.PRREffort;
 import org.team100.lib.geometry.prr.PRRAcceleration;
 import org.team100.lib.geometry.prr.PRRConfig;
 import org.team100.lib.geometry.prr.PRRVelocity;
-import org.team100.lib.geometry.r2.GlobalVelocityR2;
+import org.team100.lib.geometry.r2.VelocityR2;
 import org.team100.lib.geometry.se2.AccelerationSE2;
 import org.team100.lib.geometry.se2.DeltaSE2;
 import org.team100.lib.geometry.se2.VelocitySE2;
@@ -638,28 +638,28 @@ public class LoggerFactory {
         return new VelocitySE2Logger(level, leaf);
     }
 
-    public class GlobalVelocityR2Logger {
+    public class VelocityR2Logger {
         private final Level m_level;
         private final DoubleLogger m_xLogger;
         private final DoubleLogger m_yLogger;
 
-        GlobalVelocityR2Logger(Level level, String leaf) {
+        VelocityR2Logger(Level level, String leaf) {
             m_level = level;
             m_xLogger = doubleLogger(level, join(leaf, "x m_s"));
             m_yLogger = doubleLogger(level, join(leaf, "y m_s"));
         }
 
-        public void log(Supplier<GlobalVelocityR2> vals) {
+        public void log(Supplier<VelocityR2> vals) {
             if (!allow(m_level))
                 return;
-            GlobalVelocityR2 val = vals.get();
+            VelocityR2 val = vals.get();
             m_xLogger.log(val::x);
             m_yLogger.log(val::y);
         }
     }
 
-    public GlobalVelocityR2Logger globalVelocityR2Logger(Level level, String leaf) {
-        return new GlobalVelocityR2Logger(level, leaf);
+    public VelocityR2Logger VelocityR2Logger(Level level, String leaf) {
+        return new VelocityR2Logger(level, leaf);
     }
 
     public class AccelerationSE2Logger {

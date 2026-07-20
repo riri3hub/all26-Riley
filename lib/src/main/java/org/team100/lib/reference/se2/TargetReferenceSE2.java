@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.function.BooleanSupplier;
 
 import org.team100.frc2026.field.FieldConstants2026;
-import org.team100.lib.geometry.r2.GlobalVelocityR2;
+import org.team100.lib.geometry.r2.VelocityR2;
 import org.team100.lib.geometry.r2.StateR2;
 import org.team100.lib.state.ControlR1;
 import org.team100.lib.state.ControlSE2;
@@ -58,7 +58,7 @@ public class TargetReferenceSE2 implements ReferenceSE2 {
                 model.translation());
         if (oTarget.isEmpty())
             return model;
-        StateR2 target = new StateR2(oTarget.get(), GlobalVelocityR2.ZERO);
+        StateR2 target = new StateR2(oTarget.get(), VelocityR2.ZERO);
         Optional<Solution> oSolution = m_solver.solve(model, target);
         if (oSolution.isEmpty())
             return model;
@@ -76,7 +76,7 @@ public class TargetReferenceSE2 implements ReferenceSE2 {
                 control.translation());
         if (oTarget.isEmpty())
             return control;
-        StateR2 target = new StateR2(oTarget.get(), GlobalVelocityR2.ZERO);
+        StateR2 target = new StateR2(oTarget.get(), VelocityR2.ZERO);
         Optional<Solution> oSolution = m_solver.solve(control.model(), target);
         if (oSolution.isEmpty())
             return control;

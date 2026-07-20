@@ -4,7 +4,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.geometry.r2.GlobalVelocityR2;
+import org.team100.lib.geometry.r2.VelocityR2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
 import org.team100.lib.logging.LoggerFactory.DoubleArrayLogger;
@@ -28,7 +28,7 @@ public class BallR2 implements Ball {
 
     // null when contained in robot.
     Translation2d m_location;
-    GlobalVelocityR2 m_velocity;
+    VelocityR2 m_velocity;
 
     /**
      * @param field   log
@@ -50,9 +50,9 @@ public class BallR2 implements Ball {
     @Override
     public void launch() {
         // Velocity due only to the gun
-        GlobalVelocityR2 v = GlobalVelocityR2.fromPolar(m_azimuth.get(), m_speed.getAsDouble());
+        VelocityR2 v = VelocityR2.fromPolar(m_azimuth.get(), m_speed.getAsDouble());
         // Velocity due to robot translation
-        GlobalVelocityR2 mv = GlobalVelocityR2.fromSe2(m_robot.get().velocity());
+        VelocityR2 mv = VelocityR2.fromSe2(m_robot.get().velocity());
         // Initial position is at the robot center.
         m_location = m_robot.get().pose().getTranslation();
         // Initial velocity.

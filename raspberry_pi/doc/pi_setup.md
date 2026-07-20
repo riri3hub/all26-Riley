@@ -3,64 +3,129 @@
 This is the new setup procedure for 2027, which does not
 use the unmaintained "WPILibPi" distribution.
 
-## SD Card
+We use only the Raspberry Pi 5.  We have a bunch of 4's,
+but we don't use them, they're too slow.
 
-* Use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
+## Burn the SD Card
 
-* Use the [Raspberry Pi OS Lite "Trixie" image](https://www.raspberrypi.com/software/operating-systems/)
+* Make sure your laptop is connected to the internet.
+* Choose a name for the camera.  The camera IP range is between
+  10.1.0.30 and 10.1.0.35, so a good camera name would be
+  "camera33" or "camera34".
 
-* Edit the bootfs network-config to set up a static ethernet IP
-  to something like 10.1.0.30, 10.1.0,31, ...
-  ([ref](https://forums.raspberrypi.com/viewtopic.php?t=396296))
-  ([ref](https://forums.raspberrypi.com/viewtopic.php?t=396987))
- 
-* Edit the bootfs config.txt to turn off the wifi and
-  bluetooth radios (because FRC prohibits them)
-  ([ref](https://help.pisignage.com/hc/en-us/articles/52406458481817-Disabling-Wi-Fi-and-Bluetooth-on-Raspberry-Pi))
+* Use the [Raspberry Pi Imager](https://www.raspberrypi.com/software/) app.
 
-## Network
+* Choose the Raspberry Pi OS Lite (64-bit) "Trixie" image.
+    * The "lite" option is behind the "other" option.  Don't use the "full" image.
+    * Use the name you selected above.
+    * fill in the localization using "los angeles"
+    * add a user "pi" with password "raspberry"
+    * enable SSH with password authentication
+    * don't do anything with the wifi setup
+    * do not use "raspberry pi connect"
+
+## Turn off the radios
+
+Turn off the wifi and bluetooth radios (because FRC prohibits them)
+
+* In the `bootfs` volume, find the file called `config.txt`, using Notepad, and add these lines at the top:
+
+```ini
+dtoverlay=disable-wifi-pi5
+dtoverlay=disable-bt-pi5
+```
+* Save the file with ctrl-S.
+
+
+## Configure the network
+
+Set up the static ethernet addressing scheme.
+
+* In the `bootfs` volume, edit file called `network-config`, using Notepad, and make it look like this: (choose an address between 10.1.0.30 and 10.1.0.35)
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    eth0:
+      addresses: 
+        - 10.1.0.31/24
+      nameservers:
+        addresses:
+          - 8.8.8.8
+      routes:
+        - to: default
+          via: 10.1.0.2
+      optional: true
+```
+* Save the file with ctrl-S.
+
+What this means:
+
+* 8.8.8.8 is the google nameserver
+* 10.1.0.2 is your laptop (for bridging)
+* `optional` to avoid holding up the boot.
+
+
+## Turn on the Pi
+
+* Close Notepad.
+* "Eject" the SD card from your laptop.
+* Install the SD card in the pi
+* Reassemble the Pi in its case
+* IMPORTANT: WRITE THE IP ADDRESS ON THE PI CASE, or you won't know what it is, later.
+* Turn it on
+
+## Set up your laptop network
 
 Give the Pi access to the internet:
 
-* Install the SD card and turn on the Pi.
-* Connect it to your laptop with ethernet.
-* Set up your laptop network as 10.1.0.5.
-* Share your laptop wifi
+* Connect your laptop to wifi, and "share" the connection
+  * On windows, sharing wifi changes the Ethernet address, so you need to change it back:
+* Change your ethernet address to `10.1.0.2`.
 
 ## Connect
 
+* Connect the Pi to your laptop with an ethernet cable,
+  or through a switch if you're working on many Pi's at the same time.
 * Get a command window ("cmd" on Win11)
-* type `ssh pi@10.1.0.30` (or whatever the address is)
+* type `ssh pi@10.1.0.31` (or whatever the address is)
 * use password `raspberry`
+* verify the pi can see the internet (`ping 8.8.8.8`)
 
-## Update
+## Update the Pi
 
-* Make sure the OS is up to date:
+* Make sure the OS is up to date.
+
 ```
 sudo apt update 
 sudo apt upgrade 
 ```
 
-## Packages
+## Install Pi Camera Support
 
-* Install system packages:
+* Install camera packages.
+
 ```
 sudo apt install libcamera-dev 
 sudo apt install python3-picamera2 
-sudo apt install python3-aiohttp 
 ```
 
-## Python
+## Set up Python
 
-* Create a virtual environment
+To avoid dependency between our app and the Raspberry Pi
+python installation, we use the python "virtual environment"
+feature.
+
+* Create a virtual environment.
+
+The env needs to see the system packages, so:
 ```
-python -m venv ./env
+python -m venv --system-site-packages ./env
 ```
-* Install required libraries
+* Install required libraries in the virtual environment.
 ```
 source ./env/bin/activate
-python -m ensurepip --default-pip
-python -m pip install --upgrade pip
 python -m pip install numpy
 python -m pip install opencv-python
 python -m pip install robotpy
@@ -68,6 +133,68 @@ python -m pip install robotpy-apriltag
 python -m pip install robotpy-cscore
 ```
 
-## Supervisord
+## Install Supervisord
 
-TODO: finish this part
+We use [supervisor](https://supervisord.org/index.html)
+for management: stop, start, and looking at logs.
+
+For these steps, the ssh password is "raspberry".
+
+* Copy the supervisord conf file to the pi.
+* Install supervisord.
+    * Because we want it to run at startup, we use the
+      system package.
+* Move the `supervisord.conf` file to the privileged location.
+* Get supervisor to read it.
+```
+scp supervisor/supervisord.conf pi@10.1.0.31:/tmp
+ssh pi@10.1.0.31
+sudo apt install supervisor
+sudo mv /tmp/supervisord.conf /etc/supervisor
+sudo systemctl restart supervisor
+supervisorctl status
+```
+
+If you haven't yet installed the app code, you should see supervisor
+complain that it can't find it:
+
+```
+app    FATAL    can't find command '/home/pi/env/bin/python'
+```
+
+At this point, your laptop browser should show the supervisor
+web page at `http://10.1.0.31:9001/`, with the red "fatal" status.
+
+## Troubleshooting
+
+What if the steps above don't work?
+
+* LED flashing 4 slow, 3 fast
+  * This indicates hardware damage.
+
+* you can try flashing the EEPROM, using a different image from the 
+  raspberry pi imager.  if it succeeds, the green LED flashes forever.
+
+* Pi can't reach 8.8.8.8.
+  * The WHS network disallows bridging.  Run the procedure
+    above on a more-friendly network (e.g. at home).
+
+## References
+
+* [cloud-init format](https://docs.cloud-init.io/en/latest/reference/network-config.html) 
+* [Raspberry Pi doc on cloud-init](https://www.raspberrypi.com/news/cloud-init-on-raspberry-pi-os/)
+* [Raspberry Pi doc on config.txt](https://www.raspberrypi.com/documentation/computers/config_txt.html)
+* [Netplan format](https://netplan.readthedocs.io/en/latest/netplan-yaml/)
+* [Netplan examples](https://netplan.readthedocs.io/en/0.106/examples/)
+* [network-config format](https://docs.cloud-init.io/en/latest/reference/network-config-format-v2.html#network-config-v2)
+* [post about network-config](https://forums.raspberrypi.com/viewtopic.php?t=396296)
+* [another post about network-config](https://forums.raspberrypi.com/viewtopic.php?t=396987)
+* [post about config.txt](https://help.pisignage.com/hc/en-us/articles/52406458481817-Disabling-Wi-Fi-and-Bluetooth-on-Raspberry-Pi)
+* [Raspberry Pi LED flashing codes](https://www.raspberrypi.com/documentation/computers/configuration.html#led-warning-flash-codes)
+
+## Appendix
+
+For developent, we need this, but I think not for the pi:
+```
+sudo apt install python3-aiohttp 
+```

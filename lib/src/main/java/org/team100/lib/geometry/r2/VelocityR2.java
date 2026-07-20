@@ -14,24 +14,24 @@ import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
 
 /** Velocity in R2, companion to Translation2d. */
-public record GlobalVelocityR2(double x, double y) {
-    public static GlobalVelocityR2 ZERO = new GlobalVelocityR2(0, 0);
+public record VelocityR2(double x, double y) {
+    public static VelocityR2 ZERO = new VelocityR2(0, 0);
 
-    public static GlobalVelocityR2 fromPolar(Rotation2d angle, double speed) {
-        return new GlobalVelocityR2(speed * angle.getCos(), speed * angle.getSin());
+    public static VelocityR2 fromPolar(Rotation2d angle, double speed) {
+        return new VelocityR2(speed * angle.getCos(), speed * angle.getSin());
     }
 
     /** Pick up the translation component of v. */
-    public static GlobalVelocityR2 fromSe2(VelocitySE2 v) {
-        return new GlobalVelocityR2(v.x(), v.y());
+    public static VelocityR2 fromSe2(VelocitySE2 v) {
+        return new VelocityR2(v.x(), v.y());
     }
 
-    public GlobalVelocityR2 plus(GlobalVelocityR2 other) {
-        return new GlobalVelocityR2(x + other.x, y + other.y);
+    public VelocityR2 plus(VelocityR2 other) {
+        return new VelocityR2(x + other.x, y + other.y);
     }
 
-    public GlobalVelocityR2 minus(GlobalVelocityR2 other) {
-        return new GlobalVelocityR2(x - other.x, y - other.y);
+    public VelocityR2 minus(VelocityR2 other) {
+        return new VelocityR2(x - other.x, y - other.y);
     }
 
     public double norm() {
@@ -46,7 +46,7 @@ public record GlobalVelocityR2(double x, double y) {
     }
 
     /** Dot product. */
-    public double dot(GlobalVelocityR2 other) {
+    public double dot(VelocityR2 other) {
         return x * other.x + y * other.y;
     }
 
@@ -59,12 +59,21 @@ public record GlobalVelocityR2(double x, double y) {
         return new Translation2d(start.getX() + x * dt, start.getY() + y * dt);
     }
 
-    public static GlobalVelocityR2 fromVector(Vector<N3> v) {
-        return new GlobalVelocityR2(v.get(0), v.get(1));
+    public static VelocityR2 fromVector2(Vector<N2> v) {
+        return new VelocityR2(v.get(0), v.get(1));
     }
 
-    public static GlobalVelocityR2 fromVector(Matrix<N3, N1> v) {
-        return new GlobalVelocityR2(v.get(0, 0), v.get(1, 0));
+    public static VelocityR2 fromVector2(Matrix<N2, N1> v) {
+        return new VelocityR2(v.get(0, 0), v.get(1, 0));
+    }
+
+    /** Ignore the Z component */
+    public static VelocityR2 fromVector(Vector<N3> v) {
+        return new VelocityR2(v.get(0), v.get(1));
+    }
+
+    public static VelocityR2 fromVector(Matrix<N3, N1> v) {
+        return new VelocityR2(v.get(0, 0), v.get(1, 0));
     }
 
     public Vector<N2> toVector() {

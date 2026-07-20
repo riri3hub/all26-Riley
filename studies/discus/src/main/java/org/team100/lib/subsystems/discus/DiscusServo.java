@@ -48,13 +48,13 @@ public class DiscusServo extends SubsystemBase {
 
         // zeros
         // PID = 1.0, 0.0, 0.05
-        PIDConstants pid = PIDConstants.makePositionPID(1.0, 0, 0); // d = 0.12 was experimentally found
-        Friction friction = new Friction(0.16, 0.15, 0, 0);
+        PIDConstants pid = PIDConstants.makePositionPID(0.0, 0, 0); // d = 0.12 was experimentally found
+        Friction friction = new Friction(0.15, 0.14, 0, 0);
         ProfileR1 profile = new TrapezoidProfileR1(
                 MAX_VELOCITY, MAX_ACCEL, POSITION_TOLERANCE);
         ReferenceR1 ref = new ProfileReferenceR1(
                 logger, () -> profile, POSITION_TOLERANCE, VELOCITY_TOLERANCE);
-        RDynamics dyn = new RDynamics(0, 0, 0);
+        RDynamics dyn = new RDynamics(0, 0, 0.005);
 
         BareMotor motor;
         switch (Identity.instance) {

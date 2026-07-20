@@ -3,23 +3,61 @@
 Dynamic analysis of the five-bar parallel linkage is somewhat more involved
 than the serial linkages covered elsewhere.
 
-TODO: complete this doc.
+Following Khalil 2020, for now, ignore the end mass in the real apparatus,
+and also ignore the operator force in the paper.
 
 ## Mass
 
-There are four moving links, and a mass on the end.
+The joints in Khalil are
 
-TODO: this whole section.
+* $q_1$: one of the actuators
+* $q_2$: an elbow
+* $q_3$: the other elbow
+* $q_4$: the other actuator
+
+All these angles are measured from the global x axis -- the "elbow" angles are not
+measured relative to their parent links.
+
+the middle joint is not modeled.
+
+The masses of the links are $m_A$, $m_B$, $m_C$, and $m_D$.
+
+The lengths are $l_1$, $l_2$, $l_3$, and $l_4$.
+
+Using these coordinates, Khalil claims this mass matrix:
+
+```math
+M = 
+\begin{bmatrix}
+(\frac{m_A}{3} + m_B)l_1^2 & \frac{m_Bl_1l_2}{4}cos(q_1-q_2) & 0 & 0 \\
+\frac{m_Bl_1l_2}{4}cos(q_1-q_2) & \frac{m_Bl_2^2}{3} & 0 & 0 \\
+0 & 0 & \frac{m_Cl_3^2}{3} & \frac{m_Cl_3l_4}{4}cos(q_3-q_4) \\
+0 & 0 & \frac{m_Cl_3l_4}{4}cos(q_3-q_4) & (\frac{m_D}{3}+m_C)l_4^2 \\
+\end{bmatrix}
+```
+
 
 ## Centrifugal and Coriolis
 
-TODO: this whole section.
+Khalil claims this C matrix:
+
+```math
+C = 
+\begin{bmatrix}
+\frac{m_Bl_1l_2}{4}\dot{q_2}sin(q_1-q_2)&-\frac{m_Bl_1l_2}{4}(\dot{q_1}-\dot{q_2})sin(q_1-q_2)&0&0\\
+-\frac{m_Bl_1l_2}{4}(\dot{q_1}-\dot{q_2})sin(q_1-q_2)&-\frac{m_Bl_1l_2}{4}\dot{q_1}sin(q_1-q_2)&0&0\\
+0&0&\frac{m_Cl_3l_4}{4}\dot{q_4}sin(q_3-q_4)&-\frac{m_Cl_3l_4}{4}(\dot{q_3}-\dot{q_4})sin(q_3-q_4)\\
+0&0&-\frac{m_Cl_3l_4}{4}(\dot{q_3}-\dot{q_4})sin(q_3-q_4)&\frac{m_Cl_3l_4}{4}\dot{q_3}sin(q_3-q_4)\\
+\end{bmatrix}
+```
 
 ## Gravity
 
 For a horizontal mechanism, there's no gravity effect.
 
-TODO: the vertical case.
+```math
+G = 0
+```
 
 ## Equation of Motion
 
@@ -29,7 +67,35 @@ Start with the definition:
 \tau = M(q)\ddot{q} + C(q,\dot{q})\dot{q} + G(q)
 ```
 
-TODO: finish this
+Note that $\tau$ covers all four joints:
+```math
+\tau = 
+\begin{bmatrix}
+\tau_1\\
+\tau_2\\
+\tau_3\\
+\tau_4\\
+\end{bmatrix}
+```
+
+... but we only care about the grounded ones, $\tau_1$ and $\tau_4$, so we  can simplify:
+
+```math
+M = 
+\begin{bmatrix}
+(\frac{m_A}{3} + m_B)l_1^2 & \frac{m_Bl_1l_2}{4}cos(q_1-q_2) & 0 & 0 \\
+0 & 0 & \frac{m_Cl_3l_4}{4}cos(q_3-q_4) & (\frac{m_D}{3}+m_C)l_4^2 \\
+\end{bmatrix}
+```
+
+```math
+C = 
+\begin{bmatrix}
+\frac{m_Bl_1l_2}{4}\dot{q_2}sin(q_1-q_2)&-\frac{m_Bl_1l_2}{4}(\dot{q_1}-\dot{q_2})sin(q_1-q_2)&0&0\\
+
+0&0&-\frac{m_Cl_3l_4}{4}(\dot{q_3}-\dot{q_4})sin(q_3-q_4)&\frac{m_Cl_3l_4}{4}\dot{q_3}sin(q_3-q_4)\\
+\end{bmatrix}
+```
 
 
 ## References

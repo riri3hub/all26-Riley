@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import org.team100.lib.coherence.Cache;
 import org.team100.lib.coherence.ObjectCache;
 import org.team100.lib.framework.TimedRobot100;
-import org.team100.lib.geometry.r2.GlobalVelocityR2;
+import org.team100.lib.geometry.r2.VelocityR2;
 import org.team100.lib.geometry.r2.StateR2;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -89,7 +89,7 @@ public class CachedSolution {
 
         return m_solver.solve(
                 state,
-                new StateR2(targetPosition, GlobalVelocityR2.ZERO));
+                new StateR2(targetPosition, VelocityR2.ZERO));
     }
 
 }

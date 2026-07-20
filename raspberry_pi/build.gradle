@@ -1,8 +1,8 @@
 plugins {
     id 'distribution'
+    id 'org.hidetake.ssh' version '2.12.0'
 }
 
-// to run this task, choose "distZip" from the vscode 
 distributions {
     main {
         distributionBaseName = 'app'
@@ -14,4 +14,45 @@ distributions {
             exclude '**/images/**'
         }
     }
+}
+
+remotes {
+    camera30 { host = '10.1.0.30'; user = 'pi'; password = 'raspberry' }
+    camera31 { host = '10.1.0.31'; user = 'pi'; password = 'raspberry' }
+    camera32 { host = '10.1.0.32'; user = 'pi'; password = 'raspberry' }
+    camera33 { host = '10.1.0.33'; user = 'pi'; password = 'raspberry' }
+    camera35 { host = '10.1.0.35'; user = 'pi'; password = 'raspberry' }
+    camera36 { host = '10.1.0.36'; user = 'pi'; password = 'raspberry' }
+}
+
+ssh.settings {
+    timeoutSec = 1
+    knownHosts = allowAnyHosts
+    logging = 'none'
+}
+task 'Deploy Camera Code' { // pretty name for vscode
+    group = 'deploy'
+    description = 'zip, deploy, and restart all cameras'
+    dependsOn distZip
+    doLast {
+        remotes.each { camera ->
+            try {
+                ssh.run {
+                    session(camera) {
+                        put from: file('runapp.py'), into: '/home/pi'
+                        put from: distZip.archiveFile.get().asFile, into: '/home/pi'
+                        execute 'supervisorctl restart app'
+                    }
+                }
+                logger.warn("\u001B[1;32mDEPLOYED\u001B[0m to ${camera.name} at ${camera.host}." +
+                    " Look at the viewfinder at ${camera.host}:1181")
+            } catch (Exception e) {
+                logger.warn("skipping ${camera.name}")
+            }
+        }
+    }
+}
+
+task 'deploy' { // short name for command-line
+    dependsOn 'Deploy Camera Code'
 }

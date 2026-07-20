@@ -3,6 +3,7 @@ package org.team100.frc2025.CalgamesArm;
 import org.junit.jupiter.api.Test;
 import org.team100.lib.geometry.prr.PRRConfig;
 import org.team100.lib.kinematics.prr.PRRKinematics;
+import org.team100.lib.kinematics.prr.PRRKinematics.Solver;
 import org.team100.lib.profile.r1.ProfileR1;
 import org.team100.lib.profile.r1.TrapezoidProfileR1;
 import org.team100.lib.state.ControlR1;
@@ -28,7 +29,7 @@ public class ProfiledTest {
     @Test
     void homeToPick() {
 
-        PRRKinematics k = new PRRKinematics(0.5, 0.343);
+        PRRKinematics k = new PRRKinematics(0.5, 0.343, Solver.ANALYTIC);
 
         // home position
         PRRConfig start = new PRRConfig(0, 0, 0);
@@ -84,7 +85,7 @@ public class ProfiledTest {
     @Test
     void homeToL4() {
 
-        PRRKinematics k = new PRRKinematics(0.5, 0.343);
+        PRRKinematics k = new PRRKinematics(0.5, 0.343, Solver.ANALYTIC);
 
         // home position
         PRRConfig start = new PRRConfig(0, 0, 0);
@@ -135,7 +136,7 @@ public class ProfiledTest {
     @Test
     void l4ToHome() {
 
-        PRRKinematics k = new PRRKinematics(0.5, 0.343);
+        PRRKinematics k = new PRRKinematics(0.5, 0.343, Solver.ANALYTIC);
         Pose2d pL4 = new Pose2d(1.9, 0.5, new Rotation2d(150));
 
         // home position

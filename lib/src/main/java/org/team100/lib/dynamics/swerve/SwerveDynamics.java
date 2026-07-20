@@ -97,7 +97,7 @@ public class SwerveDynamics {
             // If the angle does not exist, then the desired velocity is zero.
             // In that case, the actual steering angle should be determined
             // by the required force, which is all longitudinal.
-            Rotation2d correctedAngle = GeometryUtil.fromVec(cornerForceVec);
+            Rotation2d correctedAngle = GeometryUtil.rotation2dFromVec(cornerForceVec);
             return new ModuleEffort(
                     cornerForceVec.norm(),
                     Optional.of(correctedAngle));

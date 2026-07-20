@@ -21,7 +21,6 @@ import org.team100.lib.geometry.se2.AccelerationSE2;
 import org.team100.lib.geometry.se2.DirectionSE2;
 import org.team100.lib.geometry.se2.VelocitySE2;
 import org.team100.lib.geometry.se2.WaypointSE2;
-import org.team100.lib.kinematics.prr.AnalyticalPRRJacobian;
 import org.team100.lib.kinematics.prr.PRRKinematics;
 import org.team100.lib.logging.Level;
 import org.team100.lib.logging.LoggerFactory;
@@ -98,7 +97,6 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
     private final MechTrajectories m_transit;
 
     private final PRRKinematics m_kinematics;
-    private final AnalyticalPRRJacobian m_jacobian;
 
     private final Dynamics m_dynamics;
 
@@ -134,13 +132,12 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
         m_armLengthM = armLength;
         m_wristLengthM = wristLength;
 
-        m_kinematics = new PRRKinematics(armLength, wristLength);
-        m_jacobian = new AnalyticalPRRJacobian(m_kinematics);
+        m_kinematics = new PRRKinematics(armLength, wristLength, PRRKinematics.Solver.ANALYTIC);
         m_dynamics = new Dynamics();
 
         m_home = m_kinematics.forward(HOME);
 
-        m_transit = new MechTrajectories(parent, this, m_kinematics, m_jacobian);
+        m_transit = new MechTrajectories(parent, this, m_kinematics);
 
         LoggerFactory jointLog = parent.name("joints");
         m_log_config = jointLog.logConfig(Level.DEBUG, "config");
@@ -321,7 +318,7 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
         PRRConfig c = getConfig();
         PRRVelocity jv = getJointVelocity();
         Pose2d p = m_kinematics.forward(c);
-        VelocitySE2 v = m_jacobian.forward(c, jv);
+        VelocitySE2 v = m_kinematics.forward(c, jv);
         return new ModelSE2(p, v);
     }
 
@@ -331,8 +328,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
         AccelerationSE2 a = new AccelerationSE2(0, 0, 0);
         ControlSE2 control = new ControlSE2(pose, v, a);
 
-        PRRVelocity jv = m_jacobian.inverse(control.model());
-        PRRAcceleration ja = m_jacobian.inverseA(control);
+        PRRVelocity jv = m_kinematics.inverse(control.model());
+        PRRAcceleration ja = m_kinematics.inverse(control);
         PRREffort jf = m_dynamics.forward(getConfig(), jv, ja);
 
         m_elevatorFront.setVelocity(jv.q1dot(), jf.f1());
@@ -359,8 +356,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
             stop();
             return;
         }
-        PRRVelocity jv = m_jacobian.inverse(control.model());
-        PRRAcceleration ja = m_jacobian.inverseA(control);
+        PRRVelocity jv = m_kinematics.inverse(control.model());
+        PRRAcceleration ja = m_kinematics.inverse(control);
         set(config, jv, ja);
     }
 
@@ -626,10 +623,6 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
         return m_kinematics;
     }
 
-    public AnalyticalPRRJacobian getJacobian() {
-        return m_jacobian;
-    }
-
     @Override
     public void periodic() {
         m_shoulder.periodic();
@@ -676,8 +669,8 @@ public class CalgamesMech extends SubsystemBase implements Music, PositionSubsys
         m_log_jointA.log(() -> ja);
         m_log_jointF.log(() -> jf);
         Pose2d p = m_kinematics.forward(c);
-        VelocitySE2 v = m_jacobian.forward(c, jv);
-        AccelerationSE2 a = m_jacobian.forwardA(c, jv, ja);
+        VelocitySE2 v = m_kinematics.forward(c, jv);
+        AccelerationSE2 a = m_kinematics.forward(c, jv, ja);
         m_log_pose.log(() -> p);
         m_log_cartesianV.log(() -> v);
         m_log_cartesianA.log(() -> a);

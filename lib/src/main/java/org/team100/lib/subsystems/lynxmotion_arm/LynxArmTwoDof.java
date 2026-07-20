@@ -2,12 +2,11 @@ package org.team100.lib.subsystems.lynxmotion_arm;
 
 import org.team100.lib.geometry.lynx_arm.LynxArmConfig;
 import org.team100.lib.geometry.lynx_arm.LynxArmPose;
-import org.team100.lib.geometry.rr.TwoDofArmConfig;
+import org.team100.lib.geometry.rr.RRConfig;
+import org.team100.lib.geometry.rr.RRPosition;
 import org.team100.lib.kinematics.lynx_arm.AnalyticLynxArmKinematics;
 import org.team100.lib.kinematics.lynx_arm.LynxArmKinematics;
-import org.team100.lib.kinematics.rr.AnalyticTwoDofKinematics;
-import org.team100.lib.kinematics.rr.TwoDofArmPosition;
-import org.team100.lib.kinematics.rr.TwoDofKinematics;
+import org.team100.lib.kinematics.rr.RRKinematics;
 import org.team100.lib.motor.servo.CalibratedServo;
 import org.team100.lib.subsystems.lynxmotion_arm.commands.MoveCommandTwoDof;
 import org.team100.lib.util.AffineFunction;
@@ -31,7 +30,7 @@ public class LynxArmTwoDof extends SubsystemBase implements AutoCloseable {
     private final CalibratedServo m_twist;
     private final CalibratedServo m_grip;
 
-    private final TwoDofKinematics m_kinematics;
+    private final RRKinematics m_kinematics;
     private final LynxArmKinematics m_fullKinematics;
 
     public LynxArmTwoDof() {
@@ -72,7 +71,7 @@ public class LynxArmTwoDof extends SubsystemBase implements AutoCloseable {
         m_wrist.set(0);
         m_twist.set(0);
 
-        m_kinematics = new AnalyticTwoDofKinematics(0.146, 0.298);
+        m_kinematics = new RRKinematics(0.146, 0.298);
         m_fullKinematics = AnalyticLynxArmKinematics.real();
 
         setPosition(HOME);
@@ -80,21 +79,21 @@ public class LynxArmTwoDof extends SubsystemBase implements AutoCloseable {
 
     /** Translation coordinates are x-forward y-up, measured from the boom joint. */
     public void setPosition(Translation2d end) {
-        TwoDofArmConfig q = m_kinematics.inverse(end);
+        RRConfig q = m_kinematics.inverse(end);
         // the joint coordinates use the 3d convention which is inverted
         // from the 2d one, so fix it here.
         m_boom.set(-1.0 * q.q1());
         m_stick.set(-1.0 * q.q2());
     }
 
-    public TwoDofArmPosition getPosition() {
-        TwoDofArmConfig q = getMeasuredConfig();
+    public RRPosition getPosition() {
+        RRConfig q = getMeasuredConfig();
         return m_kinematics.forward(q);
     }
 
-    public TwoDofArmConfig getMeasuredConfig() {
+    public RRConfig getMeasuredConfig() {
         // invert the actual angles to match the 2dof convention
-        return new TwoDofArmConfig(
+        return new RRConfig(
                 -1.0 * m_boom.get(),
                 -1.0 * m_stick.get());
     }
