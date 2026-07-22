@@ -10,7 +10,7 @@ from app.dashboard.display_util import DisplayUtil
 from app.analysis.analysis_protocol import ColorAnalysis
 from app.network.network_protocol import Network
 from app.network.structs import Target
-
+import math
 
 class Blobs(ColorAnalysis):
     """A wrapper for OpenCV target finding."""
@@ -78,32 +78,48 @@ class Blobs(ColorAnalysis):
         targets: list[Target] = []
         # list of [x, y]
         points_to_undistort: list[list[int]] = []
-        contour_info: list[tuple[MatLike, int, int]] = []
+        contour_info: list[tuple[MatLike, int, int, int, float]] = []
 
         for contour in contours:
             # https://en.wikipedia.org/wiki/Image_moment
             mmnts: Moments = cv2.moments(contour)
-
+            min_pixels = 800           
             # reject too small (m00 is in pixels)
-            if mmnts["m00"] < 175:
+            if mmnts["m00"] < min_pixels:
                 continue
 
             # reject if not round enough
 
             # Roundness tolerance
 
-            # roundtolo = 0.85
+            roundtolo = 0.52
 
-            # perimeter = cv2.arcLength(contour, True) ** 2
+            perimeter = cv2.arcLength(contour, True) ** 2
 
-            # In a circle, the area is c^2 over 4 pi
-            # fourpi = 4*3.14
-
-            # if cv2.contourArea(contour) < roundtolo * ( perimeter / fourpi):
-                continue
+            area = cv2.contourArea(contour)
             
+            # In a circle, the area is c^2 over 4 pi
+            fourpi = 4*3.14
+
+            if area < roundtolo * ( perimeter / fourpi):
+                continue
+            k_area = 1.50E4
+
             cX: int = int(mmnts["m10"] / mmnts["m00"])
             cY: int = int(mmnts["m01"] / mmnts["m00"])
+            cA: int =  int(area)
+
+            # Insures that range_1 always has a value
+            range_1 = 0
+
+            if area >= min_pixels:
+                range_1 = math.sqrt(k_area/area)
+            
+            low_y = 600
+
+            #reject if object is below a y value
+            if low_y < cY:
+                continue
 
             # Calculates how big the object is based on how far (high in the image) it is.
             min_area = 100
@@ -112,8 +128,8 @@ class Blobs(ColorAnalysis):
                 continue
 
             points_to_undistort.append([cX, cY])
-            contour_info.append((contour, cX, cY))
-
+            contour_info.append((contour, cX, cY, cA, range_1))
+            
         if points_to_undistort:
             # Undistort all points at once
             undistorted_points = self.undistort_points(points_to_undistort)
@@ -123,7 +139,7 @@ class Blobs(ColorAnalysis):
             orig_cY: int
             undist_cX: float
             undist_cY: float
-            for (c, orig_cX, orig_cY), (undist_cX, undist_cY) in zip(
+            for (c, orig_cX, orig_cY, cA, range1), (undist_cX, undist_cY) in zip(
                 contour_info, undistorted_points
             ):
 
@@ -133,8 +149,8 @@ class Blobs(ColorAnalysis):
                 initial = np.array([1, 0, 0], dtype=np.float64)
                 final = np.array([1, xNormalized, yNormalized], dtype=np.float64)
                 rotation = Rotation3d(initial=initial, final=final)
-
-                targets.append(Target(int(servertime), rotation))
+                
+                targets.append(Target(int(servertime), rotation, range1))
                 if img_display is not None:
                     DisplayUtil.note(img_display, c, orig_cX, orig_cY)
 

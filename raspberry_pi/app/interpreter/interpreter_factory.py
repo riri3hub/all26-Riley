@@ -40,9 +40,13 @@ class InterpreterFactory:
         # object_lower: NDArray[np.int32] = np.array((0, 0, 200))
         # object_higher: NDArray[np.int32] = np.array((255, 150, 255))
 
-        # YELLOW TARGET VALUES
-        object_lower: NDArray[np.int32] = np.array((15, 100, 133))
-        object_higher: NDArray[np.int32] = np.array((35, 255, 255))
+        # YELLOW TARGET VALUES (outside)
+       #  object_lower: NDArray[np.int32] = np.array((15, 100, 133))
+       # object_higher: NDArray[np.int32] = np.array((35, 255, 255))
+
+        # YELLOW TARGET VALUES (inside)
+        object_lower: NDArray[np.int32] = np.array((15, 45, 45))
+        object_higher: NDArray[np.int32] = np.array((35, 265, 260))
 
         # https://medium.com/@pkusolruangchai/find-hsv-range-interactive-sliders-in-opencv-1571c4c64433
 
