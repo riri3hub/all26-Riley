@@ -93,7 +93,7 @@ class DualInterpreter(InterpreterBase):
                 self._analyzer_mono.analyze_mono(img_mono, img_display, servertime)
 
             if img_bgr is not None:
-                self._analyzer_color.analyze_color(img_bgr, img_display, servertime)
+                self._analyzer_color.analyze_color(img_bgr, img_display, servertime, 800)
 
             # Send camera FPS to network.
             fps: float = req.fps()
