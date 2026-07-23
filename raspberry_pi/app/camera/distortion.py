@@ -37,15 +37,12 @@ class Distortion:
             case Identity.CAMERA_FRONT:
                 # Calibrated 2/28/26.
                 self._dist = np.array(
-                    [-0.03226, 0.01730, 0.00105, 0.00284]
+                    [-0.2961790762, 0.09865662084, -0.0001707410996, 0.0002482554604]
                 )
-            
             case Identity.FUNNEL:
-                # Calibrated 07/14/26
                 self._dist = np.array(
                     [-0.03226, 0.01730, 0.00105, 0.00284]
-                ) 
-   
+                )   
             #
             # TODO: clean up the entries below
             #

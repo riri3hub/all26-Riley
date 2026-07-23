@@ -63,13 +63,19 @@ class BlipWithCorners:
 
 @wpistruct.make_wpistruct  # type:ignore
 @dataclasses.dataclass
+
 class Target:
+
     """Game piece target"""
+    #area: int
+    """target area"""
 
     timestamp: wpistruct.int64
     """server microseconds"""
     sight: Rotation3d
     """camera-relative"""
+    range: float
+    """the target's distance in meters"""
 
 
 @wpistruct.make_wpistruct  # type:ignore
