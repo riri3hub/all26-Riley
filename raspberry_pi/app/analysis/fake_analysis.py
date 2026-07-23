@@ -31,6 +31,7 @@ class FakeColorAnalysis(ColorAnalysis):
         img: MatLike,
         img_display: MatLike,
         servertime: int,
+        min_pixels: int
     ) -> None:
         self.count += 1
         self.size = img.shape

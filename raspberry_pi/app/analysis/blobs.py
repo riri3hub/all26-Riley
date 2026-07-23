@@ -49,6 +49,7 @@ class Blobs(ColorAnalysis):
         img: MatLike,
         img_display: MatLike | None,
         servertime: int,
+        min_pixels: int,
     ) -> None:
         """Find things in img_bgr
 
@@ -83,7 +84,7 @@ class Blobs(ColorAnalysis):
         for contour in contours:
             # https://en.wikipedia.org/wiki/Image_moment
             mmnts: Moments = cv2.moments(contour)
-            min_pixels = 800           
+                     
             # reject too small (m00 is in pixels)
             if mmnts["m00"] < min_pixels:
                 continue

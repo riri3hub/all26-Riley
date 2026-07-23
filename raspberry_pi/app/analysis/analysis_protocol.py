@@ -30,6 +30,7 @@ class ColorAnalysis(Protocol):
         img: MatLike,
         img_display: MatLike,
         servertime: int,
+        min_pixels: int
     ) -> None:
         """Analysis of a color image.
 
