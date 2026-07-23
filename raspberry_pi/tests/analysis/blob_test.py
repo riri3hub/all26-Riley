@@ -91,7 +91,7 @@ class BlobTest(unittest.TestCase):
         object_higher = np.array((70, 255, 255))
 
         blobs = Blobs(camera, network, object_lower, object_higher)
-        blobs.analyze_color(camera._img, None, 0)  # type: ignore
+        blobs.analyze_color(camera._img, None, 0, 100)  # type: ignore
 
         ## always publish even if empty
 
