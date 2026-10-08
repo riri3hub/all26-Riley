@@ -11,6 +11,7 @@ class Model(Enum):
     GS = "imx296"
     THRIFTY = "SPCA2630 PC Camera: PC Camera"
     ARDU_OV9782 = "Arducam OV9782 USB Camera: Ardu"
+    ARDU_BO61O = "Arducam BO61O USB Camera: Ardu"
     UNKNOWN = "unknown"
 
     @classmethod
