@@ -50,12 +50,21 @@ public class Autons implements AutoCloseable {
                 machinery.m_swerveKinodynamics,
                 controller,
                 machinery));
+        m_autonChooser.add(new AheadTwoMetersWithRotation(
+                log,
+                machinery.m_swerveKinodynamics,
+                controller,
+                machinery));
         m_autonChooser.add(new UTurnWithRotation(
                 log,
                 machinery.m_swerveKinodynamics,
                 controller,
                 machinery));
-
+        m_autonChooser.add(new GoInCircle(
+                log,
+                machinery.m_swerveKinodynamics,
+                controller,
+                machinery));
         // The following were from CVE in 2026
         m_autonChooser.add(new ScallopLobAuton(
                 log,
