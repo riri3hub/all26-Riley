@@ -23,9 +23,9 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /**
- * Make a large U shape, ahead and to the left, while rotating
- * 180 degrees. The path is very approximately a half-circle with a radius of
- * about 1 meter.
+ * Makes a large circle shape
+ * The path has a 2 meter radius
+ * Ends in the same spot as the start
  */
 public class GoInCircle implements AnnotatedCommand {
     private final LoggerFactory log;
@@ -53,18 +53,14 @@ public class GoInCircle implements AnnotatedCommand {
     }
 
     TrajectorySE2 t1(Pose2d p1) {
-        // cartesian is robot-relative +x, also rotate CCW.
+        // code from UTurnWithRotation
         DirectionSE2 d1 = DirectionSE2.fromDirections(p1.getRotation(), 1);
-        // the end is the opposite direction.
         DirectionSE2 d2 = DirectionSE2.fromDirections(p1.getRotation().plus(Rotation2d.kPi), 1);
-        // making a big U means using a large scale factor
         WaypointSE2 w1 = new WaypointSE2(p1, d1, 2.5);
-        // end point is to the left
         Transform2d t1 = new Transform2d(0, 2, Rotation2d.kPi);
         Pose2d p2 = p1.plus(t1);
-        // making a big U means using a large scale factor
         WaypointSE2 w2 = new WaypointSE2(p2, d2, 2.5);
-        // changed code
+        // new code
         DirectionSE2 d3 = DirectionSE2.fromDirections(p2.getRotation().plus(Rotation2d.kPi), 1);
         Transform2d t2 = new Transform2d(0, 2, Rotation2d.kPi);
         Pose2d p3 = p2.plus(t2);
