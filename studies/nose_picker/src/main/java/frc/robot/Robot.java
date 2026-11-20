@@ -44,8 +44,10 @@ public class Robot extends TimedRobot100 {
    * initialization code.
    */
 private final Falcon500Motor m_motor;
+private final NeoVortexCANSparkMotor m_motor1;
 private final NeoVortexCANSparkMotor m_motor2;
-private double m_dutyCycle1 = 0;
+private double m_velocityf = 0;
+private double m_velocityv = 0;
 private DriverXboxControl m_controller;
 public Robot() {
     Startup.start();
@@ -54,30 +56,39 @@ public Robot() {
     TotalCurrentLog currentLog = robotLog.totalCurrentLog();
     m_controller = new DriverXboxControl(log, 0);
   
-
-
-    System.out.println("Initializing motor");
+    System.out.println("Initializing motors");
     m_motor = new Falcon500Motor(
-            log.name("motor"),
+            log.name("falcon motor"),
             currentLog,
             new CanId(18), 
             NeutralMode100.COAST,
             MotorPhase.FORWARD,
-            new CurrentLimit(60, 60),
+            new CurrentLimit(30, 30),
             new Friction(0, 0, 0, 0),
             PIDConstants.zero());
-    m_motor2 = new NeoVortexCANSparkMotor(
-            log.name("motor"),
+    m_motor1 = new NeoVortexCANSparkMotor(
+            log.name("vortex motor 1"),
             currentLog,
-            new CanId(18), 
+            new CanId(0), 
             NeutralMode100.COAST,
             MotorPhase.FORWARD,
-            new CurrentLimit(60, 60),
+            new CurrentLimit(30, 30),
             new Friction(0, 0, 0, 0),
             PIDConstants.zero(),
             0,
             0);
-    System.out.println("Motor initialized");
+    m_motor2 = new NeoVortexCANSparkMotor(
+            log.name("vortex motor 2"),
+            currentLog,
+            new CanId(1), 
+            NeutralMode100.COAST,
+            MotorPhase.FORWARD,
+            new CurrentLimit(30, 30),
+            new Friction(0, 0, 0, 0),
+            PIDConstants.zero(),
+            0,
+            0);
+    System.out.println("Motors initialized");
 
 }
 
@@ -137,21 +148,11 @@ public Robot() {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-
-    // Slowly speeds up
-    // if(m_dutyCycle < 0.3){
-    //   m_dutyCycle += 0.001;
-    // }
-    // m_motor.setDutyCycle(m_dutyCycle);
-    // controlled by controller
-    // m_dutyCycle = m_controller.leftY() / 10.0;
-    // if(m_controller.a()){
-    //   m_dutyCycle1 = 1;
-    //   m_motor.setDutyCycle(m_dutyCycle1);
-    // }
-
-    m_dutyCycle1 = 315;
-    m_motor.setVelocity(m_dutyCycle1, 0);
+    m_velocityf = 300;
+    m_velocityv = 300;
+    m_motor.setVelocity(m_velocityf, 0);
+    m_motor1.setVelocity(m_velocityv, 0);
+    m_motor2.setVelocity(m_velocityv, 0);
 
   }
 
