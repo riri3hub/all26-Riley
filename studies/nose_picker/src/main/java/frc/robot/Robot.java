@@ -67,22 +67,22 @@ public Robot() {
             new Friction(0, 0, 0, 0),
             PIDConstants.zero());
     m_motor1 = new NeoVortexCANSparkMotor(
-            log.name("vortex motor 1"),
+            log.name("vortex motor L"),
             currentLog,
-            new CanId(0), 
+            new CanId(2), 
             NeutralMode100.COAST,
-            MotorPhase.FORWARD,
+            MotorPhase.FORWARD, // f for closing
             new CurrentLimit(30, 30),
             new Friction(0, 0, 0, 0),
             PIDConstants.zero(),
             0,
             0);
     m_motor2 = new NeoVortexCANSparkMotor(
-            log.name("vortex motor 2"),
+            log.name("vortex motor R"),
             currentLog,
-            new CanId(1), 
+            new CanId(5), 
             NeutralMode100.COAST,
-            MotorPhase.FORWARD,
+            MotorPhase.REVERSE, // r for closing
             new CurrentLimit(30, 30),
             new Friction(0, 0, 0, 0),
             PIDConstants.zero(),
@@ -148,11 +148,14 @@ public Robot() {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    m_velocityf = 300;
-    m_velocityv = 300;
-    m_motor.setVelocity(m_velocityf, 0);
-    m_motor1.setVelocity(m_velocityv, 0);
-    m_motor2.setVelocity(m_velocityv, 0);
+    m_velocityf = 100;
+    m_velocityv = 100;
+    // m_motor.setVelocity(m_velocityf, 0);
+    // m_motor1.setVelocity(m_velocityv, 0);
+    // m_motor2.setVelocity(m_velocityv, 0);
+    double positionRad = m_motor2.encoder().getUnwrappedPositionRad();
+    double positionDeg = Math.toDegrees(positionRad);
+    System.out.printf("position v2 %.1f deg%n", positionDeg);
 
   }
 
