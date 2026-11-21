@@ -25,6 +25,7 @@ import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
 import org.team100.lib.motor.ctre.Falcon500Motor;
 import org.team100.lib.motor.rev.NeoVortexCANSparkMotor;
+import org.team100.lib.sensor.position.incremental.IncrementalEncoder;
 import org.team100.lib.util.CanId;
 import org.team100.lib.util.Startup;
 
@@ -48,7 +49,14 @@ private final NeoVortexCANSparkMotor m_motor1;
 private final NeoVortexCANSparkMotor m_motor2;
 private double m_velocityf = 0;
 private double m_velocityv = 0;
+private double m_dutyCycle = 0;
 private DriverXboxControl m_controller;
+private final IncrementalEncoder m_encoder1;
+private final IncrementalEncoder m_encoder2;
+private double OPEN = 0;
+// change this if you want closed to be at a dif degree
+private double CLOSED = (70 * (Math.PI / 180));
+
 public Robot() {
     Startup.start();
     LoggerFactory log = Logging.root();
@@ -82,12 +90,14 @@ public Robot() {
             currentLog,
             new CanId(5), 
             NeutralMode100.COAST,
-            MotorPhase.REVERSE, // r for closing
+            MotorPhase.REVERSE,
             new CurrentLimit(30, 30),
             new Friction(0, 0, 0, 0),
             PIDConstants.zero(),
             0,
             0);
+    m_encoder1 = m_motor1.encoder();
+    m_encoder2 = m_motor2.encoder();
     System.out.println("Motors initialized");
 
 }
@@ -108,6 +118,10 @@ public Robot() {
         CommandScheduler.getInstance().run();
 
         LogPoller.log();
+
+        double positionRad = m_encoder1.getUnwrappedPositionRad();
+        double positionDeg = Math.toDegrees(positionRad);
+        System.out.printf("position %.1f deg%n", positionDeg);
   }
 
   /**
@@ -148,14 +162,35 @@ public Robot() {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    m_velocityf = 100;
-    m_velocityv = 100;
-    // m_motor.setVelocity(m_velocityf, 0);
-    // m_motor1.setVelocity(m_velocityv, 0);
-    // m_motor2.setVelocity(m_velocityv, 0);
-    double positionRad = m_motor2.encoder().getUnwrappedPositionRad();
+    double positionRad = m_encoder1.getUnwrappedPositionRad();
     double positionDeg = Math.toDegrees(positionRad);
-    System.out.printf("position v2 %.1f deg%n", positionDeg);
+
+    m_velocityf = 300;
+    m_velocityv = 300;
+
+    if(m_controller.a()){
+      // for all of these, change the middle param to inc/dec the velocity
+      m_motor1.setUnwrappedPosition(OPEN, 100, 0);
+      m_motor2.setUnwrappedPosition(OPEN, 100, 0);
+      System.out.printf("opened");
+
+      System.out.printf("position %.1f deg%n", positionDeg);
+    }
+    // could be the turning the wrong way, if so make CLOSED negative
+    if(m_controller.b()){
+      m_motor1.setUnwrappedPosition(CLOSED, 100, 0);
+      m_motor2.setUnwrappedPosition(CLOSED, 100, 0);
+      System.out.printf("closed");
+
+      System.out.printf("position %.1f deg%n", positionDeg);
+    }
+
+    // this is a temporary solution for the falcon motor
+    // change this to specific button and pos later
+    // *** OWEN find out the degree you want this to be at for lifting
+    m_dutyCycle = m_controller.leftY()/10.0;
+    m_motor.setDutyCycle(m_dutyCycle);
+
 
   }
 
