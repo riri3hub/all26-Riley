@@ -45,17 +45,11 @@ public class Robot extends TimedRobot100 {
    * initialization code.
    */
 private final Falcon500Motor m_motor;
-private final NeoVortexCANSparkMotor m_motor1;
-private final NeoVortexCANSparkMotor m_motor2;
+private final Nosepicker m_nosepicker;
+
 private double m_velocityf = 0;
-private double m_velocityv = 0;
 private double m_dutyCycle = 0;
 private DriverXboxControl m_controller;
-private final IncrementalEncoder m_encoder1;
-private final IncrementalEncoder m_encoder2;
-private double OPEN = 0;
-// change this if you want closed to be at a dif degree
-private double CLOSED = (70 * (Math.PI / 180));
 
 public Robot() {
     Startup.start();
@@ -73,32 +67,10 @@ public Robot() {
             MotorPhase.FORWARD,
             new CurrentLimit(30, 30),
             new Friction(0, 0, 0, 0),
-            PIDConstants.zero());
-    m_motor1 = new NeoVortexCANSparkMotor(
-            log.name("vortex motor L"),
-            currentLog,
-            new CanId(2), 
-            NeutralMode100.COAST,
-            MotorPhase.FORWARD, // f for closing
-            new CurrentLimit(30, 30),
-            new Friction(0, 0, 0, 0),
-            PIDConstants.zero(),
-            0,
-            0);
-    m_motor2 = new NeoVortexCANSparkMotor(
-            log.name("vortex motor R"),
-            currentLog,
-            new CanId(5), 
-            NeutralMode100.COAST,
-            MotorPhase.REVERSE,
-            new CurrentLimit(30, 30),
-            new Friction(0, 0, 0, 0),
-            PIDConstants.zero(),
-            0,
-            0);
-    m_encoder1 = m_motor1.encoder();
-    m_encoder2 = m_motor2.encoder();
+            PIDConstants.makePositionPID(10));
+    m_nosepicker = new Nosepicker();
     System.out.println("Motors initialized");
+
 
 }
 
@@ -119,9 +91,7 @@ public Robot() {
 
         LogPoller.log();
 
-        double positionRad = m_encoder1.getUnwrappedPositionRad();
-        double positionDeg = Math.toDegrees(positionRad);
-        System.out.printf("position %.1f deg%n", positionDeg);
+        // System.out.printf("position %.1f deg%n", positionDeg);
   }
 
   /**
@@ -150,6 +120,7 @@ public Robot() {
         break;
       case kDefaultAuto:
       default:
+        
         // Put default auto code here
         break;
     }
@@ -162,33 +133,27 @@ public Robot() {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    double positionRad = m_encoder1.getUnwrappedPositionRad();
-    double positionDeg = Math.toDegrees(positionRad);
 
-    m_velocityf = 300;
-    m_velocityv = 300;
 
-    if(m_controller.a()){
-      // for all of these, change the middle param to inc/dec the velocity
-      m_motor1.setUnwrappedPosition(OPEN, 100, 0);
-      m_motor2.setUnwrappedPosition(OPEN, 100, 0);
-      System.out.printf("opened");
 
-      System.out.printf("position %.1f deg%n", positionDeg);
-    }
-    // could be the turning the wrong way, if so make CLOSED negative
     if(m_controller.b()){
-      m_motor1.setUnwrappedPosition(CLOSED, 100, 0);
-      m_motor2.setUnwrappedPosition(CLOSED, 100, 0);
-      System.out.printf("closed");
-
-      System.out.printf("position %.1f deg%n", positionDeg);
+      m_nosepicker.closeGrabber();
+    }
+    if(m_controller.a()){
+      m_nosepicker.openGrabber();
+    }
+    if(m_controller.y()){
+      m_nosepicker.stopGrabber();
+      m_nosepicker.resetGrabber();
+    }
+    if(m_controller.x()){
+      m_nosepicker.stopGrabber();
     }
 
     // this is a temporary solution for the falcon motor
     // change this to specific button and pos later
     // *** OWEN find out the degree you want this to be at for lifting
-    m_dutyCycle = m_controller.leftY()/10.0;
+    m_dutyCycle = m_controller.leftY()/30.0;
     m_motor.setDutyCycle(m_dutyCycle);
 
 
