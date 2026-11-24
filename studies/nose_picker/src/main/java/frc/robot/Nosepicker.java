@@ -89,14 +89,14 @@ public class Nosepicker extends SubsystemBase {
         rotary2.setUnwrappedEncoderPositionRad(OPEN);
     }
 
-    public void testMotor1(int velocity) {
-        rotary1.setVelocity(velocity, TORQUE_NM);
+    public void testMotor1(int velocityRad_S) {
+        rotary1.setVelocity(velocityRad_S, TORQUE_NM);
         rotary2.stop();
     }
 
-    public void testMotor2(int velocity) {
+    public void testMotor2(int velocityRad_S) {
         rotary1.stop();
-        rotary2.setVelocity(velocity, TORQUE_NM);
+        rotary2.setVelocity(velocityRad_S, TORQUE_NM);
     }
 
 }
