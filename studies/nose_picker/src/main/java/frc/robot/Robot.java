@@ -140,7 +140,8 @@ public Robot() {
       m_nosepicker.closeGrabber();
     }
     if(m_controller.a()){
-      m_nosepicker.openGrabber();
+      // m_nosepicker.openGrabber();
+      m_nosepicker.testMotor1(50);
     }
     if(m_controller.y()){
       m_nosepicker.stopGrabber();
@@ -150,11 +151,9 @@ public Robot() {
       m_nosepicker.stopGrabber();
     }
 
-    // this is a temporary solution for the falcon motor
-    // change this to specific button and pos later
     // *** OWEN find out the degree you want this to be at for lifting
-    m_dutyCycle = m_controller.leftY()/30.0;
-    m_motor.setDutyCycle(m_dutyCycle);
+    // m_dutyCycle = m_controller.leftY()/30.0;
+    // m_motor.setDutyCycle(m_dutyCycle);
 
 
   }

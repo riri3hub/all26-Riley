@@ -10,7 +10,6 @@ import org.team100.lib.logging.TotalCurrentLog;
 import org.team100.lib.mechanism.RotaryMechanism;
 import org.team100.lib.motor.MotorPhase;
 import org.team100.lib.motor.NeutralMode100;
-import org.team100.lib.motor.ctre.Falcon500Motor;
 import org.team100.lib.motor.rev.NeoVortexCANSparkMotor;
 import org.team100.lib.util.CanId;
 
@@ -21,7 +20,8 @@ public class Nosepicker extends SubsystemBase {
     private final NeoVortexCANSparkMotor m_motor2;
     private final RotaryMechanism rotary1;
     private final RotaryMechanism rotary2;
-    private double OPEN = -1;
+    private final double TORQUE_NM = 3.6;
+    private double OPEN = 0;
     private double CLOSED = 1.55;
     public Nosepicker() {
         LoggerFactory log = Logging.root();
@@ -68,22 +68,35 @@ public class Nosepicker extends SubsystemBase {
                 CLOSED);
 
     }
+
     public void closeGrabber() {
-        rotary1.setUnwrappedPosition(CLOSED, 0, 3.6);
-        rotary2.setUnwrappedPosition(CLOSED, 0, 3.6);
+        rotary1.setUnwrappedPosition(CLOSED, 0, TORQUE_NM);
+        rotary2.setUnwrappedPosition(CLOSED, 0, TORQUE_NM);
     }
+
     public void openGrabber() {
-        rotary1.setUnwrappedPosition(OPEN, 0, 3.6);
-        rotary2.setUnwrappedPosition(OPEN, 0, 3.6);
+        rotary1.setUnwrappedPosition(OPEN, 0, TORQUE_NM);
+        rotary2.setUnwrappedPosition(OPEN, 0, TORQUE_NM);
     }
+
     public void stopGrabber() {
         rotary1.stop();
         rotary2.stop();
     }
+
     public void resetGrabber() {
-        rotary1.setUnwrappedEncoderPositionRad(0);
-        rotary2.setUnwrappedEncoderPositionRad(0);
+        rotary1.setUnwrappedEncoderPositionRad(OPEN);
+        rotary2.setUnwrappedEncoderPositionRad(OPEN);
     }
 
+    public void testMotor1(int velocity) {
+        rotary1.setVelocity(velocity, TORQUE_NM);
+        rotary2.stop();
+    }
+
+    public void testMotor2(int velocity) {
+        rotary1.stop();
+        rotary2.setVelocity(velocity, TORQUE_NM);
+    }
 
 }
