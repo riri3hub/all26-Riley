@@ -33,10 +33,10 @@ public class Nosepicker extends SubsystemBase {
                 currentLog,
                 new CanId(2), 
                 NeutralMode100.BRAKE,
-                MotorPhase.REVERSE, // f for closing
-                new CurrentLimit(40, 40),
+                MotorPhase.REVERSE, 
+                new CurrentLimit(100, 40), // work up stator to 211
                 new Friction(0, 0, 0, 0),
-                PIDConstants.makePositionPID(20),
+                PIDConstants.makePositionPID(30), // maybe increase?
                 0,
                 0);
         m_motor2 = new NeoVortexCANSparkMotor(
@@ -45,9 +45,9 @@ public class Nosepicker extends SubsystemBase {
                 new CanId(5), 
                 NeutralMode100.BRAKE,
                 MotorPhase.FORWARD,
-                new CurrentLimit(40, 40),
+                new CurrentLimit(100, 40), // work up stator to 211
                 new Friction(0, 0, 0, 0),
-                PIDConstants.makePositionPID(20),
+                PIDConstants.makePositionPID(30), // maybe increase?
                 0,
                 0);
         rotary1 = new RotaryMechanism(
